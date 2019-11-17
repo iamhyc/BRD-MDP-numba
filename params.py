@@ -58,7 +58,7 @@ def genProcessingDistribution():
 def genDelayDistribution():
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float32)
     for k in prange(N_AP):
-        dist[k,m] = genGaussianDist(BR_RNG_L)
+        dist[k] = genGaussianDist(BR_RNG_L)
     return dist
 
 @njit
