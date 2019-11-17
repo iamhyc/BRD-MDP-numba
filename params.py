@@ -43,7 +43,15 @@ npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 @njit
 def genProcessingDistribution():
     dist = np.zeros((N_ES, N_JOB, PROC_RNG_L), dtype=np.float32)
-    #TODO:
+    for j in prange(N_JOB):
+        for m in prange(N_ES):
+            _roll = np.random.randint(2)
+            dist[m,j] = genHeavyHeadDist(PROC_RNG_L) if _roll==1 else genHeavyTailDist(PROC_RNG_L)
+            # dist[m,j] = genHeavyHeadDist(PROC_RNG_L)
+            # dist[m,j] = genHeavyTailDist(PROC_RNG_L)
+            # dist[m,j] = genGaussianDist(PROC_RNG_L)
+            # dist[m,j] = genSplitDist(PROC_RNG_L)
+            # dist[m,j] = genFlatDist(PROC_RNG_L)
     return dist
 
 @njit
