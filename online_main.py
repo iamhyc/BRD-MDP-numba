@@ -7,11 +7,52 @@ from utility import *
 import matplotlib.pyplot as plt
 
 def NextState(oldStat, nowStat, oldPolicy, nowPolicy, arrival_ap, br_delay):
-    nextStat  = State().clone(nowStat)
+    lastStat  = State().clone(nowStat)
+    nextStat  = State().clone(lastStat)
 
     # update intermediate state with arrivals in each time slot 
     for n in range(N_SLT):
-        TODO:
+        #NOTE: allocate arrival jobs on APs
+        for j in range(N_JOB):
+            for k in range(N_AP):
+                if callable(oldPolicy) and callable(nowPolicy):
+                    _m = oldPolicy(oldStat, k, j) if n<br_delay[k] else nowPolicy(nowStat, k, j)
+                else:
+                    _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
+                nextStat[k, _m, j, 0] = arrival_ap[n, k, j]
+        
+        #NOTE: count uploading & offloading jobs
+        off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
+        for j in range(N_JOB):
+            for m in range(N_ES):
+                for k in range(N_AP):
+                    for xi in range(N_CNT):
+                        toss_ul = toss(ul_prob[k,m,j,xi]) #NOTE: hidden_assert(if xi==N_CNT-1 then: ul_prob==1)
+                        if toss_ul:
+                            off_number[m,j]             += lastStat.ap_stat[k,m,j,xi]
+                        else:
+                            nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
+
+        #NOTE: process jobs on ES
+        for j in range(N_JOB):
+            for m in range(N_ES):
+                nextStat.es_stat[m,j,0] += off_numbers[m,j]
+                nextStat.es_stat[m,j,1] -= 1
+
+                if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]
+                    nextStat.es_stat[m,j,0] = LQ            #
+                if nextStat.es_stat[m,j,1] <= 0:            # if first job finished:
+                    if nextStat.es_stat[m,j,0] > 0:         #     if has_next_job:
+                        nextStat.es_stat[m,j,0] -= 1        #         next job joins processing
+                        nextStat.es_stat[m,j,1]  = PROC_RNG[ multoss(proc_dist[m,j]) ]
+                    else:                                   #     else:
+                        nextStat.es_stat[m,j,1]  = 0        #         clip the remaining time
+                else:                                       # else:
+                    pass                                    #     do nothing.
+
+        #NOTE: update the iteration backup
+        lastStat = nextStat
+        nextStat = State().clone(lastStat)
         pass
 
     return nextStat
