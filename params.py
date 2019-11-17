@@ -63,17 +63,17 @@ def genDelayDistribution():
 
 @njit
 def genUploadingDistribution():
-    dist = np.zeros((N_AP, N_ES, N_JOB, UL_RNG_L), dtype=np.float32)
+    dist = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float32)
+    choice_dist = genGaussianDist(UL_RNG_L)
     for j in prange(N_JOB):
         for m in prange(N_ES):
             for k in prange(N_AP):
-                _mid_rng = len(UL_RNG)//4                            #FIXME: dimension error, should be [0, N_CNT-1]
-                _mean = np.random.choice(UL_RNG[:_mid_rng] - UL_RNG[_mid_rng]) #FIXME: meaningless?
-                _var  = (UL_RNG[-1] - _mean) / 3 #3-sigma-rule       #FIXME: dimension error, should be [0, N_CNT-1]
-                rv = norm(loc=_mean, scale=_var)
-                rv_total = rv.cdf(UL_RNG[-1]) - rv.cdf(UL_RNG)       #FIXME: dimension error, should be [0, N_CNT-1]
-                rv_prob  = np.diff( rv.cdf(UL_RNG) ) / rv_total[:-1] #FIXME: dimension error, should be [0, N_CNT-1]
-                dist[k,m,j] = rv_prob                                #FIXME: dimension error, should be [0, N_CNT-1]
+                mean = UL_RNG[ multoss(choice_dist) ]
+                var  = (N_CNT - _mean) / 3 #3-sigma-rule
+                rv   = norm(loc=_mean, scale=var)
+                rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
+                rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
+                dist[k,m,j] = np.concatenate((rv_prob, [1.0])) #FIXME: need a double-check: the last uploading is a must.
     return dist
 
 @njit

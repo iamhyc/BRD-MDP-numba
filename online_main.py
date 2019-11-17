@@ -66,14 +66,14 @@ def main():
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     
     while stage < STAGE:
-        #toss job arrival for APs in each interval
+        #NOTE: toss job arrival for APs in each time slot
         arrival_ap = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
         for n in range(N_SLT):
             for j in range(N_JOB):
                 for k in range(N_AP):
                     arrival_ap[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
 
-        # toss for broadcast delay for each AP
+        #NOTE: toss broadcast delay for each AP
         br_delay = np.zeros((N_AP), dtype=np.int32)
         for k in range(N_AP):
             br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
