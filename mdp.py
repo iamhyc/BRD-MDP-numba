@@ -47,7 +47,7 @@ def TransES(beta, proc_dist):
     return mat
 
 @njit
-def evaluate(j, stat, policy):
+def evaluate(k,j, oldStat, nowStat, oldPolicy, br_delay):
     val_ap = np.zeros((N_AP, N_ES),        dtype=np.float32)
     val_es = np.zeros((N_ES,),             dtype=np.float32)
     ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float32)
@@ -56,8 +56,8 @@ def evaluate(j, stat, policy):
     return np.sum(val_ap) + np.sum(val_es)
 
 @njit
-def optimize(stat):
-    policy         = BaselinePolicy()
+def optimize(oldStat, nowStat, oldPolicy, br_delay, stage):
+    nowPolicy      = BaselinePolicy()
     val_collection = np.zeros(N_JOB, dtype=np.float32)
     #TODO:
-    return policy, val_collection
+    return nowPolicy, val_collection
