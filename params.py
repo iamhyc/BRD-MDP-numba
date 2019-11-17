@@ -55,14 +55,16 @@ def genProcessingDistribution():
     return dist
 
 @njit
-def genUploadingDistribution():
-    dist = np.zeros((N_AP, N_ES, N_JOB, UL_RNG_L), dtype=np.float32)
-    #TODO:
+def genDelayDistribution():
+    dist = np.zeros((N_AP, N_ES, BR_RNG_L), dtype=np.float32)
+    for m in prange(N_ES):
+        for k in prange(N_AP):
+            dist[k,m] = genGaussianDist(BR_RNG_L)
     return dist
 
 @njit
-def genDelayDistribution():
-    dist = np.zeros((), dtype=np.float32)
+def genUploadingDistribution():
+    dist = np.zeros((N_AP, N_ES, N_JOB, UL_RNG_L), dtype=np.float32)
     #TODO:
     return dist
 
@@ -78,7 +80,7 @@ if Path(npzfile).exists():
     arr_prob  = _params['arr_prob']
     br_dist   = _params['br_dist']
     proc_dist = _params['proc_dist']
-    # ul_prob   = _params['ul_prob']
+    ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
@@ -91,8 +93,16 @@ else:
     np.savez(npzfile, **{
         'arr_prob' : arr_prob,
         'ul_prob'  : ul_prob,
+        'br_dist'  : br_dist,
         'proc_dist': proc_dist,
         'ul_trans' : ul_trans,
-        'off_trans': off_trans
+        'off_trans': off_trans,
+        'miscs'    : np.array([
+            N_AP,N_ES,N_JOB,LQ,
+            TS,TB,N_SLT,N_CNT,
+            BR_MIN,BR_MAX,BR_RNG_L,
+            UL_MIN,UL_MAX,UL_RNG_L,
+            PROC_MIN,PROC_MAX,PROC_RNG_L,DIM_P
+        ])
     })
     pass
