@@ -3,6 +3,7 @@ import random
 import numpy as numpy
 from pathlib import *
 from utility import *
+from scipy.stats import norm
 
 RANDOM_SEED = random.randit(0, 2**16)
 np.random.seed(RANDOM_SEED)
@@ -19,18 +20,17 @@ LQ    = 10 #maximum queue length on ES (inclusive)
 TS    = 0.01         #timeslot, 10ms
 TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #50 slots/interval
-N_CNT = 3*N_SLT      #(for convenience)
+N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
 BR_MIN   = int( 0.00 * N_SLT )    #(inclusive)
-BR_MAX   = int( 0.50 * N_SLT )    #(exclusive)
+BR_MAX   = N_CNT                  #(exclusive)
 BR_RNG   = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L = len(BR_RNG)
 
 UL_MIN   = int( 0.00 * N_SLT )    #(inclusive)
-UL_MAX   = int( 3.00 * N_SLT )    #(inclusive)NOTE: upper boundary included
+UL_MAX   = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG   = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L = len(UL_RNG)
-assert(N_CNT == UL_RNG_L))        #(for convenience)
 
 PROC_MIN   = int( 1.00 * N_SLT )  #(inclusive)
 PROC_MAX   = int( 3.50 * N_SLT )  #(exclusive) 
@@ -65,14 +65,29 @@ def genDelayDistribution():
 @njit
 def genUploadingDistribution():
     dist = np.zeros((N_AP, N_ES, N_JOB, UL_RNG_L), dtype=np.float32)
-    #TODO:
+    for j in prange(N_JOB):
+        for m in prange(N_ES):
+            for k in prange(N_AP):
+                _mid_rng = len(UL_RNG)//4
+                _mean = np.random.choice(UL_RNG[:_mid_rng] - UL_RNG[_mid_rng]) #FIXME: meaningless?
+                _var  = (UL_RNG[-1] - _mean) / 3 #3-sigma-rule
+                rv = norm(loc=_mean, scale=_var)
+                rv_total = rv.cdf(UL_RNG[-1]) - rv.cdf(UL_RNG)       #FIXME: need a double-check
+                rv_prob  = np.diff( rv.cdf(UL_RNG) ) / rv_total[:-1] #FIXME: need a double-check
+                dist[k,m,j] = rv_prob
     return dist
 
 @njit
-def genTransitionMatrix(ul_prob):
-    ul_mat  = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
-    off_mat = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
-    #TODO:
+def genTransitionMatrix():
+    ul_mat  = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float32)
+    off_mat = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float32)
+    for j in prange(N_JOB):
+        for m in prange(N_ES):
+            for k in prange(N_AP):
+                ul_mat[k,m,j, 0,0] = 1
+                for i in prange(N_CNT-1):
+                    ul_mat[k,m,j,  i,i+1] =     ul_prob[k,m,j,i]
+                    off_mat[k,m,j, i,i+1] = 1 - ul_prob[k,m,j,i]
     return ul_mat, off_mat
 
 if Path(npzfile).exists():
@@ -88,7 +103,7 @@ else:
     ul_prob   = genUploadingDistribution()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
-    ul_trans, off_trans = genTransitionMatrix(ul_prob)
+    ul_trans, off_trans = genTransitionMatrix()
 
     np.savez(npzfile, **{
         'arr_prob' : arr_prob,
