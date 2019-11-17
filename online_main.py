@@ -23,10 +23,10 @@ def NextState(oldStat, nowStat, oldPolicy, nowPolicy, arrival_ap, br_delay):
         
         #NOTE: count uploading & offloading jobs
         off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
-        for j in range(N_JOB):
-            for m in range(N_ES):
-                for k in range(N_AP):
-                    for xi in range(N_CNT):
+        for xi in range(N_CNT):
+            for j in range(N_JOB):
+                for m in range(N_ES):
+                    for k in range(N_AP):
                         toss_ul = toss(ul_prob[k,m,j,xi]) #NOTE: hidden_assert(if xi==N_CNT-1 then: ul_prob==1)
                         if toss_ul:
                             off_number[m,j]             += lastStat.ap_stat[k,m,j,xi]
@@ -58,7 +58,7 @@ def NextState(oldStat, nowStat, oldPolicy, nowPolicy, arrival_ap, br_delay):
     return nextStat
 
 def main():
-    pathlib.Path('.logs').mkdir(exist_ok=True)
+    pathlib.Path('logs').mkdir(exist_ok=True)
     pathlib.Path('figures').mkdir(exist_ok=True)
 
     stage = 0
@@ -78,7 +78,7 @@ def main():
         for k in range(N_AP):
             br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
 
-        # optimize and update the backup
+        #NOTE: optimize and update the backup
         oldPolicy      = nowPolicy
         nowPolicy, val = optimize( oldStat, nowStat, oldPolicy, br_delay, stage )
         oldStat        = nowStat
