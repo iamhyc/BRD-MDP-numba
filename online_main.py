@@ -36,7 +36,7 @@ def NextState(oldStat, nowStat, oldPolicy, nowPolicy, arrival_ap, br_delay):
         #NOTE: process jobs on ES
         for j in range(N_JOB):
             for m in range(N_ES):
-                nextStat.es_stat[m,j,0] += off_numbers[m,j]
+                nextStat.es_stat[m,j,0] += off_number[m,j]
                 nextStat.es_stat[m,j,1] -= 1
 
                 if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]

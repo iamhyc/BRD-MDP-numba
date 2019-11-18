@@ -69,8 +69,8 @@ def genUploadingDistribution():
         for m in prange(N_ES):
             for k in prange(N_AP):
                 mean = UL_RNG[ multoss(choice_dist) ]
-                var  = (N_CNT - _mean) / 3 #3-sigma-rule
-                rv   = norm(loc=_mean, scale=var)
+                var  = (N_CNT - mean) / 3 #3-sigma-rule
+                rv   = norm(loc=mean, scale=var)
                 rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
                 rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
                 dist[k,m,j] = np.concatenate((rv_prob, [1.0])) #FIXME: need a double-check: the last uploading is a must.
@@ -83,7 +83,8 @@ def genTransitionMatrix():
     for j in prange(N_JOB):
         for m in prange(N_ES):
             for k in prange(N_AP):
-                ul_mat[k,m,j, 0,0] = 1
+                ul_mat[k,m,j,  0, 0] = 1
+                ul_mat[k,m,j, -1,-1] = 1
                 for i in prange(N_CNT-1):
                     ul_mat[k,m,j,  i,i+1] =     ul_prob[k,m,j,i]
                     off_mat[k,m,j, i,i+1] = 1 - ul_prob[k,m,j,i]

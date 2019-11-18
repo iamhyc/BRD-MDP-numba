@@ -70,8 +70,8 @@ def TransES(beta, proc_dist):
         for r in prange(1,PROC_MAX):
             e  = ES2Entry(l,r)
             l2 = LQ if l+1>LQ else (l+1)
-            mat[e, ES2Entry(l2, r-1)] += alpha
-            mat[e, ES2Entry(l,  r-1)] += 1-alpha
+            mat[e, ES2Entry(l2, r-1)] += beta
+            mat[e, ES2Entry(l,  r-1)] += 1-beta
     
     return mat
 
