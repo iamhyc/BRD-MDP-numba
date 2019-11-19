@@ -15,7 +15,7 @@ class State(object):
 
     def clone(self, stat):
         self.ap_stat = np.copy(stat.ap_stat)
-        self.es_stat = np.copu(stat.es_stat)
+        self.es_stat = np.copy(stat.es_stat)
         return self
     
     def cost(self):
@@ -76,7 +76,8 @@ def TransES(beta, proc_dist):
     return mat
 
 @njit
-def evaluate(k,j, oldStat, nowStat, oldPolicy, br_delay):
+def evaluate(x0, k, j, systemStat, oldPolicy):
+    (oldStat, nowStat, br_delay) = systemStat
     val_ap = np.zeros((N_AP, N_ES),        dtype=np.float32)
     val_es = np.zeros((N_ES,),             dtype=np.float32)
     ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float32)
@@ -85,8 +86,14 @@ def evaluate(k,j, oldStat, nowStat, oldPolicy, br_delay):
     return np.sum(val_ap) + np.sum(val_es)
 
 @njit
-def optimize(oldStat, nowStat, oldPolicy, br_delay, stage):
+def optimize(stage, systemStat, oldPolicy):
+    (oldStat, nowStat, br_delay) = systemStat
     nowPolicy      = BaselinePolicy()
     val_collection = np.zeros(N_JOB, dtype=np.float32)
-    #TODO:
+
+    _k = stage // N_AP
+    for j in prange(N_JOB):
+        #TODO:
+        pass
+
     return nowPolicy, val_collection

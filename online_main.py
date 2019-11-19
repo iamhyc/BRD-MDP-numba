@@ -6,7 +6,8 @@ from params import*
 from utility import *
 import matplotlib.pyplot as plt
 
-def NextState(oldStat, nowStat, oldPolicy, nowPolicy, arrival_ap, br_delay):
+def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
+    (oldStat, nowStat, br_delay) = systemStat 
     lastStat  = State().clone(nowStat)
     nextStat  = State().clone(lastStat)
 
@@ -79,10 +80,11 @@ def main():
             br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
 
         #NOTE: optimize and update the backup
+        systemStat     = (oldStat, nowStat, br_delay)
         oldPolicy      = nowPolicy
-        nowPolicy, val = optimize( oldStat, nowStat, oldPolicy, br_delay, stage )
+        nowPolicy, val = optimize(stage, systemStat, oldPolicy)
         oldStat        = nowStat
-        nowStat        = NextState(oldStat, nowStat, oldPolicy, nowPolicy, arrival_ap, br_delay)
+        nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
         
         stage += 1
         pass

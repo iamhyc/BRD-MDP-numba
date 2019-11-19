@@ -22,18 +22,18 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #50 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN   = int( 0.00 * N_SLT )    #(inclusive)
-BR_MAX   = N_CNT                  #(exclusive)
-BR_RNG   = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
-BR_RNG_L = len(BR_RNG)
+BR_MIN     = int( 0.00 * N_SLT )    #(inclusive)
+BR_MAX     = N_CNT                  #(exclusive)
+BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
+BR_RNG_L   = len(BR_RNG)
 
-UL_MIN   = int( 0.00 * N_SLT )    #(inclusive)
-UL_MAX   = int( 3.00 * N_SLT )    #(exclusive)
-UL_RNG   = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
-UL_RNG_L = len(UL_RNG)
+UL_MIN     = int( 0.00 * N_SLT )    #(inclusive)
+UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
+UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
+UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.00 * N_SLT )  #(inclusive)
-PROC_MAX   = int( 3.50 * N_SLT )  #(exclusive) 
+PROC_MIN   = int( 1.00 * N_SLT )    #(inclusive)
+PROC_MAX   = int( 3.50 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)*PROC_MAX
