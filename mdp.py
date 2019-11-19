@@ -76,7 +76,7 @@ def TransES(beta, proc_dist):
     return mat
 
 @njit
-def evaluate(x0, k, j, systemStat, oldPolicy):
+def evaluate(x0, j, k, systemStat, oldPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     val_ap = np.zeros((N_AP, N_ES),        dtype=np.float32)
     val_es = np.zeros((N_ES,),             dtype=np.float32)
@@ -87,13 +87,23 @@ def evaluate(x0, k, j, systemStat, oldPolicy):
 
 @njit
 def optimize(stage, systemStat, oldPolicy):
-    (oldStat, nowStat, br_delay) = systemStat
     nowPolicy      = BaselinePolicy()
     val_collection = np.zeros(N_JOB, dtype=np.float32)
 
-    _k = stage // N_AP
+    _k = stage // N_AP #NOTE: optimize one AP at one time
     for j in prange(N_JOB):
-        #TODO:
+        x0 = policy[:, j]
+        val_tmp = np.zeros(N_ES, dtype=np.float32)
+        for m in prange(N_ES):
+            x1         = np.copy(x0)
+            x1[_k]     = m
+            val_tmp[m] = evaluate(x1, j, _k, systemStat, oldPolicy)
+            pass
+        policy[_k, j] = val_tmp.argmin()
         pass
+
+    for j in prange(N_JOB):
+        x0 = policy[:, j]
+        val_collection[j] = evaluate(x0, j, _k, systemStat, oldPolicy)
 
     return nowPolicy, val_collection
