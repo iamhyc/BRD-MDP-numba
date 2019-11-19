@@ -6,6 +6,8 @@ from numba import int32, float32
 from numba import njit, prange, jitclass
 from itertools import product
 
+ESValVec  = np.repeat(np.arange(LQ+1), repeats=PROC_MAX).astype(np.float32)
+
 @jitclass([ ('ap_stat', int32[:,:,:,:]), ('es_stat', int32[:,:,:]) ])
 class State(object):
     def __init__(self):
@@ -76,34 +78,50 @@ def TransES(beta, proc_dist):
     return mat
 
 @njit
-def evaluate(x0, j, k, systemStat, oldPolicy):
+def evaluate(j, k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     val_ap = np.zeros((N_AP, N_ES),        dtype=np.float32)
     val_es = np.zeros((N_ES,),             dtype=np.float32)
     ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float32)
     es_vec = np.zeros((N_ES, DIM_P),       dtype=np.float32)
+
     #TODO:
+    # old_prob[k,j]
+
+    # # init vector
+    # for m in prange(N_ES):
+    #     es_vec[m] = ES2Vec(nowStat.es_stat[m,j])
+    #     for k in prange(N_AP):
+    #         ap_vec[k,m] = AP2Vec(nowStat.ap_stat[k,m,j])
+
+    # # iteration and collect cost
+
+    #     # calculate _beta and val_ap
+        
+    #     # calculate val_es with _beta
+
     return np.sum(val_ap) + np.sum(val_es)
 
 @njit
 def optimize(stage, systemStat, oldPolicy):
-    nowPolicy      = BaselinePolicy()
+    nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float32)
 
     _k = stage // N_AP #NOTE: optimize one AP at one time
+
     for j in prange(N_JOB):
-        x0 = policy[:, j]
+        x0 = nowPolicy[:, j]
         val_tmp = np.zeros(N_ES, dtype=np.float32)
         for m in prange(N_ES):
             x1         = np.copy(x0)
             x1[_k]     = m
-            val_tmp[m] = evaluate(x1, j, _k, systemStat, oldPolicy)
+            val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
             pass
-        policy[_k, j] = val_tmp.argmin()
+        nowPolicy[_k, j] = val_tmp.argmin()
         pass
 
     for j in prange(N_JOB):
-        x0 = policy[:, j]
-        val_collection[j] = evaluate(x0, j, _k, systemStat, oldPolicy)
+        x1 = nowPolicy[:, j]
+        val_collection[j] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
 
     return nowPolicy, val_collection
