@@ -107,9 +107,6 @@ def evaluate(j, k, systemStat, oldPolicy, nowPolicy):
 
     # iteration to (t+3) and collect cost
 
-    # calculate _beta and val_ap    
-    # calculate val_es with _beta
-
     return np.sum(val_ap) + np.sum(val_es)
 
 @njit
