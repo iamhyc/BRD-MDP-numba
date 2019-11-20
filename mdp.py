@@ -85,20 +85,30 @@ def evaluate(j, k, systemStat, oldPolicy, nowPolicy):
     ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float32)
     es_vec = np.zeros((N_ES, DIM_P),       dtype=np.float32)
 
-    #TODO:
-    # old_prob[k,j]
+    # generate arrival probability
+    old_prob = np.zeros((N_AP, N_ES), dtype=np.float32)
+    now_prob = np.zeros((N_AP, N_ES), dtype=np.float32)
+    for k in prange(N_AP):
+        old_prob[ k, oldPolicy[k,j] ] = arr_prob[k,j]
+        now_prob[ k, nowPolicy[k,j] ] = arr_prob[k,j]
 
-    # # init vector
-    # for m in prange(N_ES):
-    #     es_vec[m] = ES2Vec(nowStat.es_stat[m,j])
-    #     for k in prange(N_AP):
-    #         ap_vec[k,m] = AP2Vec(nowStat.ap_stat[k,m,j])
+    # init vector
+    for m in prange(N_ES):
+        es_vec[m] = ES2Vec(nowStat.es_stat[m,j])
+        for k in prange(N_AP):
+            ap_vec[k,m] = AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])
 
-    # # iteration and collect cost
+    _delay = br_delay[k]
+    # iteration to (t+1) and collect cost
+    for n in range(_delay):
+        pass
+    for n in range(_delay, N_SLT):
+        pass
 
-    #     # calculate _beta and val_ap
-        
-    #     # calculate val_es with _beta
+    # iteration to (t+3) and collect cost
+
+    # calculate _beta and val_ap    
+    # calculate val_es with _beta
 
     return np.sum(val_ap) + np.sum(val_es)
 
