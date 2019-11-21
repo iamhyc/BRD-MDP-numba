@@ -73,7 +73,7 @@ def genUploadingDistribution():
                 rv   = norm(loc=mean, scale=var)
                 rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
                 rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
-                dist[k,m,j] = np.concatenate((rv_prob, [1.0])) #FIXME: need a double-check: the last uploading is a must.
+                dist[k,m,j] = np.concatenate((rv_prob, [1.0])) #NOTE: true story, the last uploading is a must.
     return dist
 
 @njit
