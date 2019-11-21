@@ -112,8 +112,13 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
             es_vec[m] = es_vec[m] @ mat
         pass
     
-    #TODO: calculate future cost for AP
-    
+    # calculate value for AP
+    for m in prange(N_ES):
+        for k in prange(N_AP):
+            trans_mat   = np.linalg.matrix_power(ul_trans[k,m])
+            ident_mat   = np.eye(N_CNT, dtype=np.float32)
+            inv_mat     = np.linalg.inv( ident_mat - GAMMA*trans_mat )
+            val_ap[k,m] = np.sum( ap_vec[k,m] @ inv_mat )
 
     #TODO: iteration to (t+3) and collect cost for ES
 
