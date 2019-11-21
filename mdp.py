@@ -78,7 +78,8 @@ def TransES(beta, proc_dist):
     return mat
 
 @njit
-def evaluate(j, k, systemStat, oldPolicy, nowPolicy):
+def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
+    _delay                       = br_delay[_k]
     (oldStat, nowStat, br_delay) = systemStat
     val_ap = np.zeros((N_AP, N_ES),        dtype=np.float32)
     val_es = np.zeros((N_ES,),             dtype=np.float32)
@@ -89,23 +90,39 @@ def evaluate(j, k, systemStat, oldPolicy, nowPolicy):
     old_prob = np.zeros((N_AP, N_ES), dtype=np.float32)
     now_prob = np.zeros((N_AP, N_ES), dtype=np.float32)
     for k in prange(N_AP):
-        old_prob[ k, oldPolicy[k,j] ] = arr_prob[k,j]
-        now_prob[ k, nowPolicy[k,j] ] = arr_prob[k,j]
+        old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
+        now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
 
     # init vector
     for m in prange(N_ES):
         es_vec[m] = ES2Vec(nowStat.es_stat[m,j])
         for k in prange(N_AP):
             ap_vec[k,m] = AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])
-
-    _delay = br_delay[k]
-    # iteration to (t+1) and collect cost
+    
+    # iterate to D_{k}(t)
     for n in range(_delay):
-        pass
-    for n in range(_delay, N_SLT):
+        for m in prange(N_ES):
+            beta = 0.0
+            for k in prange(N_AP):
+                ap_vec[k,m] = ap_vec[k,m] @ ul_trans[k,m,j]
+                beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                pass
+            mat       = TransES(beta, proc_dist[m,j])
+            es_vec[m] = es_vec[m] @ mat
         pass
 
-    # iteration to (t+3) and collect cost
+    # update ap_vec arrival probability
+    for m in prange(N_ES):
+        for k in prange(N_AP):
+            ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m])
+    
+    # continue iterate to (t+1)
+    for n in range(_delay, N_SLT):
+
+        pass
+    
+    # calculate the cost for AP
+    # iteration to (t+3) and collect cost for ES
 
     return np.sum(val_ap) + np.sum(val_es)
 
