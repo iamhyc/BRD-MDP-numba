@@ -115,12 +115,26 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # calculate value for AP
     for m in prange(N_ES):
         for k in prange(N_AP):
-            trans_mat   = np.linalg.matrix_power(ul_trans[k,m])
+            trans_mat   = np.linalg.matrix_power(ul_trans[k,m,j])
             ident_mat   = np.eye(N_CNT, dtype=np.float32)
             inv_mat     = np.linalg.inv( ident_mat - GAMMA*trans_mat )
             val_ap[k,m] = np.sum( ap_vec[k,m] @ inv_mat )
 
-    #TODO: iteration to (t+3) and collect cost for ES
+    # continue iterate system state to (t+3) and collect cost for ES
+    for n in range(2*N_SLT):
+        for m in prange(N_ES):
+            beta = 0.0
+            for k in prange(N_AP):
+                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
+                beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                pass
+            mat       = TransES(beta, proc_dist[m,j])
+            es_vec[m] = es_vec[m] @ mat
+            if n//N_SLT == 0:
+                val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT) #FIXME: n//N_SLT or n//N_SLT+1 ?
+        pass
+
+    #TODO: calculate value for ES
 
     return np.sum(val_ap) + np.sum(val_es)
 
