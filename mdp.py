@@ -99,30 +99,23 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
         for k in prange(N_AP):
             ap_vec[k,m] = AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])
     
-    # iterate to D_{k}(t)
-    for n in range(_delay):
+    # iterate system state to (t+1)
+    for n in range(N_SLT):
         for m in prange(N_ES):
             beta = 0.0
             for k in prange(N_AP):
                 ap_vec[k,m] = ap_vec[k,m] @ ul_trans[k,m,j]
                 beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                if n==_delay: ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update once is okay!
                 pass
             mat       = TransES(beta, proc_dist[m,j])
             es_vec[m] = es_vec[m] @ mat
         pass
-
-    # update ap_vec arrival probability
-    for m in prange(N_ES):
-        for k in prange(N_AP):
-            ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m])
     
-    # continue iterate to (t+1)
-    for n in range(_delay, N_SLT):
-
-        pass
+    #TODO: calculate future cost for AP
     
-    # calculate the cost for AP
-    # iteration to (t+3) and collect cost for ES
+
+    #TODO: iteration to (t+3) and collect cost for ES
 
     return np.sum(val_ap) + np.sum(val_es)
 
