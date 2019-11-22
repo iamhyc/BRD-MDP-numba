@@ -63,27 +63,35 @@ def main():
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     
     while stage < STAGE:
-        #NOTE: toss job arrival for APs in each time slot
-        arrival_ap = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
-        for n in range(N_SLT):
-            for j in range(N_JOB):
-                for k in range(N_AP):
-                    arrival_ap[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
+        with Timer(output=True):
+            #NOTE: toss job arrival for APs in each time slot
+            arrival_ap = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
+            for n in range(N_SLT):
+                for j in range(N_JOB):
+                    for k in range(N_AP):
+                        arrival_ap[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
 
-        #NOTE: toss broadcast delay for each AP
-        br_delay = np.zeros((N_AP), dtype=np.int32)
-        for k in range(N_AP):
-            br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
+            #NOTE: toss broadcast delay for each AP
+            br_delay = np.zeros((N_AP), dtype=np.int32)
+            for k in range(N_AP):
+                br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
 
-        #NOTE: optimize and update the backup
-        systemStat     = (oldStat, nowStat, br_delay)
-        oldPolicy      = nowPolicy
-        nowPolicy, val = optimize(stage, systemStat, oldPolicy)
-        oldStat        = nowStat
-        nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
-        
-        stage += 1
+            #NOTE: optimize and update the backup
+            systemStat     = (oldStat, nowStat, br_delay)
+            oldPolicy      = nowPolicy
+            nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+            oldStat        = nowStat
+            nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
+            
+            stage += 1
         pass
+
+        trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
+        np.savez(trace_file, **{
+            'mdp_ap_stat': nowStat.ap_stat,
+            'mdp_es_stat': nowStat.es_stat,
+            'mdp_value'  : val
+        })
     pass
 
 if __name__ == "__main__":
