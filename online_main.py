@@ -19,7 +19,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                     _m = oldPolicy(oldStat, k, j) if n<br_delay[k] else nowPolicy(nowStat, k, j)
                 else:
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
-                nextStat[k, _m, j, 0] = arrival_ap[n, k, j]
+                nextStat.ap_stat[k, _m, j, 0] = arrival_ap[n, k, j]
         
         #NOTE: count uploading & offloading jobs
         off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
@@ -58,6 +58,8 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main():
+    pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
+    
     stage = 0
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
