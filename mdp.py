@@ -2,11 +2,11 @@
 import numpy as np
 from params import *
 from utility import *
-from numba import int32, float32
+from numba import int32, float64
 from numba import njit, prange, jitclass
 from itertools import product
 
-ESValVec  = np.repeat(np.arange(LQ+1), repeats=PROC_MAX).astype(np.float32)
+ESValVec  = np.repeat(np.arange(LQ+1), repeats=PROC_MAX).astype(np.float64)
 
 @jitclass([ ('ap_stat', int32[:,:,:,:]), ('es_stat', int32[:,:,:]) ])
 class State(object):
@@ -27,7 +27,7 @@ class State(object):
 @njit
 def BaselinePolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
-    proc_rng = np.copy(PROC_RNG).astype(np.float32)
+    proc_rng = np.copy(PROC_RNG).astype(np.float64)
     for k in prange(N_AP):
         for j in prange(N_JOB):
             policy[k,j] = (proc_dist[:,j,:] @ proc_rng).argmin()
@@ -36,13 +36,16 @@ def BaselinePolicy():
 @njit
 def AP2Vec(ap_stat, prob):
     assert((ap_stat <= 1).all())
-    ap_vec    = np.copy(ap_stat).astype(dtype=np.float32)
+    ap_vec = np.zeros(N_CNT, dtype=np.float64)
+    for i in prange(len(ap_vec)):
+        ap_vec[i] = ap_stat[i]
+    # ap_vec = np.array(ap_stat, dtype=np.float64)
     ap_vec[0] = prob
     return ap_vec
 
 @njit
 def ES2Vec(es_stat):
-    es_vec = np.zeros((DIM_P), dtype=np.float32)
+    es_vec = np.zeros((DIM_P), dtype=np.float64)
     _idx   = es_stat[0] * PROC_MAX + es_stat[1]
     es_vec[_idx] = 1
     return es_vec
@@ -53,7 +56,7 @@ def ES2Entry(l,r):
 
 @njit
 def TransES(beta, proc_dist):
-    mat = np.zeros((DIM_P,DIM_P), dtype=np.float32)
+    mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
     
     #NOTE: fill-in l==0 && r==0
     mat[ES2Entry(0,0), ES2Entry(0,0)] = 1 - beta
@@ -79,16 +82,16 @@ def TransES(beta, proc_dist):
 
 @njit
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
-    _delay                       = br_delay[_k]
     (oldStat, nowStat, br_delay) = systemStat
-    val_ap = np.zeros((N_AP, N_ES),        dtype=np.float32)
-    val_es = np.zeros((N_ES,),             dtype=np.float32)
-    ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float32)
-    es_vec = np.zeros((N_ES, DIM_P),       dtype=np.float32)
+    _delay                       = br_delay[_k]
+    val_ap = np.zeros((N_AP, N_ES),        dtype=np.float64)
+    val_es = np.zeros((N_ES,),             dtype=np.float64)
+    ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float64)
+    es_vec = np.zeros((N_ES, DIM_P),       dtype=np.float64)
 
     # generate arrival probability
-    old_prob = np.zeros((N_AP, N_ES), dtype=np.float32)
-    now_prob = np.zeros((N_AP, N_ES), dtype=np.float32)
+    old_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
+    now_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
     for k in prange(N_AP):
         old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
         now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
@@ -115,8 +118,9 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # calculate value for AP
     for m in prange(N_ES):
         for k in prange(N_AP):
-            trans_mat   = np.linalg.matrix_power(ul_trans[k,m,j], N_SLT)
-            ident_mat   = np.eye(N_CNT, dtype=np.float32)
+            mat         = np.copy(ul_trans[k,m,j])
+            trans_mat   = np.linalg.matrix_power(mat, N_SLT)
+            ident_mat   = np.eye(N_CNT, dtype=np.float64)
             inv_mat     = np.linalg.inv( ident_mat - GAMMA*trans_mat )
             val_ap[k,m] = np.sum( ap_vec[k,m] @ inv_mat )
 
@@ -139,7 +143,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
         beta = np.sum(now_prob[:,m]) #FIXME:: TRUE STORY! okay, double-check
         mat  = TransES(beta, proc_dist[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
-        ident_mat = np.zeros(DIM_P, dtype=np.float32)
+        ident_mat = np.eye(DIM_P, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
         val_es[m]+= np.power(GAMMA, 2) * (es_vec[m] @ inv_mat @ ESValVec)
 
@@ -148,13 +152,13 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 @njit
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
-    val_collection = np.zeros(N_JOB, dtype=np.float32)
+    val_collection = np.zeros(N_JOB, dtype=np.float64)
 
     _k = stage // N_AP #NOTE: optimize one AP at one time
 
     for j in prange(N_JOB):
         x0 = nowPolicy[:, j]
-        val_tmp = np.zeros(N_ES, dtype=np.float32)
+        val_tmp = np.zeros(N_ES, dtype=np.float64)
         for m in prange(N_ES):
             x1         = np.copy(x0)
             x1[_k]     = m

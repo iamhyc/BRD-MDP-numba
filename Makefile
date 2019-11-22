@@ -9,5 +9,5 @@ run:
 	python3 ./online_main.py
 
 clean:
-	@rm -rf logs/
+	@rm -rf logs/*
 	@rm -rf traces-*

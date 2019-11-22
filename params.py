@@ -5,7 +5,7 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-RANDOM_SEED = random.randit(0, 2**16)
+RANDOM_SEED = random.randint(0, 2**16)
 np.random.seed(RANDOM_SEED)
 
 GAMMA = 0.90
@@ -42,7 +42,7 @@ npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
 @njit
 def genProcessingDistribution():
-    dist = np.zeros((N_ES, N_JOB, PROC_RNG_L), dtype=np.float32)
+    dist = np.zeros((N_ES, N_JOB, PROC_RNG_L), dtype=np.float64)
     for j in prange(N_JOB):
         for m in prange(N_ES):
             _roll = np.random.randint(2)
@@ -54,32 +54,30 @@ def genProcessingDistribution():
             # dist[m,j] = genFlatDist(PROC_RNG_L)
     return dist
 
-@njit
 def genDelayDistribution():
-    dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float32)
-    for k in prange(N_AP):
+    dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)
+    for k in range(N_AP):
         dist[k] = genGaussianDist(BR_RNG_L)
     return dist
 
-@njit
 def genUploadingDistribution():
-    dist = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float32)
+    dist = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
     choice_dist = genGaussianDist(UL_RNG_L)
-    for j in prange(N_JOB):
-        for m in prange(N_ES):
-            for k in prange(N_AP):
+    for j in range(N_JOB):
+        for m in range(N_ES):
+            for k in range(N_AP):
                 mean = UL_RNG[ multoss(choice_dist) ]
                 var  = (N_CNT - mean) / 3 #3-sigma-rule
                 rv   = norm(loc=mean, scale=var)
                 rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
                 rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
-                dist[k,m,j] = np.concatenate((rv_prob, [1.0])) #NOTE: true story, the last uploading is a must.
+                dist[k,m,j] = rv_prob #NOTE: true story, the last uploading is a ONE.
     return dist
 
 @njit
 def genTransitionMatrix():
-    ul_mat  = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float32)
-    off_mat = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float32)
+    ul_mat  = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float64)
+    off_mat = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float64)
     for j in prange(N_JOB):
         for m in prange(N_ES):
             for k in prange(N_AP):
@@ -99,7 +97,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.05 + 0.05 * np.random.rand(N_AP, N_JOB).astype(np.float32)
+    arr_prob  = 0.05 + 0.05 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingDistribution()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()

@@ -1,5 +1,4 @@
 
-import pathlib
 import numpy as np
 from mdp import *
 from params import*
@@ -59,9 +58,6 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main():
-    pathlib.Path('logs').mkdir(exist_ok=True)
-    pathlib.Path('figures').mkdir(exist_ok=True)
-
     stage = 0
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
