@@ -10,8 +10,21 @@ p_files  = [x for x in p.iterdir() if x.is_file()]
 n_files  = len(p_files)
 npzfiles = '{LOG_DIR}/%04d.npz'.format(LOG_DIR=argv[1])
 
-mdp_cost = np.zeros(n_files, dtype=np.float32)
+mdp_trace = list()
 
 for i in range(n_files):
     trace = np.load(npzfiles%i)
-    mdp_cost
+    mdp_trace.append({
+        'ap_stat': trace['mdp_ap_stat'],
+        'es_stat': trace['mdp_es_stat'],
+        'value'  : trace['mdp_val']
+    })
+    pass
+
+def plot_cost_vs_time():
+    mdp_cost = np.sum(mdp_trace['ap_stat']) + np.sum(mdp_trace['es_stat'])
+    plt.plot(range(n_files), mdp_cost, '-ro')
+    plt.legend(['MDP Policy'])
+    plt.show()
+
+# plot_cost_vs_time()
