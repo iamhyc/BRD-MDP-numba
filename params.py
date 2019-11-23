@@ -6,6 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
+# RANDOM_SEED = 43415
 np.random.seed(RANDOM_SEED)
 
 GAMMA = 0.90
@@ -97,7 +98,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.05 + 0.05 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.01 + 0.01 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingDistribution()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()

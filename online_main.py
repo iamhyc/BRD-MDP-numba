@@ -64,6 +64,8 @@ def main():
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     
+    print('Baseline Policy\n{}'.format(nowPolicy))
+
     while stage < STAGE:
         with Timer(output=True):
             #NOTE: toss job arrival for APs in each time slot
@@ -84,6 +86,10 @@ def main():
             nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             oldStat        = nowStat
             nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
+
+            print(nowPolicy)
+            print(np.sum(nowStat.ap_stat), np.sum(nowStat.es_stat[:,:,0]))
+            print(val)
             
             stage += 1
         pass

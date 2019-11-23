@@ -22,7 +22,7 @@ for i in range(n_files):
     pass
 
 def plot_cost_vs_time():
-    mdp_cost = np.sum(mdp_trace['ap_stat']) + np.sum(mdp_trace['es_stat'])
+    mdp_cost = np.sum(mdp_trace['ap_stat']) + np.sum(mdp_trace['es_stat'][:,:,0])
     plt.plot(range(n_files), mdp_cost, '-ro')
     plt.legend(['MDP Policy'])
     plt.show()

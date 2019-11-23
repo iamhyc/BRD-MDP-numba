@@ -134,8 +134,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
                 pass
             mat       = TransES(beta, proc_dist[m,j])
             es_vec[m] = es_vec[m] @ mat
-            if n//N_SLT == 0:
-                val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT) #NOTE: n//N_SLT or n//N_SLT+1 ?
+            if n%N_SLT == 0:
+                val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
         pass
 
     # calculate value for ES
@@ -164,6 +164,7 @@ def optimize(stage, systemStat, oldPolicy):
             x1[_k]     = m
             val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
             pass
+        print(val_tmp)
         nowPolicy[_k, j] = val_tmp.argmin()
         pass
 
