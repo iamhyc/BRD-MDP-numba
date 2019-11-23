@@ -154,7 +154,7 @@ def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
 
-    _k = stage // N_AP #NOTE: optimize one AP at one time
+    _k = stage % N_AP #NOTE: optimize one AP at one time
 
     for j in prange(N_JOB):
         val_tmp = np.zeros(N_ES, dtype=np.float64)
