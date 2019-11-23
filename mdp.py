@@ -157,14 +157,12 @@ def optimize(stage, systemStat, oldPolicy):
     _k = stage // N_AP #NOTE: optimize one AP at one time
 
     for j in prange(N_JOB):
-        x0 = nowPolicy[:, j]
         val_tmp = np.zeros(N_ES, dtype=np.float64)
         for m in prange(N_ES):
-            x1         = np.copy(x0)
+            x1         = np.copy(nowPolicy[:, j])
             x1[_k]     = m
             val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
             pass
-        print(val_tmp)
         nowPolicy[_k, j] = val_tmp.argmin()
         pass
 

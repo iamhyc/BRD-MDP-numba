@@ -13,8 +13,8 @@ GAMMA = 0.90
 BETA  = 10
 STAGE = 1000
 
-N_AP  = 5
-N_ES  = 3
+N_AP  = 3
+N_ES  = 5
 N_JOB = 5
 LQ    = 10 #maximum queue length on ES (inclusive)
 
@@ -82,8 +82,8 @@ def genTransitionMatrix():
     for j in prange(N_JOB):
         for m in prange(N_ES):
             for k in prange(N_AP):
-                ul_mat[k,m,j,  0, 0] = 1
-                ul_mat[k,m,j, -1,-1] = 1
+                ul_mat[k,m,j,   0, 0] = 1
+                off_mat[k,m,j, -1,-1] = 1
                 for i in prange(N_CNT-1):
                     ul_mat[k,m,j,  i,i+1] =     ul_prob[k,m,j,i]
                     off_mat[k,m,j, i,i+1] = 1 - ul_prob[k,m,j,i]

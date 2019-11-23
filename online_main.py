@@ -87,9 +87,7 @@ def main():
             oldStat        = nowStat
             nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
 
-            print(nowPolicy)
-            print(np.sum(nowStat.ap_stat), np.sum(nowStat.es_stat[:,:,0]))
-            print(val)
+            print('Stage-{} Policy\n{}'.format(stage, nowPolicy))
             
             stage += 1
         pass
