@@ -24,7 +24,7 @@ N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
 BR_MIN     = int( 0.00 * N_SLT )    #(inclusive)
-BR_MAX     = N_CNT                  #(exclusive)
+BR_MAX     = int( 0.20 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
