@@ -13,6 +13,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
     # update intermediate state with arrivals in each time slot 
     for n in range(N_SLT):
         #NOTE: allocate arrival jobs on APs
+        nextStat.ap_stat = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32) #NOTE:NAIVE MISTAKE
         for j in range(N_JOB):
             for k in range(N_AP):
                 if callable(oldPolicy) and callable(nowPolicy):
@@ -21,7 +22,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
                 nextStat.ap_stat[k, _m, j, 0] = arrival_ap[n, k, j]
         
-        #NOTE: count uploading & offloading jobs FIXME:
+        #NOTE: count uploading & offloading jobs
         off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
         for xi in range(N_CNT):
             for j in range(N_JOB):
