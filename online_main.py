@@ -21,7 +21,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
                 nextStat.ap_stat[k, _m, j, 0] = arrival_ap[n, k, j]
         
-        #NOTE: count uploading & offloading jobs
+        #NOTE: count uploading & offloading jobs FIXME:
         off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
         for xi in range(N_CNT):
             for j in range(N_JOB):
@@ -49,8 +49,10 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                         nextStat.es_stat[m,j,1]  = 0        #         clip the remaining time
                 else:                                       # else:
                     pass                                    #     do nothing.
+            pass
 
         #NOTE: update the iteration backup
+        print(nextStat.es_stat[:,:,0])
         lastStat = nextStat
         nextStat = State().clone(lastStat)
         pass

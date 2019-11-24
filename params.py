@@ -16,7 +16,7 @@ STAGE = 1000
 N_AP  = 5
 N_ES  = 3
 N_JOB = 5
-LQ    = 10 #maximum queue length on ES (inclusive)
+LQ    = 20 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -33,8 +33,8 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 0.50 * N_SLT )    #(inclusive)
-PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
+PROC_MIN   = int( 0.20 * N_SLT )    #(inclusive)
+PROC_MAX   = int( 1.00 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)*PROC_MAX

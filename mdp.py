@@ -6,7 +6,9 @@ from numba import int32, float64
 from numba import njit, prange, jitclass
 from itertools import product
 
-ESValVec  = np.repeat(np.arange(LQ+1), repeats=PROC_MAX).astype(np.float64)
+ESValVec  = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
+PENALTY   = (LQ+10) * np.ones(PROC_MAX, dtype=np.float64)
+ESValVec  = np.concatenate((ESValVec, PENALTY))
 
 @jitclass([ ('ap_stat', int32[:,:,:,:]), ('es_stat', int32[:,:,:]) ])
 class State(object):
@@ -174,7 +176,6 @@ def optimize(stage, systemStat, oldPolicy):
             pass
         nowPolicy[_k, j]  = val_tmp.argmin()
         val_collection[j] = val_tmp.min()
-        print(val_tmp)
         pass
 
     return nowPolicy, val_collection
