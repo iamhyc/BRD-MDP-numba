@@ -63,6 +63,7 @@ def main():
     stage = 0
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
+    # oldPolicy, nowPolicy = RandomPolicy(), RandomPolicy()
     
     print('Baseline Policy\n{}'.format(nowPolicy))
 
@@ -88,6 +89,7 @@ def main():
             nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
 
             print('Stage-{} Policy\n{}'.format(stage, nowPolicy))
+            print('ES State:\n{}'.format(nowStat.es_stat[:,:,0]))
             
             stage += 1
         pass

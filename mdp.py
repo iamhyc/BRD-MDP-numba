@@ -25,6 +25,15 @@ class State(object):
     pass
 
 @njit
+def RandomPolicy():
+    policy   = np.zeros((N_AP, N_JOB), dtype=np.int32)
+    proc_rng = np.copy(PROC_RNG).astype(np.float64)
+    for k in prange(N_AP):
+        for j in prange(N_JOB):
+            policy[k, j] = np.random.randint(N_ES)
+    return policy
+
+@njit
 def BaselinePolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
     proc_rng = np.copy(PROC_RNG).astype(np.float64)
@@ -165,6 +174,7 @@ def optimize(stage, systemStat, oldPolicy):
             pass
         nowPolicy[_k, j]  = val_tmp.argmin()
         val_collection[j] = val_tmp.min()
+        print(val_tmp)
         pass
 
     return nowPolicy, val_collection

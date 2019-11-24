@@ -28,13 +28,13 @@ BR_MAX     = int( 0.20 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
-UL_MIN     = int( 0.00 * N_SLT )    #(inclusive)
+UL_MIN     = int( 1.00 * N_SLT )    #(inclusive)
 UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.00 * N_SLT )    #(inclusive)
-PROC_MAX   = int( 3.50 * N_SLT )    #(exclusive)
+PROC_MIN   = int( 0.50 * N_SLT )    #(inclusive)
+PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)*PROC_MAX
@@ -58,12 +58,12 @@ def genProcessingDistribution():
 def genDelayDistribution():
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)
     for k in range(N_AP):
-        dist[k] = genGaussianDist(BR_RNG_L)
+        dist[k] = genFlatDist(BR_RNG_L)
     return dist
 
 def genUploadingDistribution():
     dist = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
-    choice_dist = genGaussianDist(UL_RNG_L)
+    choice_dist = genFlatDist(UL_RNG_L)
     for j in range(N_JOB):
         for m in range(N_ES):
             for k in range(N_AP):
