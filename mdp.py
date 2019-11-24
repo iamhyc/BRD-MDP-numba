@@ -163,11 +163,8 @@ def optimize(stage, systemStat, oldPolicy):
             x1[_k]     = m
             val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
             pass
-        nowPolicy[_k, j] = val_tmp.argmin()
+        nowPolicy[_k, j]  = val_tmp.argmin()
+        val_collection[j] = val_tmp.min()
         pass
-
-    for j in prange(N_JOB):
-        x1 = nowPolicy[:, j]
-        val_collection[j] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
 
     return nowPolicy, val_collection
