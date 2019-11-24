@@ -1,6 +1,6 @@
 
 import random
-import numpy as numpy
+import numpy as np
 from pathlib import *
 from utility import *
 from scipy.stats import norm
@@ -13,8 +13,8 @@ GAMMA = 0.90
 BETA  = 10
 STAGE = 1000
 
-N_AP  = 3
-N_ES  = 5
+N_AP  = 5
+N_ES  = 3
 N_JOB = 5
 LQ    = 10 #maximum queue length on ES (inclusive)
 

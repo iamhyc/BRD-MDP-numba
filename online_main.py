@@ -1,4 +1,4 @@
-
+import pathlib
 import numpy as np
 from mdp import *
 from params import*
@@ -91,6 +91,10 @@ def main():
             
             stage += 1
         pass
+
+        _cost = np.sum(nowStat.ap_stat) + np.sum(nowStat.es_stat[:,:,0])
+        plt.scatter(stage, _cost, c='k')
+        plt.pause(0.05)
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
