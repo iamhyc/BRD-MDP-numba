@@ -128,7 +128,7 @@ def main():
             #----------------------------------------------------------------
 
             cprint('Stage-{} Delta Policy'.format(stage), 'red')
-            print(nowPolicy - BaselinePolicy())
+            print(nowPolicy - oldPolicy)
             cprint('ES State:', 'green')
             print(nowStat.es_stat[:,:,0])
             

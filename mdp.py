@@ -115,13 +115,13 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # iterate system state to (t+1)
     for n in range(N_SLT):
         for m in prange(N_ES):
-            beta = 0.0
+            beta = np.zeros(N_ES, dtype=np.float64)
             for k in prange(N_AP):
-                ap_vec[k,m] = ap_vec[k,m] @ ul_trans[k,m,j]
-                beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
                 if n==_delay: ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update once is okay!
                 pass
-            mat       = TransES(beta, proc_dist[m,j])
+            mat       = TransES(beta.sum(), proc_dist[m,j])
             es_vec[m] = es_vec[m] @ mat
         pass
     
@@ -137,12 +137,12 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # continue iterate system state to (t+3) and collect cost for ES
     for n in range(2*N_SLT):
         for m in prange(N_ES):
-            beta = 0.0
+            beta = np.zeros(N_ES, dtype=np.float64)
             for k in prange(N_AP):
+                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
-                beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 pass
-            mat       = TransES(beta, proc_dist[m,j])
+            mat       = TransES(beta.sum(), proc_dist[m,j])
             es_vec[m] = es_vec[m] @ mat
             if n%N_SLT == 0:
                 val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
@@ -150,8 +150,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     # calculate value for ES
     for m in prange(N_ES):
-        beta = np.sum(now_prob[:,m]) #FIXME:: TRUE STORY! okay, double-check
-        mat  = TransES(beta, proc_dist[m,j])
+        _beta = np.sum(now_prob[:,m]) #FIXME:: TRUE STORY! okay, double-check
+        mat  = TransES(_beta, proc_dist[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
