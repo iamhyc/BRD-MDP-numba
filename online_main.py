@@ -4,6 +4,27 @@ from mdp import *
 from params import*
 from utility import *
 import matplotlib.pyplot as plt
+from termcolor import cprint
+
+@njit
+def ABaselinPolicy(stat, k, j):
+    return BaselinePolicy()[k,j]
+
+@njit
+def ARandomPolicy(stat, k, j):
+    return np.random.randint(N_ES)
+
+@njit
+def AQueueFirstPolicy(stat, k, j):
+    return (stat.es_stat[:,j,0]).argmin()
+
+@njit
+def ASelfishPolicy(stat, k, j):
+    ul_rng    = np.arange(N_CNT, dtype=np.float64)
+    proc_rng  = np.copy(PROC_RNG).astype(np.float64)
+    eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng
+    # eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
+    return eval_cost.argmin()
 
 def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
@@ -53,7 +74,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
-        print(nextStat.es_stat[:,:,0])
+        # print(nextStat.es_stat[:,:,0])
         lastStat = nextStat
         nextStat = State().clone(lastStat)
         pass
@@ -66,8 +87,13 @@ def main():
     stage = 0
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
-    # oldPolicy, nowPolicy = RandomPolicy(), RandomPolicy()
-    
+    #-----------------------------------------------------------
+    bs_oldStat, bs_nowStat = State(), State()
+    sf_oldStat, sf_nowStat = State(), State()
+    qf_oldStat, qf_nowStat = State(), State()
+    rd_oldStat, rd_nowStat = State(), State()
+    #-----------------------------------------------------------
+
     print('Baseline Policy\n{}'.format(nowPolicy))
 
     while stage < STAGE:
@@ -90,15 +116,33 @@ def main():
             nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             oldStat        = nowStat
             nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
+            #----------------------------------------------------------------
+            systemStat             = (bs_oldStat, bs_nowStat, br_delay)
+            bs_oldStat, bs_nowStat = bs_nowStat, NextState(arrival_ap, systemStat, ABaselinPolicy, ABaselinPolicy)
+            systemStat             = (sf_oldStat, sf_nowStat, br_delay)
+            sf_oldStat, sf_nowStat = sf_nowStat, NextState(arrival_ap, systemStat, ASelfishPolicy, ASelfishPolicy)
+            systemStat             = (qf_oldStat, qf_nowStat, br_delay)
+            qf_oldStat, qf_nowStat = qf_nowStat, NextState(arrival_ap, systemStat, AQueueFirstPolicy, AQueueFirstPolicy)
+            systemStat             = (rd_oldStat, rd_nowStat, br_delay)
+            rd_oldStat, rd_nowStat = rd_nowStat, NextState(arrival_ap, systemStat, ARandomPolicy, ARandomPolicy)
+            #----------------------------------------------------------------
 
-            print('Stage-{} Policy\n{}'.format(stage, nowPolicy))
-            print('ES State:\n{}'.format(nowStat.es_stat[:,:,0]))
+            cprint('Stage-{} Delta Policy'.format(stage), 'red')
+            print(nowPolicy - BaselinePolicy())
+            cprint('ES State:', 'green')
+            print(nowStat.es_stat[:,:,0])
             
             stage += 1
         pass
 
-        _cost = np.sum(nowStat.ap_stat) + np.sum(nowStat.es_stat[:,:,0])
-        plt.scatter(stage, _cost, c='k')
+        #---------------------------------------------------------------------
+        plt.plot([stage, stage+1], [oldStat.cost(), nowStat.cost()], '-ro')
+        plt.plot([stage, stage+1], [bs_oldStat.cost(), bs_nowStat.cost()], '-ko')
+        plt.plot([stage, stage+1], [sf_oldStat.cost(), sf_nowStat.cost()], '-bo')
+        plt.plot([stage, stage+1], [qf_oldStat.cost(), qf_nowStat.cost()], '-go')
+        plt.plot([stage, stage+1], [rd_oldStat.cost(), rd_nowStat.cost()], '-co')
+        plt.legend(['MDP Policy', 'Baseline Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
+        #---------------------------------------------------------------------
         plt.pause(0.05)
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)

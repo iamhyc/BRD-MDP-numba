@@ -23,13 +23,12 @@ class State(object):
         return self
     
     def cost(self):
-        return np.sum(self.ap_stat) + np.sum(es_stat[:,:,0])
+        return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
     pass
 
 @njit
 def RandomPolicy():
     policy   = np.zeros((N_AP, N_JOB), dtype=np.int32)
-    proc_rng = np.copy(PROC_RNG).astype(np.float64)
     for k in prange(N_AP):
         for j in prange(N_JOB):
             policy[k, j] = np.random.randint(N_ES)
@@ -177,5 +176,7 @@ def optimize(stage, systemStat, oldPolicy):
         nowPolicy[_k, j]  = val_tmp.argmin()
         val_collection[j] = val_tmp.min()
         pass
+
+    # print(nowPolicy[_k,:] - oldPolicy[_k,:])
 
     return nowPolicy, val_collection
