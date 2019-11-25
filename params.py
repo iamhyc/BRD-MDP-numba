@@ -85,8 +85,8 @@ def genTransitionMatrix():
                 ul_mat[k,m,j,   0, 0] = 1
                 off_mat[k,m,j, -1,-1] = 1
                 for i in prange(N_CNT-1):
-                    ul_mat[k,m,j,  i,i+1] =     ul_prob[k,m,j,i]
-                    off_mat[k,m,j, i,i+1] = 1 - ul_prob[k,m,j,i]
+                    ul_mat[k,m,j,  i,i+1] = 1 - ul_prob[k,m,j,i]
+                    off_mat[k,m,j, i,i+1] =     ul_prob[k,m,j,i]
     return ul_mat, off_mat
 
 if Path(npzfile).exists():
