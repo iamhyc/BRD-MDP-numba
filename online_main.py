@@ -88,10 +88,10 @@ def main():
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     #-----------------------------------------------------------
-    bs_oldStat, bs_nowStat = State(), State()
-    sf_oldStat, sf_nowStat = State(), State()
-    qf_oldStat, qf_nowStat = State(), State()
-    rd_oldStat, rd_nowStat = State(), State()
+    # bs_oldStat, bs_nowStat = State(), State()
+    # sf_oldStat, sf_nowStat = State(), State()
+    # qf_oldStat, qf_nowStat = State(), State()
+    # rd_oldStat, rd_nowStat = State(), State()
     #-----------------------------------------------------------
 
     print('Baseline Policy\n{}'.format(nowPolicy))
@@ -117,14 +117,14 @@ def main():
             oldStat        = nowStat
             nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
             #----------------------------------------------------------------
-            systemStat             = (bs_oldStat, bs_nowStat, br_delay)
-            bs_oldStat, bs_nowStat = bs_nowStat, NextState(arrival_ap, systemStat, ABaselinPolicy, ABaselinPolicy)
-            systemStat             = (sf_oldStat, sf_nowStat, br_delay)
-            sf_oldStat, sf_nowStat = sf_nowStat, NextState(arrival_ap, systemStat, ASelfishPolicy, ASelfishPolicy)
-            systemStat             = (qf_oldStat, qf_nowStat, br_delay)
-            qf_oldStat, qf_nowStat = qf_nowStat, NextState(arrival_ap, systemStat, AQueueFirstPolicy, AQueueFirstPolicy)
-            systemStat             = (rd_oldStat, rd_nowStat, br_delay)
-            rd_oldStat, rd_nowStat = rd_nowStat, NextState(arrival_ap, systemStat, ARandomPolicy, ARandomPolicy)
+            # systemStat             = (bs_oldStat, bs_nowStat, br_delay)
+            # bs_oldStat, bs_nowStat = bs_nowStat, NextState(arrival_ap, systemStat, ABaselinPolicy, ABaselinPolicy)
+            # systemStat             = (sf_oldStat, sf_nowStat, br_delay)
+            # sf_oldStat, sf_nowStat = sf_nowStat, NextState(arrival_ap, systemStat, ASelfishPolicy, ASelfishPolicy)
+            # systemStat             = (qf_oldStat, qf_nowStat, br_delay)
+            # qf_oldStat, qf_nowStat = qf_nowStat, NextState(arrival_ap, systemStat, AQueueFirstPolicy, AQueueFirstPolicy)
+            # systemStat             = (rd_oldStat, rd_nowStat, br_delay)
+            # rd_oldStat, rd_nowStat = rd_nowStat, NextState(arrival_ap, systemStat, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
 
             cprint('Stage-{} Delta Policy'.format(stage), 'red')
@@ -137,11 +137,11 @@ def main():
 
         #---------------------------------------------------------------------
         plt.plot([stage, stage+1], [oldStat.cost(), nowStat.cost()], '-ro')
-        plt.plot([stage, stage+1], [bs_oldStat.cost(), bs_nowStat.cost()], '-ko')
-        plt.plot([stage, stage+1], [sf_oldStat.cost(), sf_nowStat.cost()], '-bo')
-        plt.plot([stage, stage+1], [qf_oldStat.cost(), qf_nowStat.cost()], '-go')
-        plt.plot([stage, stage+1], [rd_oldStat.cost(), rd_nowStat.cost()], '-co')
-        plt.legend(['MDP Policy', 'Baseline Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
+        # plt.plot([stage, stage+1], [bs_oldStat.cost(), bs_nowStat.cost()], '-ko')
+        # plt.plot([stage, stage+1], [sf_oldStat.cost(), sf_nowStat.cost()], '-bo')
+        # plt.plot([stage, stage+1], [qf_oldStat.cost(), qf_nowStat.cost()], '-go')
+        # plt.plot([stage, stage+1], [rd_oldStat.cost(), rd_nowStat.cost()], '-co')
+        # plt.legend(['MDP Policy', 'Baseline Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
         #---------------------------------------------------------------------
         plt.pause(0.05)
 

@@ -61,8 +61,8 @@ def genDelayDistribution():
         dist[k] = genFlatDist(BR_RNG_L)
     return dist
 
-def genUploadingDistribution():
-    dist = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
+def genUploadingProbabilities():
+    probs = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
     choice_dist = genFlatDist(UL_RNG_L)
     for j in range(N_JOB):
         for m in range(N_ES):
@@ -72,8 +72,8 @@ def genUploadingDistribution():
                 rv   = norm(loc=mean, scale=var)
                 rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
                 rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
-                dist[k,m,j] = rv_prob #NOTE: true story, the last uploading is a ONE.
-    return dist
+                probs[k,m,j] = rv_prob #NOTE: true story, the last uploading is a ONE.
+    return probs
 
 @njit
 def genTransitionMatrix():
@@ -99,7 +99,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
 else:
     arr_prob  = 0.02 + 0.02 * np.random.rand(N_AP, N_JOB).astype(np.float64)
-    ul_prob   = genUploadingDistribution()
+    ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
     ul_trans, off_trans = genTransitionMatrix()
