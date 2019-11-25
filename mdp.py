@@ -6,8 +6,9 @@ from numba import int32, float64
 from numba import njit, prange, jitclass
 from itertools import product
 
+ul_rng    = np.arange(N_CNT, dtype=np.float64)
 ESValVec  = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
-PENALTY   = (LQ+10) * np.ones(PROC_MAX, dtype=np.float64)
+PENALTY   = (LQ*10) * np.ones(PROC_MAX, dtype=np.float64)
 ESValVec  = np.concatenate((ESValVec, PENALTY))
 
 @jitclass([ ('ap_stat', int32[:,:,:,:]), ('es_stat', int32[:,:,:]) ])
@@ -40,7 +41,9 @@ def BaselinePolicy():
     proc_rng = np.copy(PROC_RNG).astype(np.float64)
     for k in prange(N_AP):
         for j in prange(N_JOB):
-            policy[k,j] = (proc_dist[:,j,:] @ proc_rng).argmin()
+            # policy[k,j] = (proc_dist[:,j,:] @ proc_rng).argmin()
+            policy[k,j] = (ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng).argmin()
+            # policy[k,j] = (ul_prob[k,:,j,:] @ _tmp).argmin()
     return policy
 
 @njit
@@ -177,6 +180,7 @@ def optimize(stage, systemStat, oldPolicy):
         val_collection[j] = val_tmp.min()
         pass
 
+    print(val_collection)
     # print(nowPolicy[_k,:] - oldPolicy[_k,:])
 
     return nowPolicy, val_collection
