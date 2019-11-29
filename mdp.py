@@ -6,8 +6,9 @@ from numba import int32, float64
 from numba import njit, prange, jitclass
 from itertools import product
 
+ul_rng    = np.arange(N_CNT, dtype=np.float64)
 ESValVec  = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
-PENALTY   = (LQ+10) * np.ones(PROC_MAX, dtype=np.float64)
+PENALTY   = (LQ*10) * np.ones(PROC_MAX, dtype=np.float64)
 ESValVec  = np.concatenate((ESValVec, PENALTY))
 
 @jitclass([ ('ap_stat', int32[:,:,:,:]), ('es_stat', int32[:,:,:]) ])
@@ -40,7 +41,9 @@ def BaselinePolicy():
     proc_rng = np.copy(PROC_RNG).astype(np.float64)
     for k in prange(N_AP):
         for j in prange(N_JOB):
-            policy[k,j] = (proc_dist[:,j,:] @ proc_rng).argmin()
+            # policy[k,j] = (proc_dist[:,j,:] @ proc_rng).argmin()
+            policy[k,j] = (ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng).argmin()
+            # policy[k,j] = (ul_prob[k,:,j,:] @ _tmp).argmin()
     return policy
 
 @njit
@@ -115,13 +118,13 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # iterate system state to (t+1)
     for n in range(N_SLT):
         for m in prange(N_ES):
-            beta = 0.0
+            beta = np.zeros(N_ES, dtype=np.float64)
             for k in prange(N_AP):
-                ap_vec[k,m] = ap_vec[k,m] @ ul_trans[k,m,j]
-                beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
                 if n==_delay: ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update once is okay!
                 pass
-            mat       = TransES(beta, proc_dist[m,j])
+            mat       = TransES(beta.sum(), proc_dist[m,j])
             es_vec[m] = es_vec[m] @ mat
         pass
     
@@ -137,12 +140,12 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # continue iterate system state to (t+3) and collect cost for ES
     for n in range(2*N_SLT):
         for m in prange(N_ES):
-            beta = 0.0
+            beta = np.zeros(N_ES, dtype=np.float64)
             for k in prange(N_AP):
+                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
-                beta       += np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 pass
-            mat       = TransES(beta, proc_dist[m,j])
+            mat       = TransES(beta.sum(), proc_dist[m,j])
             es_vec[m] = es_vec[m] @ mat
             if n%N_SLT == 0:
                 val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
@@ -150,8 +153,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     # calculate value for ES
     for m in prange(N_ES):
-        beta = np.sum(now_prob[:,m]) #FIXME:: TRUE STORY! okay, double-check
-        mat  = TransES(beta, proc_dist[m,j])
+        _beta = np.sum(now_prob[:,m]) #FIXME:: TRUE STORY! okay, double-check
+        mat  = TransES(_beta, proc_dist[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
@@ -177,6 +180,7 @@ def optimize(stage, systemStat, oldPolicy):
         val_collection[j] = val_tmp.min()
         pass
 
+    print(val_collection)
     # print(nowPolicy[_k,:] - oldPolicy[_k,:])
 
     return nowPolicy, val_collection

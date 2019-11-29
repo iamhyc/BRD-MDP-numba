@@ -6,6 +6,8 @@ from utility import *
 import matplotlib.pyplot as plt
 from termcolor import cprint
 
+ul_rng    = np.arange(N_CNT, dtype=np.float64)
+
 @njit
 def ABaselinPolicy(stat, k, j):
     return BaselinePolicy()[k,j]
@@ -20,7 +22,6 @@ def AQueueFirstPolicy(stat, k, j):
 
 @njit
 def ASelfishPolicy(stat, k, j):
-    ul_rng    = np.arange(N_CNT, dtype=np.float64)
     proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng
     # eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
@@ -31,10 +32,12 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
     lastStat  = State().clone(nowStat)
     nextStat  = State().clone(lastStat)
 
+    # print(arrival_ap)
+
     # update intermediate state with arrivals in each time slot 
     for n in range(N_SLT):
+        nextStat.ap_stat = np.zeros((N_AP,N_ES,N_JOB,N_CNT), dtype=np.int32)
         #NOTE: allocate arrival jobs on APs
-        nextStat.ap_stat = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32) #NOTE:NAIVE MISTAKE
         for j in range(N_JOB):
             for k in range(N_AP):
                 if callable(oldPolicy) and callable(nowPolicy):
@@ -74,6 +77,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
+        # print(np.sum(nextStat.ap_stat))
         # print(nextStat.es_stat[:,:,0])
         lastStat = nextStat
         nextStat = State().clone(lastStat)
@@ -128,7 +132,7 @@ def main():
             #----------------------------------------------------------------
 
             cprint('Stage-{} Delta Policy'.format(stage), 'red')
-            print(nowPolicy - BaselinePolicy())
+            print(nowPolicy - oldPolicy)
             cprint('ES State:', 'green')
             print(nowStat.es_stat[:,:,0])
             

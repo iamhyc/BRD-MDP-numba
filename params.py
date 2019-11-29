@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 43415
+# RANDOM_SEED = 25785
 np.random.seed(RANDOM_SEED)
 
 GAMMA = 0.90
@@ -14,7 +14,7 @@ BETA  = 10
 STAGE = 1000
 
 N_AP  = 5
-N_ES  = 5
+N_ES  = 3
 N_JOB = 5
 LQ    = 10 #maximum queue length on ES (inclusive)
 
@@ -23,13 +23,13 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 0.00 * N_SLT )    #(inclusive)
-BR_MAX     = int( 0.20 * N_SLT )    #(exclusive)
+BR_MIN     = int( 0.50 * N_SLT )    #(inclusive)
+BR_MAX     = int( 0.70 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
-UL_MIN     = int( 1.00 * N_SLT )    #(inclusive)
-UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
+UL_MIN     = int( 0.50 * N_SLT )    #(inclusive)
+UL_MAX     = int( 1.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
@@ -50,7 +50,7 @@ def genProcessingDistribution():
             dist[m,j] = genHeavyHeadDist(PROC_RNG_L) if _roll==1 else genHeavyTailDist(PROC_RNG_L)
             # dist[m,j] = genHeavyHeadDist(PROC_RNG_L)
             # dist[m,j] = genHeavyTailDist(PROC_RNG_L)
-            # dist[m,j] = genGaussianDist(PROC_RNG_L)
+            # 1dist[m,j] = genGaussianDist(PROC_RNG_L)
             # dist[m,j] = genSplitDist(PROC_RNG_L)
             # dist[m,j] = genFlatDist(PROC_RNG_L)
     return dist
@@ -61,8 +61,8 @@ def genDelayDistribution():
         dist[k] = genFlatDist(BR_RNG_L)
     return dist
 
-def genUploadingDistribution():
-    dist = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
+def genUploadingProbabilities():
+    probs = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
     choice_dist = genFlatDist(UL_RNG_L)
     for j in range(N_JOB):
         for m in range(N_ES):
@@ -72,8 +72,8 @@ def genUploadingDistribution():
                 rv   = norm(loc=mean, scale=var)
                 rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
                 rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
-                dist[k,m,j] = rv_prob #NOTE: true story, the last uploading is a ONE.
-    return dist
+                probs[k,m,j] = rv_prob #NOTE: true story, the last uploading is a ONE.
+    return probs
 
 @njit
 def genTransitionMatrix():
@@ -85,8 +85,8 @@ def genTransitionMatrix():
                 ul_mat[k,m,j,   0, 0] = 1
                 off_mat[k,m,j, -1,-1] = 1
                 for i in prange(N_CNT-1):
-                    ul_mat[k,m,j,  i,i+1] =     ul_prob[k,m,j,i]
-                    off_mat[k,m,j, i,i+1] = 1 - ul_prob[k,m,j,i]
+                    ul_mat[k,m,j,  i,i+1] = 1 - ul_prob[k,m,j,i]
+                    off_mat[k,m,j, i,i+1] =     ul_prob[k,m,j,i]
     return ul_mat, off_mat
 
 if Path(npzfile).exists():
@@ -98,8 +98,8 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.02 + 0.02 * np.random.rand(N_AP, N_JOB).astype(np.float64)
-    ul_prob   = genUploadingDistribution()
+    arr_prob  = 0.015 + 0.01 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
     ul_trans, off_trans = genTransitionMatrix()
