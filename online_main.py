@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pathlib
 import numpy as np
 from mdp import *
@@ -75,8 +76,6 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
-        # print(np.sum(nextStat.ap_stat))
-        # print(nextStat.es_stat[:,:,0])
         lastStat = nextStat
         nextStat = State().clone(lastStat)
         pass
@@ -150,9 +149,15 @@ def main():
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
-            'mdp_ap_stat': nowStat.ap_stat,
-            'mdp_es_stat': nowStat.es_stat,
-            'mdp_value'  : val
+            'mdp_value'  : val,
+            'mdp_ap_stat'    : nowStat.ap_stat,
+            'mdp_es_stat'    : nowStat.es_stat,
+            "selfish_ap_stat": sf_nowStat.ap_stat,
+            "selfish_es_stat": sf_nowStat.es_stat,
+            "sqf_ap_stat"    : qf_nowStat.ap_stat,
+            "sqf_es_stat"    : qf_nowStat.es_stat,
+            "random_ap_stat" : rd_nowStat.ap_stat,
+            "random_es_Stat" : rd_nowStat.es_stat
         })
         pass
 
