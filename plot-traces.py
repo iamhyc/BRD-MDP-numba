@@ -47,7 +47,7 @@ def plot_cost_vs_time():
     plt.plot(range(n_files), random_cost,  '-co')
     plt.plot(range(n_files), selfish_cost, '-bo')
 
-    plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
+    plt.legend(['MDP Policy', 'SQF Policy', 'Random Policy', 'Selfish Policy'])
     plt.show()
     pass
 
@@ -78,7 +78,7 @@ def plot_cost_cdf_vs_time():
     plt.plot(pmf_x, pmf_y[2], '-c')
     plt.plot(pmf_x, pmf_y[3], '-b')
 
-    plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
+    plt.legend(['MDP Policy', 'SQF Policy', 'Random Policy', 'Selfish Policy'])
     plt.show()
     pass
 
