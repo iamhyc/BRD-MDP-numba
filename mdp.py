@@ -180,7 +180,6 @@ def optimize(stage, systemStat, oldPolicy):
         val_collection[j] = val_tmp.min()
         pass
 
-    print(val_collection)
-    # print(nowPolicy[_k,:] - oldPolicy[_k,:])
+    # print(val_collection)
 
     return nowPolicy, val_collection
