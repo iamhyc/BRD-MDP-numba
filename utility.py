@@ -59,9 +59,9 @@ def genFlatDist(size):          #e.g. [1, 1, ... 1, 1]
 
 @njit
 def genHeavyTailDist(size):     #e.g. [0, 0, ... 1, 1]
-    mid_size = size//2
+    mid_size = size - size//6
     arr_1 = 0.1*np.random.rand(mid_size).astype(np.float64)
-    arr_2 = 0.5+0.1*np.random.rand(size-mid_size).astype(np.float64)
+    arr_2 = 0.6+0.1*np.random.rand(size-mid_size).astype(np.float64)
     arr = np.sort( np.concatenate((arr_1, arr_2)) )
     return (arr / np.sum(arr))
 

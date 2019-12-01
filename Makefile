@@ -10,5 +10,5 @@ run:
 	python3 ./online_main.py
 
 clean:
-	@rm -rf logs/*
-	@rm -rf traces-*
+	@rm -rf logs/$(ID).npz
+	@rm -rf traces-$(ID)
