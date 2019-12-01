@@ -8,7 +8,7 @@ from itertools import product
 
 ul_rng    = np.arange(N_CNT, dtype=np.float64)
 ESValVec  = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
-PENALTY   = (LQ*10) * np.ones(PROC_MAX, dtype=np.float64)
+PENALTY   = (LQ+10) * np.ones(PROC_MAX, dtype=np.float64)
 ESValVec  = np.concatenate((ESValVec, PENALTY))
 
 @jitclass([ ('ap_stat', int32[:,:,:,:]), ('es_stat', int32[:,:,:]) ])
