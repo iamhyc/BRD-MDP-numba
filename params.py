@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 7209
+# RANDOM_SEED = 7209
 np.random.seed(RANDOM_SEED)
 
 GAMMA = 0.90
@@ -18,7 +18,7 @@ N_ES  = 3
 N_JOB = 5
 LQ    = 10 #maximum queue length on ES (inclusive)
 
-TS    = 0.02         #timeslot, 20ms
+TS    = 0.01         #timeslot, 10ms
 TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
