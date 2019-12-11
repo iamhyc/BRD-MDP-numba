@@ -20,24 +20,24 @@ for line in raw_data:
 
 #NOTE: filter the processing time larger than 30 seconds
 for key in timestamp.keys():
-    timestamp[key] = filter(lambda x:x<30.0, timestamp[key])
+    timestamp[key] = list( filter(lambda x:x<30.0, timestamp[key]) )
     pass
 
 #NOTE: calculate the arrival rate dict
 
 
-# keys = list(timestamp.keys())
-# keys.sort()
-# with open('./sorted-trace.txt', 'w+') as fd:
-#     fd.write(str(len(keys)) + '\n')
-#     for key in keys:
-#         timestamp[key].sort()
-#         fd.write('{key} {num}\n{list}\n\n'.format(
-#             key = key,
-#             num = len(timestamp[key]),
-#             list= ' '.join([str(x) for x in timestamp[key]])
-#         ))
-#     pass
+keys = list(timestamp.keys())
+keys.sort()
+with open('./sorted-trace.txt', 'w+') as fd:
+    fd.write(str(len(keys)) + '\n')
+    for key in keys:
+        timestamp[key].sort()
+        fd.write('{key} {num}\n{list}\n\n'.format(
+            key = key,
+            num = len(timestamp[key]),
+            list= ' '.join([str(x) for x in timestamp[key]])
+        ))
+    pass
 
 #------------------------------------------- Step 2 -------------------------------------------#
 #NOTE: difference the data, scale the number by 100:1, and calculate the frequency scale the data by 100:1
