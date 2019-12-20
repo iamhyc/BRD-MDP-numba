@@ -36,6 +36,9 @@ for i,_file in enumerate(npzfiles):
     })
     pass
 
+def plot_bar_graph():
+    pass
+
 def plot_cost_vs_time():
     mdp_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in mdp_trace]
     sqf_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in sqf_trace]
