@@ -11,30 +11,49 @@ ESValVec   = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
 PenaltyVec = (LQ+10) * np.ones(PROC_MAX, dtype=np.float64)
 ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 
+#FIXME: should analyze for each K/M/J ?
 @jitclass([
     ('ap_stat', int32[:,:,:,:]),
     ('es_stat', int32[:,:,:]),
     ('acc_num', int64),
+    ('acc_dep', int64),
+    ('acc_cost', int64),
     ('timeslot', int64)
 ])
 class State(object):
     def __init__(self):
         self.ap_stat = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
         self.es_stat = np.zeros((N_ES, N_JOB, 2),           dtype=np.int32)
-        self.acc_num, self.timeslot = 0, 0
+        self.acc_num, self.acc_dep   = 0, 0
+        self.acc_cost, self.timeslot = 0, 0
         pass
 
     def clone(self, stat):
         self.ap_stat = np.copy(stat.ap_stat)
         self.es_stat = np.copy(stat.es_stat)
-        self.acc_num,self.timeslot = stat.acc_num, stat.timeslot
+        self.acc_num, self.acc_dep  = stat.acc_num, stat.acc_dep
+        self.acc_cost, self.timeslot= stat.acc_cost, stat.timeslot
         return self
     
     def cost(self):
         return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
+
+    def average_JCT(self): #FIXME: double-check it
+        return self.acc_cost / self.acc_num
     
-    # def avgJCT(self):
-    #     return self.acc_num / self.timeslot
+    def average_cost(self):
+        return self.acc_cost / self.timeslot
+    
+    def average_departure_rate(self):
+        return self.acc_dep / self.timeslot
+
+    def iterate(self, arrivals, departures):
+        self.timeslot += 1
+        self.acc_cost += self.cost()
+        self.acc_num  += np.sum(arrivals) - np.sum(departures)
+        self.acc_dep  += np.sum(departures)
+        pass
+
     pass
 
 @njit
@@ -163,7 +182,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     # calculate value for ES
     for m in prange(N_ES):
-        _beta = np.sum(now_prob[:,m]) #FIXME:: TRUE STORY! okay, double-check
+        _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY! okay, double-check
         mat  = TransES(_beta, proc_dist[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)

@@ -14,10 +14,6 @@ def ARandomPolicy(stat, k, j):
     return np.random.randint(N_ES)
 
 @njit
-def AQueueFirstPolicy(stat, k, j):
-    return (stat.es_stat[:,j,0]).argmin()
-
-@njit
 def ASelfishPolicy(stat, k, j):
     proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng
@@ -25,12 +21,14 @@ def ASelfishPolicy(stat, k, j):
     return eval_cost.argmin()
 
 @njit
-def AMixedPolicy(stat, k, j):
+def AQueueAwarePolicy(stat, k, j):
     proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
     return eval_cost.argmin()
+    # return (stat.es_stat[:,j,0]).argmin()
 
-def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
+#FIXME: 'clone' is bad, maybe?
+def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
     lastStat  = State().clone(nowStat)
     nextStat  = State().clone(lastStat)
@@ -45,7 +43,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                     _m = oldPolicy(oldStat, k, j) if n<br_delay[k] else nowPolicy(nowStat, k, j)
                 else:
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
-                nextStat.ap_stat[k, _m, j, 0] = arrival_ap[n, k, j]
+                nextStat.ap_stat[k, _m, j, 0] = arrivals[n, k, j]
         
         #NOTE: count uploading & offloading jobs
         off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
@@ -60,6 +58,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                             nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
 
         #NOTE: process jobs on ES
+        departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
         for j in range(N_JOB):
             for m in range(N_ES):
                 nextStat.es_stat[m,j,0] += off_number[m,j]
@@ -68,6 +67,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
                 if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]
                     nextStat.es_stat[m,j,0] = LQ            #
                 if nextStat.es_stat[m,j,1] <= 0:            # if first job finished:
+                    departures[m,j] += 1                    #     <record the departure>
                     if nextStat.es_stat[m,j,0] > 0:         #     if has_next_job:
                         nextStat.es_stat[m,j,0] -= 1        #         next job joins processing
                         nextStat.es_stat[m,j,1]  = PROC_RNG[ multoss(proc_dist[m,j]) ]
@@ -78,6 +78,7 @@ def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
+        nextStat.iterate(arrivals[n], departures) #update the accumulation
         lastStat = nextStat
         nextStat = State().clone(lastStat)
         pass
@@ -91,9 +92,9 @@ def main():
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     #-----------------------------------------------------------
-    sf_oldStat, sf_nowStat = State(), State()
-    qf_oldStat, qf_nowStat = State(), State()
-    rd_oldStat, rd_nowStat = State(), State()
+    SF_oldStat, SF_nowStat = State(), State()
+    QA_oldStat, QA_nowStat = State(), State()
+    RD_oldStat, RD_nowStat = State(), State()
     #-----------------------------------------------------------
 
     print('Baseline Policy\n{}'.format(nowPolicy))
@@ -101,11 +102,11 @@ def main():
     while stage < STAGE:
         with Timer(output=True):
             #NOTE: toss job arrival for APs in each time slot
-            arrival_ap = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
+            arrivals = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
             for n in range(N_SLT):
                 for j in range(N_JOB):
                     for k in range(N_AP):
-                        arrival_ap[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
+                        arrivals[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
 
             #NOTE: toss broadcast delay for each AP
             br_delay = np.zeros((N_AP), dtype=np.int32)
@@ -117,14 +118,14 @@ def main():
             oldPolicy      = nowPolicy
             nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             oldStat        = nowStat
-            nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
+            nowStat        = NextState(arrivals, systemStat, oldPolicy, nowPolicy)
             #----------------------------------------------------------------
-            systemStat             = (sf_oldStat, sf_nowStat, br_delay)
-            sf_oldStat, sf_nowStat = sf_nowStat, NextState(arrival_ap, systemStat, ASelfishPolicy, ASelfishPolicy)
-            systemStat             = (qf_oldStat, qf_nowStat, br_delay)
-            qf_oldStat, qf_nowStat = qf_nowStat, NextState(arrival_ap, systemStat, AQueueFirstPolicy, AQueueFirstPolicy)
-            systemStat             = (rd_oldStat, rd_nowStat, br_delay)
-            rd_oldStat, rd_nowStat = rd_nowStat, NextState(arrival_ap, systemStat, ARandomPolicy, ARandomPolicy)
+            systemStat             = (SF_oldStat, SF_nowStat, br_delay)
+            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, ASelfishPolicy, ASelfishPolicy)
+            systemStat             = (QA_oldStat, QA_nowStat, br_delay)
+            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, AQueueAwarePolicy, AQueueAwarePolicy)
+            systemStat             = (RD_oldStat, RD_nowStat, br_delay)
+            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
 
             cprint('Stage-{} Delta Policy'.format(stage), 'red')
@@ -137,9 +138,9 @@ def main():
 
         #---------------------------------------------------------------------
         plt.plot([stage, stage+1], [oldStat.cost(), nowStat.cost()], '-ro')
-        plt.plot([stage, stage+1], [sf_oldStat.cost(), sf_nowStat.cost()], '-bo')
-        plt.plot([stage, stage+1], [qf_oldStat.cost(), qf_nowStat.cost()], '-go')
-        plt.plot([stage, stage+1], [rd_oldStat.cost(), rd_nowStat.cost()], '-co')
+        plt.plot([stage, stage+1], [SF_oldStat.cost(), SF_nowStat.cost()], '-bo')
+        plt.plot([stage, stage+1], [QA_oldStat.cost(), QA_nowStat.cost()], '-go')
+        plt.plot([stage, stage+1], [RD_oldStat.cost(), RD_nowStat.cost()], '-co')
         # plt.plot([stage, stage+1], [mix_oldStat.cost(), mix_nowStat.cost()], '-ko') #FIXME:
         plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
         #---------------------------------------------------------------------
@@ -147,15 +148,15 @@ def main():
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
-            'mdp_value'  : val,
-            'mdp_ap_stat'    : nowStat.ap_stat,
-            'mdp_es_stat'    : nowStat.es_stat,
-            "selfish_ap_stat": sf_nowStat.ap_stat,
-            "selfish_es_stat": sf_nowStat.es_stat,
-            "sqf_ap_stat"    : qf_nowStat.ap_stat,
-            "sqf_es_stat"    : qf_nowStat.es_stat,
-            "random_ap_stat" : rd_nowStat.ap_stat,
-            "random_es_Stat" : rd_nowStat.es_stat
+            'mdp_value'   : val,
+            'mdp_ap_stat' : nowStat.ap_stat,
+            'mdp_es_stat' : nowStat.es_stat,
+            "selfish_ap_stat": SF_nowStat.ap_stat,
+            "selfish_es_stat": SF_nowStat.es_stat,
+            "QAware_ap_stat" : QA_nowStat.ap_stat,
+            "QAware_es_stat" : QA_nowStat.es_stat,
+            "random_ap_stat" : RD_nowStat.ap_stat,
+            "random_es_Stat" : RD_nowStat.es_stat
         })
         pass
 
