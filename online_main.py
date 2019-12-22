@@ -10,10 +10,6 @@ from termcolor import cprint
 ul_rng    = np.arange(N_CNT, dtype=np.float64)
 
 @njit
-def ABaselinPolicy(stat, k, j):
-    return BaselinePolicy()[k,j]
-
-@njit
 def ARandomPolicy(stat, k, j):
     return np.random.randint(N_ES)
 
@@ -26,6 +22,12 @@ def ASelfishPolicy(stat, k, j):
     proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng
     # eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
+    return eval_cost.argmin()
+
+@njit
+def AMixedPolicy(stat, k, j):
+    proc_rng  = np.copy(PROC_RNG).astype(np.float64)
+    eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
     return eval_cost.argmin()
 
 def NextState(arrival_ap, systemStat, oldPolicy, nowPolicy):
@@ -89,7 +91,6 @@ def main():
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     #-----------------------------------------------------------
-    # bs_oldStat, bs_nowStat = State(), State()
     sf_oldStat, sf_nowStat = State(), State()
     qf_oldStat, qf_nowStat = State(), State()
     rd_oldStat, rd_nowStat = State(), State()
@@ -118,8 +119,6 @@ def main():
             oldStat        = nowStat
             nowStat        = NextState(arrival_ap, systemStat, oldPolicy, nowPolicy)
             #----------------------------------------------------------------
-            # systemStat             = (bs_oldStat, bs_nowStat, br_delay)
-            # bs_oldStat, bs_nowStat = bs_nowStat, NextState(arrival_ap, systemStat, ABaselinPolicy, ABaselinPolicy)
             systemStat             = (sf_oldStat, sf_nowStat, br_delay)
             sf_oldStat, sf_nowStat = sf_nowStat, NextState(arrival_ap, systemStat, ASelfishPolicy, ASelfishPolicy)
             systemStat             = (qf_oldStat, qf_nowStat, br_delay)
@@ -138,11 +137,10 @@ def main():
 
         #---------------------------------------------------------------------
         plt.plot([stage, stage+1], [oldStat.cost(), nowStat.cost()], '-ro')
-        # plt.plot([stage, stage+1], [bs_oldStat.cost(), bs_nowStat.cost()], '-ko')
         plt.plot([stage, stage+1], [sf_oldStat.cost(), sf_nowStat.cost()], '-bo')
         plt.plot([stage, stage+1], [qf_oldStat.cost(), qf_nowStat.cost()], '-go')
         plt.plot([stage, stage+1], [rd_oldStat.cost(), rd_nowStat.cost()], '-co')
-        # plt.legend(['MDP Policy', 'Baseline Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
+        # plt.plot([stage, stage+1], [mix_oldStat.cost(), mix_nowStat.cost()], '-ko') #FIXME:
         plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
         #---------------------------------------------------------------------
         plt.pause(0.05)

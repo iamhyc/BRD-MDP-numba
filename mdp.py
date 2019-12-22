@@ -33,13 +33,13 @@ class State(object):
     def cost(self):
         return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
     
-    def avgJCT(self):
-        return self.acc_num / self.timeslot
+    # def avgJCT(self):
+    #     return self.acc_num / self.timeslot
     pass
 
 @njit
 def RandomPolicy():
-    policy   = np.zeros((N_AP, N_JOB), dtype=np.int32)
+    policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
     for k in prange(N_AP):
         for j in prange(N_JOB):
             policy[k, j] = np.random.randint(N_ES)
