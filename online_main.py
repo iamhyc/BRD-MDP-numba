@@ -64,7 +64,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                 nextStat.es_stat[m,j,1] -= 1
 
                 if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]
-                    nextStat.es_stat[m,j,0] = LQ            #
+                    nextStat.es_stat[m,j,0] = LQ            #FIXME: arrivals is nonsense?
                 if nextStat.es_stat[m,j,1] <= 0:            # if first job finished:
                     departures[m,j] += 1                    #     <record the departure>
                     if nextStat.es_stat[m,j,0] > 0:         #     if has_next_job:
@@ -160,18 +160,18 @@ def main():
 
     #save summary file
     np.savez('traces-summary', **{
-        'MDP_average_cost'    : nowStat.average_cost,
-        'Selfish_average_cost': SF_nowStat.average_cost,
-        'QAware_average_cost' : QA_nowStat.average_cost,
-        'Random_average_cost' : RD_nowStat.average_cost,
-        'MDP_average_JCT'    : nowStat.average_JCT,
-        'Selfish_average_JCT': SF_nowStat.average_JCT,
-        'QAware_average_JCT' : QA_nowStat.average_JCT,
-        'Random_average_JCT' : RD_nowStat.average_JCT,
-        'MDP_throughput'    : nowStat.throughput,
-        'Selfish_throughput': SF_nowStat.throughput,
-        'QAware_throughput' : QA_nowStat.throughput,
-        'Random_throughput' : RD_nowStat.throughput
+        'MDP_average_cost'    : nowStat.average_cost(),
+        'Selfish_average_cost': SF_nowStat.average_cost(),
+        'QAware_average_cost' : QA_nowStat.average_cost(),
+        'Random_average_cost' : RD_nowStat.average_cost(),
+        'MDP_average_JCT'    : nowStat.average_JCT(),
+        'Selfish_average_JCT': SF_nowStat.average_JCT(),
+        'QAware_average_JCT' : QA_nowStat.average_JCT(),
+        'Random_average_JCT' : RD_nowStat.average_JCT(),
+        'MDP_average_throughput'    : nowStat.average_throughput(),
+        'Selfish_average_throughput': SF_nowStat.average_throughput(),
+        'QAware_average_throughput' : QA_nowStat.average_throughput(),
+        'Random_average_throughput' : RD_nowStat.average_throughput()
     })
 
     plt.show()
