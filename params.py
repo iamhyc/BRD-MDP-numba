@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 7209
+RANDOM_SEED = 44488
 np.random.seed(RANDOM_SEED)
 
 GAMMA = 0.90
@@ -23,7 +23,7 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 1.00 * N_SLT - 1 )    #(inclusive)
+BR_MIN     = int( 0.50 * N_SLT )    #(inclusive)
 BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
@@ -47,7 +47,7 @@ def genProcessingDistribution():
     for j in prange(N_JOB):
         for m in prange(N_ES):
             _roll = np.random.randint(2)
-            dist[m,j] = genHeavyHeadDist(PROC_RNG_L) if _roll==1 else genHeavyTailDist(PROC_RNG_L) #1:1
+            dist[m,j] = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #1:1
             # dist[m,j] = genHeavyHeadDist(PROC_RNG_L)
             # dist[m,j] = genHeavyTailDist(PROC_RNG_L)
             # 1dist[m,j] = genGaussianDist(PROC_RNG_L)
@@ -98,7 +98,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.01 + 0.01 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.01 + 0.013 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()

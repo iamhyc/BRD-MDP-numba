@@ -27,7 +27,6 @@ def AQueueAwarePolicy(stat, k, j):
     return eval_cost.argmin()
     # return (stat.es_stat[:,j,0]).argmin()
 
-#FIXME: 'clone' is bad, maybe?
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
     lastStat  = State().clone(nowStat)
@@ -141,7 +140,6 @@ def main():
         plt.plot([stage, stage+1], [SF_oldStat.cost(), SF_nowStat.cost()], '-bo')
         plt.plot([stage, stage+1], [QA_oldStat.cost(), QA_nowStat.cost()], '-go')
         plt.plot([stage, stage+1], [RD_oldStat.cost(), RD_nowStat.cost()], '-co')
-        # plt.plot([stage, stage+1], [mix_oldStat.cost(), mix_nowStat.cost()], '-ko') #FIXME:
         plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
         #---------------------------------------------------------------------
         plt.pause(0.05)
@@ -159,6 +157,22 @@ def main():
             "Random_es_Stat" : RD_nowStat.es_stat
         })
         pass
+
+    #save summary file
+    np.savez('traces-summary', **{
+        'MDP_average_cost'    : nowStat.average_cost,
+        'Selfish_average_cost': SF_nowStat.average_cost,
+        'QAware_average_cost' : QA_nowStat.average_cost,
+        'Random_average_cost' : RD_nowStat.average_cost,
+        'MDP_average_JCT'    : nowStat.average_JCT,
+        'Selfish_average_JCT': SF_nowStat.average_JCT,
+        'QAware_average_JCT' : QA_nowStat.average_JCT,
+        'Random_average_JCT' : RD_nowStat.average_JCT,
+        'MDP_throughput'    : nowStat.throughput,
+        'Selfish_throughput': SF_nowStat.throughput,
+        'QAware_throughput' : QA_nowStat.throughput,
+        'Random_throughput' : RD_nowStat.throughput
+    })
 
     plt.show()
     pass
