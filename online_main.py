@@ -148,15 +148,15 @@ def main():
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
-            'mdp_value'   : val,
-            'mdp_ap_stat' : nowStat.ap_stat,
-            'mdp_es_stat' : nowStat.es_stat,
-            "selfish_ap_stat": SF_nowStat.ap_stat,
-            "selfish_es_stat": SF_nowStat.es_stat,
+            'MDP_value'   : val,
+            'MDP_ap_stat' : nowStat.ap_stat,
+            'MDP_es_stat' : nowStat.es_stat,
+            "Selfish_ap_stat": SF_nowStat.ap_stat,
+            "Selfish_es_stat": SF_nowStat.es_stat,
             "QAware_ap_stat" : QA_nowStat.ap_stat,
             "QAware_es_stat" : QA_nowStat.es_stat,
-            "random_ap_stat" : RD_nowStat.ap_stat,
-            "random_es_Stat" : RD_nowStat.es_stat
+            "Random_ap_stat" : RD_nowStat.ap_stat,
+            "Random_es_Stat" : RD_nowStat.es_stat
         })
         pass
 

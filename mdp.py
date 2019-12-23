@@ -38,13 +38,13 @@ class State(object):
     def cost(self):
         return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
 
-    def average_JCT(self): #FIXME: double-check it
+    def average_JCT(self):
         return self.acc_cost / self.acc_arr
     
     def average_cost(self):
         return self.acc_cost / self.timeslot
     
-    def average_departure_rate(self):
+    def average_throughput(self):
         return self.acc_dep / self.timeslot
 
     def iterate(self, arrivals, departures):

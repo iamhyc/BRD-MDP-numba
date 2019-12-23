@@ -10,29 +10,29 @@ npzfiles = glob.glob( '{LOG_DIR}/*.npz'.format(LOG_DIR=argv[1]) )
 npzfiles.sort()
 n_files  = len(npzfiles)
 
-mdp_trace     = list()
-selfish_trace = list()
-QAware_trace     = list()
-random_trace  = list()
+MDP_trace     = list()
+Selfish_trace = list()
+QAware_trace  = list()
+Random_trace  = list()
 
 for i,_file in enumerate(npzfiles):
     trace = np.load(_file)
-    mdp_trace.append({
-        'ap_stat': trace['mdp_ap_stat'],
-        'es_stat': trace['mdp_es_stat'],
-        'value'  : trace['mdp_value']
+    MDP_trace.append({
+        'ap_stat': trace['MDP_ap_stat'],
+        'es_stat': trace['MDP_es_stat'],
+        'value'  : trace['MDP_value']
     })
     QAware_trace.append({
         'ap_stat': trace['QAware_ap_stat'],
         'es_stat': trace['QAware_es_stat'],
     })
-    random_trace.append({
-        'ap_stat': trace['random_ap_stat'],
-        'es_stat': trace['random_es_Stat'],
+    Random_trace.append({
+        'ap_stat': trace['Random_ap_stat'],
+        'es_stat': trace['Random_es_Stat'],
     })
-    selfish_trace.append({
-        'ap_stat': trace['selfish_ap_stat'],
-        'es_stat': trace['selfish_es_stat'],
+    Selfish_trace.append({
+        'ap_stat': trace['Selfish_ap_stat'],
+        'es_stat': trace['Selfish_es_stat'],
     })
     pass
 
@@ -40,15 +40,15 @@ def plot_bar_graph():
     pass
 
 def plot_cost_vs_time():
-    mdp_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in mdp_trace]
-    QAware_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace]
-    random_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in random_trace]
-    selfish_cost = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in selfish_trace]
+    MDP_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace]
+    QAware_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace]
+    Random_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace]
+    Selfish_cost = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace]
 
-    plt.plot(range(n_files), mdp_cost,     '-ro')
-    plt.plot(range(n_files), QAware_cost,     '-go')
-    plt.plot(range(n_files), random_cost,  '-co')
-    plt.plot(range(n_files), selfish_cost, '-bo')
+    plt.plot(range(n_files), MDP_cost,     '-ro')
+    plt.plot(range(n_files), QAware_cost,  '-go')
+    plt.plot(range(n_files), Random_cost,  '-co')
+    plt.plot(range(n_files), Selfish_cost, '-bo')
 
     plt.legend(['MDP Policy', 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
     plt.show()
@@ -56,10 +56,10 @@ def plot_cost_vs_time():
 
 def plot_cost_cdf_vs_time():
     y = [0] * 4
-    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in mdp_trace])
+    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace])
     y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace])
-    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in random_trace])
-    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in selfish_trace])
+    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace])
+    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace])
     
     ylim = max([arr.max() for arr in y])
     pmf_x = np.linspace(0, ylim, num=1000)
@@ -85,5 +85,6 @@ def plot_cost_cdf_vs_time():
     plt.show()
     pass
 
+# plot_bar_graph()
 plot_cost_vs_time()
 # plot_cost_cdf_vs_time()
