@@ -15,7 +15,7 @@ ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 @jitclass([
     ('ap_stat', int32[:,:,:,:]),
     ('es_stat', int32[:,:,:]),
-    ('acc_num', int64),
+    ('acc_arr', int64),
     ('acc_dep', int64),
     ('acc_cost', int64),
     ('timeslot', int64)
@@ -24,14 +24,14 @@ class State(object):
     def __init__(self):
         self.ap_stat = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
         self.es_stat = np.zeros((N_ES, N_JOB, 2),           dtype=np.int32)
-        self.acc_num, self.acc_dep   = 0, 0
+        self.acc_arr, self.acc_dep   = 0, 0
         self.acc_cost, self.timeslot = 0, 0
         pass
 
     def clone(self, stat):
         self.ap_stat = np.copy(stat.ap_stat)
         self.es_stat = np.copy(stat.es_stat)
-        self.acc_num, self.acc_dep  = stat.acc_num, stat.acc_dep
+        self.acc_arr, self.acc_dep  = stat.acc_arr, stat.acc_dep
         self.acc_cost, self.timeslot= stat.acc_cost, stat.timeslot
         return self
     
@@ -39,7 +39,7 @@ class State(object):
         return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
 
     def average_JCT(self): #FIXME: double-check it
-        return self.acc_cost / self.acc_num
+        return self.acc_cost / self.acc_arr
     
     def average_cost(self):
         return self.acc_cost / self.timeslot
@@ -50,7 +50,7 @@ class State(object):
     def iterate(self, arrivals, departures):
         self.timeslot += 1
         self.acc_cost += self.cost()
-        self.acc_num  += np.sum(arrivals) - np.sum(departures)
+        self.acc_arr  += np.sum(arrivals)
         self.acc_dep  += np.sum(departures)
         pass
 
