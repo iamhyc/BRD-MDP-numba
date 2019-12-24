@@ -136,10 +136,10 @@ def main():
         pass
 
         #---------------------------------------------------------------------
-        plt.plot([stage, stage+1], [oldStat.cost(), nowStat.cost()], '-ro')
-        plt.plot([stage, stage+1], [SF_oldStat.cost(), SF_nowStat.cost()], '-bo')
-        plt.plot([stage, stage+1], [QA_oldStat.cost(), QA_nowStat.cost()], '-go')
-        plt.plot([stage, stage+1], [RD_oldStat.cost(), RD_nowStat.cost()], '-co')
+        plt.plot([stage, stage+1], [oldStat.getNumber(), nowStat.getNumber()], '-ro')
+        plt.plot([stage, stage+1], [SF_oldStat.getNumber(), SF_nowStat.getNumber()], '-bo')
+        plt.plot([stage, stage+1], [QA_oldStat.getNumber(), QA_nowStat.getNumber()], '-go')
+        plt.plot([stage, stage+1], [RD_oldStat.getNumber(), RD_nowStat.getNumber()], '-co')
         plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
         #---------------------------------------------------------------------
         plt.pause(0.05)
@@ -159,7 +159,8 @@ def main():
         pass
 
     #save summary file
-    np.savez('traces-summary', **{
+    summary_file = 'traces-{:05d}/summary.npz'.format(RANDOM_SEED)
+    np.savez(summary_file, **{
         'MDP_average_cost'    : nowStat.average_cost(),
         'Selfish_average_cost': SF_nowStat.average_cost(),
         'QAware_average_cost' : QA_nowStat.average_cost(),

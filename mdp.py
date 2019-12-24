@@ -8,10 +8,9 @@ from itertools import product
 
 ul_rng     = np.arange(N_CNT, dtype=np.float64)
 ESValVec   = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
-PenaltyVec = (LQ+10) * np.ones(PROC_MAX, dtype=np.float64)
+PenaltyVec = PENALTY * np.ones(PROC_MAX, dtype=np.float64)
 ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 
-#FIXME: should analyze for each K/M/J ?
 @jitclass([
     ('ap_stat', int32[:,:,:,:]),
     ('es_stat', int32[:,:,:]),
@@ -35,8 +34,13 @@ class State(object):
         self.acc_cost, self.timeslot= stat.acc_cost, stat.timeslot
         return self
     
-    def cost(self):
+    def getNumber(self):
         return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
+
+    def getCost(self):
+        # _penalty = PENALTY if self.es_stat[:,:,0]
+        _penalty = PENALTY * np.count_nonzero( self.es_stat[:,:,0]==LQ )
+        return _penalty + np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
 
     def average_JCT(self):
         return self.acc_cost / self.acc_arr
@@ -49,7 +53,7 @@ class State(object):
 
     def iterate(self, arrivals, departures):
         self.timeslot += 1
-        self.acc_cost += self.cost()
+        self.acc_cost += self.getCost()
         self.acc_arr  += np.sum(arrivals)
         self.acc_dep  += np.sum(departures)
         pass
