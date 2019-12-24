@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from sys import argv
 import glob
 
-npzfiles = glob.glob( '{LOG_DIR}/*.npz'.format(LOG_DIR=argv[1]) )
+log_dir  = argv[1]
+npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
 npzfiles.sort()
 n_files  = len(npzfiles)
 
@@ -36,7 +37,51 @@ for i,_file in enumerate(npzfiles):
     })
     pass
 
+def autolabel(bar_plot, labels):
+    for idx,rect in enumerate(bar_plot):
+        height = rect.get_height()
+        plt.text(rect.get_x() + rect.get_width()/2.,
+                height+0.25,
+                '%.2f'%labels[idx],
+                ha='center', va='bottom', rotation=0)
+
 def plot_bar_graph():
+    summary_file = '{LOG_DIR}/summary'.format(LOG_DIR=log_dir)
+    summary = np.load(summary_file)
+
+    x = np.arange(4)
+
+    plt.figure(1)
+    average_cost = [summary['MDP_average_cost'],
+                    summary['Selfish_average_cost'],
+                    summary['QAware_average_cost'],
+                    summary['Random_average_cost']]
+    bar_plot = plt.bar(x, average_cost)
+    autolabel(bar_plot, average_cost)
+    plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'])
+    plt.ylabel('Average Cost')
+
+    plt.figure(2)
+    average_JCT = [summary['MDP_average_JCT'],
+                    summary['Selfish_average_JCT'],
+                    summary['QAware_average_JCT'],
+                    summary['Random_average_JCT']]
+    bar_plot = plt.bar(x, average_JCT)
+    autolabel(bar_plot, average_JCT)
+    plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'])
+    plt.ylabel('Average JCT')
+
+    plt.figure(3)
+    average_throughput = [summary['MDP_average_throughput'],
+                    summary['Selfish_average_throughput'],
+                    summary['QAware_average_throughput'],
+                    summary['Random_average_throughput']]
+    bar_plot = plt.bar(x, average_throughput)
+    autolabel(bar_plot, average_throughput)
+    plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'])
+    plt.ylabel('Average Throughput')
+    
+    plt.show()
     pass
 
 def plot_cost_vs_time():
@@ -85,6 +130,6 @@ def plot_cost_cdf_vs_time():
     plt.show()
     pass
 
-# plot_bar_graph()
-plot_cost_vs_time()
+plot_bar_graph()
+# plot_cost_vs_time()
 # plot_cost_cdf_vs_time()

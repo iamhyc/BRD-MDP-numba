@@ -6,18 +6,17 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 44488
+# RANDOM_SEED = 44488
 np.random.seed(RANDOM_SEED)
 
-GAMMA   = 0.90
-BETA    = 10
+GAMMA   = 0.85
+BETA    = 30 #expected computation time
 STAGE   = 600
-PENALTY = 15 #expected computation time
 
 N_AP  = 5
 N_ES  = 3
 N_JOB = 5
-LQ    = 10 #maximum queue length on ES (inclusive)
+LQ    = 15 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -25,7 +24,7 @@ N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
 BR_MIN     = int( 0.40 * N_SLT )    #(inclusive)
-BR_MAX     = int( 0.80 * N_SLT )    #(exclusive)
+BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
@@ -99,7 +98,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.01 + 0.013 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.01 + 0.014 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()

@@ -8,7 +8,7 @@ from itertools import product
 
 ul_rng     = np.arange(N_CNT, dtype=np.float64)
 ESValVec   = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
-PenaltyVec = PENALTY * np.ones(PROC_MAX, dtype=np.float64)
+PenaltyVec = BETA * np.ones(PROC_MAX, dtype=np.float64)
 ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 
 @jitclass([
@@ -38,8 +38,7 @@ class State(object):
         return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
 
     def getCost(self):
-        # _penalty = PENALTY if self.es_stat[:,:,0]
-        _penalty = PENALTY * np.count_nonzero( self.es_stat[:,:,0]==LQ )
+        _penalty = BETA * np.count_nonzero( self.es_stat[:,:,0]==LQ )
         return _penalty + np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
 
     def average_JCT(self):
