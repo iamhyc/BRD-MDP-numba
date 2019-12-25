@@ -24,7 +24,7 @@ N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
 BR_MIN     = int( 0.40 * N_SLT )    #(inclusive)
-BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
+BR_MAX     = int( 0.70 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
@@ -33,7 +33,7 @@ UL_MAX     = int( 1.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.00 * N_SLT )    #(inclusive)
+PROC_MIN   = int( 1.50 * N_SLT )    #(inclusive)
 PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX,   step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
@@ -98,7 +98,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.01 + 0.014 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.013 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
