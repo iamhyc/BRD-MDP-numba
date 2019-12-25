@@ -50,10 +50,10 @@ class State(object):
     def average_throughput(self):
         return self.acc_dep / self.timeslot
 
-    def iterate(self, arrivals, departures):
+    def iterate(self, admissions, departures):
         self.timeslot += 1
         self.acc_cost += self.getCost()
-        self.acc_arr  += np.sum(arrivals)
+        self.acc_arr  += np.sum(admissions)
         self.acc_dep  += np.sum(departures)
         pass
 

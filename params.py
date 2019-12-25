@@ -9,14 +9,14 @@ RANDOM_SEED = random.randint(0, 2**16)
 # RANDOM_SEED = 44488
 np.random.seed(RANDOM_SEED)
 
-GAMMA   = 0.85
-BETA    = 30 #expected computation time
+GAMMA   = 0.95
+BETA    = 20
 STAGE   = 600
 
 N_AP  = 5
 N_ES  = 3
 N_JOB = 5
-LQ    = 15 #maximum queue length on ES (inclusive)
+LQ    = 10 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms

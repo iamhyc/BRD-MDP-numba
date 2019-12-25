@@ -57,6 +57,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                             nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
 
         #NOTE: process jobs on ES
+        # admissions = np.zeros((N_ES, N_JOB), dtype=np.int32)
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
         for j in range(N_JOB):
             for m in range(N_ES):
@@ -64,7 +65,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                 nextStat.es_stat[m,j,1] -= 1
 
                 if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]
-                    nextStat.es_stat[m,j,0] = LQ            #FIXME: arrivals is nonsense?
+                    nextStat.es_stat[m,j,0] = LQ            #
                 if nextStat.es_stat[m,j,1] <= 0:            # if first job finished:
                     departures[m,j] += 1                    #     <record the departure>
                     if nextStat.es_stat[m,j,0] > 0:         #     if has_next_job:
@@ -77,7 +78,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
-        nextStat.iterate(arrivals[n], departures) #update the accumulation
+        nextStat.iterate(off_number, departures) #update the accumulation
         lastStat = nextStat
         nextStat = State().clone(lastStat)
         pass
