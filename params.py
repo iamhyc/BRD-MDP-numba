@@ -10,7 +10,7 @@ RANDOM_SEED = random.randint(0, 2**16)
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 20
+BETA    = 10
 STAGE   = 600
 
 N_AP  = 5
