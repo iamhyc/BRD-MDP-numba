@@ -4,8 +4,10 @@ import numpy as np
 from mdp import *
 from params import*
 from utility import *
+import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
+matplotlib.use("Qt5agg")
 
 ul_rng    = np.arange(N_CNT, dtype=np.float64)
 
@@ -160,7 +162,7 @@ def main():
         pass
 
     #save summary file
-    summary_file = 'traces-{:05d}/summary'.format(RANDOM_SEED)
+    summary_file = open( 'traces-{:05d}/summary'.format(RANDOM_SEED) )
     np.savez(summary_file, **{
         'MDP_average_cost'    : nowStat.average_cost(),
         'Selfish_average_cost': SF_nowStat.average_cost(),

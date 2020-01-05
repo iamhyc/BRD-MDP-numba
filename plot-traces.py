@@ -51,32 +51,32 @@ def plot_bar_graph():
 
     x = np.arange(4)
 
-    plt.figure(1)
+    plt.subplot(1, 3, 1)
     average_cost = [summary['MDP_average_cost'],
                     summary['Selfish_average_cost'],
                     summary['QAware_average_cost'],
                     summary['Random_average_cost']]
-    bar_plot = plt.bar(x, average_cost)
+    bar_plot = plt.bar(x, average_cost, color='#1F77B4')
     autolabel(bar_plot, average_cost)
     plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'])
     plt.ylabel('Average Cost')
 
-    plt.figure(2)
+    plt.subplot(1, 3, 2)
     average_JCT = [summary['MDP_average_JCT'],
                     summary['Selfish_average_JCT'],
                     summary['QAware_average_JCT'],
                     summary['Random_average_JCT']]
-    bar_plot = plt.bar(x, average_JCT)
+    bar_plot = plt.bar(x, average_JCT, color='#1F77B4')
     autolabel(bar_plot, average_JCT)
     plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'])
     plt.ylabel('Average JCT')
 
-    plt.figure(3)
+    plt.subplot(1, 3, 3)
     average_throughput = [summary['MDP_average_throughput'],
                     summary['Selfish_average_throughput'],
                     summary['QAware_average_throughput'],
                     summary['Random_average_throughput']]
-    bar_plot = plt.bar(x, average_throughput)
+    bar_plot = plt.bar(x, average_throughput, color='#1F77B4')
     autolabel(bar_plot, average_throughput)
     plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'])
     plt.ylabel('Average Throughput')
