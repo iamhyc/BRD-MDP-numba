@@ -124,10 +124,10 @@ def plot_number_vs_time():
 
 def plot_cost_cdf_vs_time():
     y = [0] * 4
-    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace])
-    y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace])
-    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace])
-    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace])
+    y[0] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in MDP_trace])
+    y[1] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in QAware_trace])
+    y[2] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in Random_trace])
+    y[3] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in Selfish_trace])
     
     ylim = max([arr.max() for arr in y])
     pmf_x = np.linspace(0, ylim, num=1000)
@@ -153,7 +153,7 @@ def plot_cost_cdf_vs_time():
     plt.show()
     pass
 
-plot_bar_graph()
+# plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
-# plot_cost_cdf_vs_time()
+plot_cost_cdf_vs_time()
