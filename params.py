@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 48113
+# RANDOM_SEED = 14624
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
@@ -23,8 +23,8 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 0.40 * N_SLT )    #(inclusive)
-BR_MAX     = int( 0.70 * N_SLT )    #(exclusive)
+BR_MIN     = int( 0.10 * N_SLT )    #(inclusive)
+BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 

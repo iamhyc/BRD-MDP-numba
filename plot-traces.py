@@ -153,7 +153,7 @@ def plot_cost_cdf_vs_time():
     plt.show()
     pass
 
-# plot_bar_graph()
+plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
-plot_cost_cdf_vs_time()
+# plot_cost_cdf_vs_time()

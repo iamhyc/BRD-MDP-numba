@@ -162,7 +162,7 @@ def main():
         pass
 
     #save summary file
-    summary_file = open( 'traces-{:05d}/summary'.format(RANDOM_SEED) )
+    summary_file = 'traces-{:05d}/summary'.format(RANDOM_SEED)
     np.savez(summary_file, **{
         'MDP_average_cost'    : nowStat.average_cost(),
         'Selfish_average_cost': SF_nowStat.average_cost(),
