@@ -11,7 +11,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 15
-STAGE   = 750
+STAGE   = 500
 
 N_AP  = 5
 N_ES  = 3
