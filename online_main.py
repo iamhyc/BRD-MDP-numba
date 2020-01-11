@@ -19,7 +19,6 @@ def ARandomPolicy(stat, k, j):
 def ASelfishPolicy(stat, k, j):
     proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng
-    # eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
     return eval_cost.argmin()
 
 @njit
@@ -101,6 +100,7 @@ def main():
 
     print('Baseline Policy\n{}'.format(nowPolicy))
 
+    plt.ion()
     while stage < STAGE:
         with Timer(output=True):
             #NOTE: toss job arrival for APs in each time slot
@@ -145,7 +145,8 @@ def main():
         plt.plot([stage, stage+1], [RD_oldStat.getCost(), RD_nowStat.getCost()], '-co')
         plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
         #---------------------------------------------------------------------
-        plt.pause(0.05)
+        plt.gcf().canvas.draw_idle()
+        plt.gcf().canvas.start_event_loop(0.3)
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
@@ -178,7 +179,8 @@ def main():
         'Random_average_throughput' : RD_nowStat.average_throughput()
     })
 
-    plt.show()
+    print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
+    # plt.show()
     pass
 
 if __name__ == "__main__":

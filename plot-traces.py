@@ -7,6 +7,8 @@ from sys import argv
 import glob
 from params import BETA,LQ
 
+MDP_LABEL = 'MDP Policy'
+
 log_dir  = argv[1]
 npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
 npzfiles.sort()
@@ -103,7 +105,7 @@ def plot_cost_vs_time():
     plt.plot(range(n_files), Random_cost,  '-co')
     plt.plot(range(n_files), Selfish_cost, '-bo')
 
-    plt.legend(['MDP Policy', 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
     plt.show()
     pass
 
@@ -118,7 +120,42 @@ def plot_number_vs_time():
     plt.plot(range(n_files), Random_cost,  '-co')
     plt.plot(range(n_files), Selfish_cost, '-bo')
 
-    plt.legend(['MDP Policy', 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.ylabel('Number of Jobs')
+    plt.xlabel('Index of Time Slots')
+    plt.show()
+    pass
+
+def plot_number_cdf_vs_time():
+    y = [0] * 4
+    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace])
+    y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace])
+    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace])
+    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace])
+    
+    ylim = max([arr.max() for arr in y])
+    pmf_x = np.linspace(0, ylim, num=1000)
+    pmf_y = np.zeros((5, 1000))
+    # pmf_inter_x     = np.linspace(0, ylim, num=200)
+    # pmf_inter_y = np.zeros((5, 200))
+
+    for i in range(4):
+        for j in range(1,1000):
+            pmf_y[i][j] = np.logical_and( y[i]>=pmf_x[j-1], y[i]<pmf_x[j] ).sum()
+        pmf_y[i] = np.cumsum(pmf_y[i]) / 1000
+        # interp_func = interp1d(x, pmf_y[i], kind='quadratic')
+        # pmf_inter_y[i] = interp_func(pmf_inter_x)
+        pass
+
+    plt.xlim(0, ylim)
+    plt.plot(pmf_x, pmf_y[0], '-r')
+    plt.plot(pmf_x, pmf_y[1], '-g')
+    plt.plot(pmf_x, pmf_y[2], '-c')
+    plt.plot(pmf_x, pmf_y[3], '-b')
+
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.ylabel('CDF')
+    plt.xlabel('Cost per Time Slot')
     plt.show()
     pass
 
@@ -149,11 +186,14 @@ def plot_cost_cdf_vs_time():
     plt.plot(pmf_x, pmf_y[2], '-c')
     plt.plot(pmf_x, pmf_y[3], '-b')
 
-    plt.legend(['MDP Policy', 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.ylabel('CDF')
+    plt.xlabel('Cost per Time Slot')
     plt.show()
     pass
 
 plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
+plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()

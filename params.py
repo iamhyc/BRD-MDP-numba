@@ -6,12 +6,12 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 14624
+RANDOM_SEED = 41122
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 15
-STAGE   = 500
+STAGE   = 1000
 
 N_AP  = 5
 N_ES  = 3
@@ -23,18 +23,18 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 0.10 * N_SLT )    #(inclusive)
+BR_MIN     = int( 1.00 * N_SLT -1)    #(inclusive)
 BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
-UL_MIN     = int( 1.00 * N_SLT )    #(inclusive)
-UL_MAX     = int( 1.50 * N_SLT )    #(exclusive)
+UL_MIN     = int( 1.50 * N_SLT )    #(inclusive)
+UL_MAX     = int( 2.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
 PROC_MIN   = int( 1.50 * N_SLT )    #(inclusive)
-PROC_MAX   = int( 2.50 * N_SLT )    #(exclusive)
+PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX,   step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)*PROC_MAX
@@ -46,11 +46,11 @@ def genProcessingDistribution():
     dist = np.zeros((N_ES, N_JOB, PROC_RNG_L), dtype=np.float64)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(2)
+            _roll = np.random.randint(3)
             dist[m,j] = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #1:1
             # dist[m,j] = genHeavyHeadDist(PROC_RNG_L)
             # dist[m,j] = genHeavyTailDist(PROC_RNG_L)
-            # 1dist[m,j] = genGaussianDist(PROC_RNG_L)
+            # dist[m,j] = genGaussianDist(PROC_RNG_L)
             # dist[m,j] = genSplitDist(PROC_RNG_L)
             # dist[m,j] = genFlatDist(PROC_RNG_L)
     return dist
@@ -92,13 +92,13 @@ def genTransitionMatrix():
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
     arr_prob  = _params['arr_prob']
-    br_dist   = _params['br_dist']
+    br_dist   = genDelayDistribution() # br_dist   = _params['br_dist']
     proc_dist = _params['proc_dist']
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.012 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.008 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
