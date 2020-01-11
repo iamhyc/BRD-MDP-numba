@@ -11,7 +11,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 15
-STAGE   = 1000
+STAGE   = 500
 
 N_AP  = 5
 N_ES  = 3
@@ -23,8 +23,8 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 1.00 * N_SLT -1)    #(inclusive)
-BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
+BR_MIN     = int( 0.10 * N_SLT )    #(inclusive)
+BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
@@ -98,7 +98,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.008 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.012 + 0.012 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
