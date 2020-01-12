@@ -214,9 +214,9 @@ def myNumAPPlot():
     rd_cost  = [32.87, 107.40, 178.48, 238.81, 277.99]
 
     plt.plot(x_ticks, mdp_cost, '-r^')
-    plt.plot(x_ticks, qf_cost,  '-bo')
+    plt.plot(x_ticks, qf_cost,  '-go')
     plt.plot(x_ticks, rd_cost,  '-cv')
-    plt.plot(x_ticks, sf_cost,  '-gs')
+    plt.plot(x_ticks, sf_cost,  '-bs')
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
     plt.ylabel('Average Cost', fontsize=12)
@@ -236,9 +236,9 @@ def myProcDistPlot():
     rd_cost  = [28.48, 64.36,  159.03, 235.14, 230.37]
 
     plt.plot(x_ticks, mdp_cost, '-r^')
-    plt.plot(x_ticks, qf_cost,  '-bo')
+    plt.plot(x_ticks, qf_cost,  '-go')
     plt.plot(x_ticks, rd_cost,  '-cv')
-    plt.plot(x_ticks, sf_cost,  '-gs')
+    plt.plot(x_ticks, sf_cost,  '-bs')
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
     plt.ylabel('Average Cost', fontsize=12)
