@@ -201,46 +201,50 @@ def plot_cost_cdf_vs_time():
     pass
 
 def myNumAPPlot():
-    x_label = [3,4,5,6,7]
+    x_ticks = [3,4,5,6,7]
     mdp_cost = [29.47, 83.98,  120.19, 142.58, 151.60]
     sf_cost  = [81.77, 137.51, 151.37, 208.47, 230.31]
     qf_cost  = [30.81, 92.72,  139.87, 186.08, 212.33]
     rd_cost  = [32.87, 107.40, 178.48, 238.81, 277.99]
 
-    plt.plot(x_label, mdp_cost, '-r^')
-    plt.plot(x_label, qf_cost,  '-bo')
-    plt.plot(x_label, rd_cost,  '-cv')
-    plt.plot(x_label, sf_cost,  '-gs')
+    plt.plot(x_ticks, mdp_cost, '-r^')
+    plt.plot(x_ticks, qf_cost,  '-bo')
+    plt.plot(x_ticks, rd_cost,  '-cv')
+    plt.plot(x_ticks, sf_cost,  '-gs')
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
     plt.ylabel('Average Cost', fontsize=12)
     plt.xlabel('Number of AP', fontsize=12)
 
     plt.grid()
-    plt.xticks(x_label, ['3', '4', '5', '6', '7'])
+    plt.xticks(x_ticks, ['3', '4', '5', '6', '7'])
     plt.show()
 
     pass
 
 def myProcDistPlot():
-    x_label = [1,2,3,4,5]
-    mdp_cost = []
-    sf_cost  = []
-    qf_cost  = []
-    rd_cost  = []
+    x_ticks = [1,2,3,4,5]
+    mdp_cost = [25.21, 58.65,  116.51, 139.72, 141.99]
+    sf_cost  = [39.73, 124.39, 158.33, 191.98, 201.36]
+    qf_cost  = [31.57, 63.13,  129.11, 186.61, 187.82]
+    rd_cost  = [28.48, 64.36,  159.03, 235.14, 230.37]
 
-    plt.plot(x_label, mdp_cost, '-k^')
-    plt.plot(x_label, qf_cost,  '-ko')
-    plt.plot(x_label, rd_cost,  '-k*')
-    plt.plot(x_label, sf_cost,  '-ks')
+    plt.plot(x_ticks, mdp_cost, '-r^')
+    plt.plot(x_ticks, qf_cost,  '-bo')
+    plt.plot(x_ticks, rd_cost,  '-cv')
+    plt.plot(x_ticks, sf_cost,  '-gs')
 
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
     plt.ylabel('Average Cost', fontsize=12)
     plt.xlabel('Number of AP', fontsize=12)
 
     plt.grid()
-    plt.xticks(x_label, ['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
+    plt.xticks(x_ticks, ['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
     plt.show()
+    pass
+
+def myPenaltyPlot():
+    #Average Throughput v.s. Penalty Weight
     pass
 
 # plot_bar_graph()
@@ -249,5 +253,5 @@ def myProcDistPlot():
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
-myNumAPPlot()
-# myProcDistPlot()
+# myNumAPPlot()
+myProcDistPlot()

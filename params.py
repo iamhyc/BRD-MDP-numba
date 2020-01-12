@@ -6,14 +6,14 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 24473
+# RANDOM_SEED = 13084
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 20
-STAGE   = 250
+STAGE   = 150
 
-N_AP  = 7
+N_AP  = 5
 N_ES  = 3
 N_JOB = 5
 LQ    = 10 #maximum queue length on ES (inclusive)
@@ -33,8 +33,8 @@ UL_MAX     = int( 2.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.50 * N_SLT )    #(inclusive)
-PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
+PROC_MIN   = int( 2.50 * N_SLT )    #(inclusive)
+PROC_MAX   = int( 3.00 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX,   step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)*PROC_MAX
