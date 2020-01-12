@@ -7,6 +7,12 @@ from sys import argv
 import glob
 from params import BETA,LQ
 
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
 MDP_LABEL = 'MDP Policy'
 CUT_NUM = 100
 
@@ -236,7 +242,7 @@ def myProcDistPlot():
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
     plt.ylabel('Average Cost', fontsize=12)
-    plt.xlabel('Number of AP', fontsize=12)
+    plt.xlabel('Range of Expectation $c_{m,j}$ of Processing Time Distribution', fontsize=12)
 
     plt.grid()
     plt.xticks(x_ticks, ['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
@@ -254,4 +260,5 @@ def myPenaltyPlot():
 # plot_cost_cdf_vs_time()
 
 # myNumAPPlot()
-myProcDistPlot()
+# myProcDistPlot()
+myPenaltyPlot()
