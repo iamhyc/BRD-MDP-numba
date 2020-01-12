@@ -225,46 +225,54 @@ def plot_cost_cdf_vs_time():
     plt.show()
     pass
 
-def myNumAPPlot():
+def myNumAPsPlot():
+    fig, ax = plt.subplots(figsize=(8,6))
+
     x_ticks = [3,4,5,6,7]
     mdp_cost = [29.47, 83.98,  120.19, 142.58, 151.60]
     sf_cost  = [81.77, 137.51, 151.37, 208.47, 230.31]
     qf_cost  = [30.81, 92.72,  139.87, 186.08, 212.33]
     rd_cost  = [32.87, 107.40, 178.48, 238.81, 277.99]
 
-    plt.plot(x_ticks, mdp_cost, '-r^')
-    plt.plot(x_ticks, qf_cost,  '-go')
-    plt.plot(x_ticks, rd_cost,  '-cv')
-    plt.plot(x_ticks, sf_cost,  '-bs')
+    ax.plot(x_ticks, mdp_cost, '-r^')
+    ax.plot(x_ticks, qf_cost,  '-go')
+    ax.plot(x_ticks, rd_cost,  '-cv')
+    ax.plot(x_ticks, sf_cost,  '-bs')
 
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
-    plt.ylabel('Average Cost', fontsize=16)
-    plt.xlabel('Number of APs', fontsize=16)
+    ax.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
+    ax.set_ylabel('Average Cost', fontsize=16)
+    ax.set_xlabel('Number of APs', fontsize=16)
 
-    plt.grid()
-    plt.xticks(x_ticks, ['3', '4', '5', '6', '7'])
+    ax.grid()
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels(['3', '4', '5', '6', '7'])
+    ax.tick_params(axis='both', which='major', labelsize=14)
     plt.show()
 
     pass
 
 def myProcDistPlot():
+    fig, ax = plt.subplots(figsize=(8,6))
+
     x_ticks = [1,2,3,4,5]
     mdp_cost = [25.21, 58.65,  116.51, 139.72, 141.99]
     sf_cost  = [39.73, 124.39, 158.33, 191.98, 201.36]
     qf_cost  = [31.57, 63.13,  129.11, 186.61, 187.82]
     rd_cost  = [28.48, 64.36,  159.03, 235.14, 230.37]
 
-    plt.plot(x_ticks, mdp_cost, '-r^')
-    plt.plot(x_ticks, qf_cost,  '-go')
-    plt.plot(x_ticks, rd_cost,  '-cv')
-    plt.plot(x_ticks, sf_cost,  '-bs')
+    ax.plot(x_ticks, mdp_cost, '-r^')
+    ax.plot(x_ticks, qf_cost,  '-go')
+    ax.plot(x_ticks, rd_cost,  '-cv')
+    ax.plot(x_ticks, sf_cost,  '-bs')
 
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
-    plt.ylabel('Average Cost', fontsize=16)
-    plt.xlabel('Range of Expectation $c_{m,j}$ of Processing Time Distribution', fontsize=16)
+    ax.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
+    ax.set_ylabel('Average Cost', fontsize=16)
+    ax.set_xlabel('Range of Expectation $c_{m,j}$ of Processing Time Distribution', fontsize=16)
 
-    plt.grid()
-    plt.xticks(x_ticks, ['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
+    ax.grid()
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels(['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
+    ax.tick_params(axis='both', which='major', labelsize=14)
     plt.show()
     pass
 
@@ -278,6 +286,6 @@ def myPenaltyPlot():
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
-# myNumAPPlot()
+# myNumAPsPlot()
 # myProcDistPlot()
 myPenaltyPlot()
