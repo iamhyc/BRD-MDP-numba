@@ -14,7 +14,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
 MDP_LABEL = 'MDP Policy'
-CUT_NUM = 100
+CUT_NUM = 0
 
 log_dir  = argv[1]
 npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
@@ -48,13 +48,13 @@ for i,_file in enumerate(npzfiles):
     })
     pass
 
-def autolabel(bar_plot, labels):
+def autolabel(bar_plot, labels, flag=0):
     for idx,rect in enumerate(bar_plot):
-        height = rect.get_height()
+        height = rect.get_height()-0.15 if flag else rect.get_height()
         plt.text(rect.get_x() + rect.get_width()/2.,
                 height+0.15,
                 '%.2f'%labels[idx],
-                ha='center', va='bottom', rotation=0)
+                ha='center', va='bottom', rotation=0, fontsize=12)
 
 def getCost(ap_stat, es_stat):
     _penalty = BETA * np.count_nonzero( es_stat[:,:,0]==LQ )
@@ -94,7 +94,7 @@ def plot_bar_graph():
                     summary['QAware_average_throughput'],
                     summary['Random_average_throughput']]
     bar_plot = plt.bar(x, average_throughput, color='#1F77B4')
-    autolabel(bar_plot, average_throughput)
+    autolabel(bar_plot, average_throughput, flag=1)
     plt.title('(c)', y=-0.075)
     plt.xticks(x, ['MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=12)
     plt.ylabel('Average Throughput', fontsize=14)
@@ -133,8 +133,8 @@ def plot_number_vs_time():
     plt.plot(range(n_files-CUT_NUM), Selfish_cost, '-bo')
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
-    plt.ylabel('Number of Jobs', fontsize=12)
-    plt.xlabel('Index of Broadcast Interval', fontsize=12)
+    plt.ylabel('Number of Jobs', fontsize=14)
+    plt.xlabel('Index of Broadcast Interval', fontsize=14)
     plt.show()
     pass
 
@@ -220,7 +220,7 @@ def myNumAPPlot():
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
     plt.ylabel('Average Cost', fontsize=12)
-    plt.xlabel('Number of AP', fontsize=12)
+    plt.xlabel('Number of APs', fontsize=12)
 
     plt.grid()
     plt.xticks(x_ticks, ['3', '4', '5', '6', '7'])
@@ -254,11 +254,11 @@ def myPenaltyPlot():
     pass
 
 # plot_bar_graph()
-# plot_number_vs_time()
+plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
 # myNumAPPlot()
 # myProcDistPlot()
-myPenaltyPlot()
+# myPenaltyPlot()

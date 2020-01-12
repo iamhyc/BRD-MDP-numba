@@ -6,12 +6,12 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 13084
+RANDOM_SEED = 41122
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 20
-STAGE   = 150
+STAGE   = 500
 
 N_AP  = 5
 N_ES  = 3
@@ -33,8 +33,8 @@ UL_MAX     = int( 2.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 2.50 * N_SLT )    #(inclusive)
-PROC_MAX   = int( 3.00 * N_SLT )    #(exclusive)
+PROC_MIN   = int( 1.50 * N_SLT )    #(inclusive)
+PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX,   step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)*PROC_MAX
@@ -90,13 +90,13 @@ def genTransitionMatrix():
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
     arr_prob  = _params['arr_prob']
-    br_dist   = genDelayDistribution() # br_dist   = _params['br_dist']
+    br_dist   = _params['br_dist'] #br_dist   = genDelayDistribution() # 
     proc_dist = _params['proc_dist']
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
 else:
-    arr_prob  = 0.012 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.010 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_dist = genProcessingDistribution()
