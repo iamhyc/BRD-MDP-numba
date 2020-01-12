@@ -130,8 +130,8 @@ def main():
             RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
 
-            cprint('Stage-{} Delta Policy'.format(stage), 'red')
-            print(nowPolicy - oldPolicy)
+            # cprint('Stage-{} Delta Policy'.format(stage), 'red')
+            # print(nowPolicy - oldPolicy)
             cprint('ES State:', 'green')
             print(nowStat.es_stat[:,:,0])
             

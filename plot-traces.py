@@ -8,6 +8,7 @@ import glob
 from params import BETA,LQ
 
 MDP_LABEL = 'MDP Policy'
+CUT_NUM = 100
 
 log_dir  = argv[1]
 npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
@@ -96,32 +97,36 @@ def plot_bar_graph():
     pass
 
 def plot_cost_vs_time():
-    MDP_cost     = [getCost(x['ap_stat'], x['es_stat']) for x in MDP_trace]
-    QAware_cost  = [getCost(x['ap_stat'], x['es_stat']) for x in QAware_trace]
-    Random_cost  = [getCost(x['ap_stat'], x['es_stat']) for x in Random_trace]
-    Selfish_cost = [getCost(x['ap_stat'], x['es_stat']) for x in Selfish_trace]
+    MDP_cost     = [getCost(x['ap_stat'], x['es_stat']) for x in MDP_trace][CUT_NUM:]
+    QAware_cost  = [getCost(x['ap_stat'], x['es_stat']) for x in QAware_trace][CUT_NUM:]
+    Random_cost  = [getCost(x['ap_stat'], x['es_stat']) for x in Random_trace][CUT_NUM:]
+    Selfish_cost = [getCost(x['ap_stat'], x['es_stat']) for x in Selfish_trace][CUT_NUM:]
+    
+    plt.grid()
+    plt.plot(range(n_files-CUT_NUM), MDP_cost,     '-ro')
+    plt.plot(range(n_files-CUT_NUM), QAware_cost,  '-go')
+    plt.plot(range(n_files-CUT_NUM), Random_cost,  '-co')
+    plt.plot(range(n_files-CUT_NUM), Selfish_cost, '-bo')
 
-    plt.plot(range(n_files), MDP_cost,     '-ro')
-    plt.plot(range(n_files), QAware_cost,  '-go')
-    plt.plot(range(n_files), Random_cost,  '-co')
-    plt.plot(range(n_files), Selfish_cost, '-bo')
-
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
+    plt.ylabel('Cost', fontsize=12)
+    plt.xlabel('Index of Broadcast Interval', fontsize=12)
     plt.show()
     pass
 
 def plot_number_vs_time():
-    MDP_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace]
-    QAware_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace]
-    Random_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace]
-    Selfish_cost = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace]
+    MDP_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace][CUT_NUM:]
+    QAware_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace][CUT_NUM:]
+    Random_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace][CUT_NUM:]
+    Selfish_cost = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace][CUT_NUM:]
 
-    plt.plot(range(n_files), MDP_cost,     '-ro')
-    plt.plot(range(n_files), QAware_cost,  '-go')
-    plt.plot(range(n_files), Random_cost,  '-co')
-    plt.plot(range(n_files), Selfish_cost, '-bo')
+    plt.grid()
+    plt.plot(range(n_files-CUT_NUM), MDP_cost,     '-ro')
+    plt.plot(range(n_files-CUT_NUM), QAware_cost,  '-go')
+    plt.plot(range(n_files-CUT_NUM), Random_cost,  '-co')
+    plt.plot(range(n_files-CUT_NUM), Selfish_cost, '-bo')
 
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('Number of Jobs', fontsize=12)
     plt.xlabel('Index of Broadcast Interval', fontsize=12)
     plt.show()
@@ -129,10 +134,10 @@ def plot_number_vs_time():
 
 def plot_number_cdf_vs_time():
     y = [0] * 4
-    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace])
-    y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace])
-    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace])
-    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace])
+    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace][CUT_NUM:])
+    y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace][CUT_NUM:])
+    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace][CUT_NUM:])
+    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace][CUT_NUM:])
     
     ylim = max([arr.max() for arr in y])
     pmf_x = np.linspace(0, ylim, num=NUM_DATA)
@@ -148,13 +153,14 @@ def plot_number_cdf_vs_time():
         # pmf_inter_y[i] = interp_func(pmf_inter_x)
         pass
 
+    plt.grid()
     plt.xlim(0, ylim)
     plt.plot(pmf_x, pmf_y[0], '-r')
     plt.plot(pmf_x, pmf_y[1], '-g')
     plt.plot(pmf_x, pmf_y[2], '-c')
     plt.plot(pmf_x, pmf_y[3], '-b')
 
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('CDF', fontsize=12)
     plt.xlabel('Number per Broadcast Interval', fontsize=12)
     plt.show()
@@ -162,10 +168,10 @@ def plot_number_cdf_vs_time():
 
 def plot_cost_cdf_vs_time():
     y = [0] * 4
-    y[0] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in MDP_trace])
-    y[1] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in QAware_trace])
-    y[2] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in Random_trace])
-    y[3] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in Selfish_trace])
+    y[0] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in MDP_trace][CUT_NUM:])
+    y[1] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in QAware_trace][CUT_NUM:])
+    y[2] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in Random_trace][CUT_NUM:])
+    y[3] = np.sort([getCost(x['ap_stat'], x['es_stat']) for x in Selfish_trace][CUT_NUM:])
     
     ylim = max([arr.max() for arr in y])
     pmf_x = np.linspace(0, ylim, num=NUM_DATA)
@@ -181,20 +187,67 @@ def plot_cost_cdf_vs_time():
         # pmf_inter_y[i] = interp_func(pmf_inter_x)
         pass
 
+    plt.grid()
     plt.xlim(0, ylim)
     plt.plot(pmf_x, pmf_y[0], '-r')
     plt.plot(pmf_x, pmf_y[1], '-g')
     plt.plot(pmf_x, pmf_y[2], '-c')
     plt.plot(pmf_x, pmf_y[3], '-b')
 
-    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'])
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('CDF', fontsize=12)
     plt.xlabel('Cost per Broadcast Interval', fontsize=12)
+    plt.show()
+    pass
+
+def myNumAPPlot():
+    x_label = [3,4,5,6,7]
+    mdp_cost = [29.47, 83.98,  120.19, 142.58, 151.60]
+    sf_cost  = [81.77, 137.51, 151.37, 208.47, 230.31]
+    qf_cost  = [30.81, 92.72,  139.87, 186.08, 212.33]
+    rd_cost  = [32.87, 107.40, 178.48, 238.81, 277.99]
+
+    plt.plot(x_label, mdp_cost, '-r^')
+    plt.plot(x_label, qf_cost,  '-bo')
+    plt.plot(x_label, rd_cost,  '-cv')
+    plt.plot(x_label, sf_cost,  '-gs')
+
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=12)
+    plt.ylabel('Average Cost', fontsize=12)
+    plt.xlabel('Number of AP', fontsize=12)
+
+    plt.grid()
+    plt.xticks(x_label, ['3', '4', '5', '6', '7'])
+    plt.show()
+
+    pass
+
+def myProcDistPlot():
+    x_label = [1,2,3,4,5]
+    mdp_cost = []
+    sf_cost  = []
+    qf_cost  = []
+    rd_cost  = []
+
+    plt.plot(x_label, mdp_cost, '-k^')
+    plt.plot(x_label, qf_cost,  '-ko')
+    plt.plot(x_label, rd_cost,  '-k*')
+    plt.plot(x_label, sf_cost,  '-ks')
+
+    plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
+    plt.ylabel('Average Cost', fontsize=12)
+    plt.xlabel('Number of AP', fontsize=12)
+
+    plt.grid()
+    plt.xticks(x_label, ['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
     plt.show()
     pass
 
 # plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
-plot_number_cdf_vs_time()
-plot_cost_cdf_vs_time()
+# plot_number_cdf_vs_time()
+# plot_cost_cdf_vs_time()
+
+myNumAPPlot()
+# myProcDistPlot()
