@@ -48,7 +48,11 @@ class State(object):
         return self.acc_cost / self.timeslot
     
     def average_throughput(self):
-        return self.acc_dep / self.timeslot
+        # return self.acc_dep / self.timeslot
+        return self.acc_dep / self.acc_arr
+
+    def getUtility(self):
+        return self.acc_dep / self.acc_arr if self.acc_arr!=0 else 0
 
     def iterate(self, admissions, departures):
         self.timeslot += 1

@@ -86,30 +86,36 @@ def plot_bar_graph():
                     summary['Selfish_average_cost'],
                     summary['QAware_average_cost'],
                     summary['Random_average_cost']]
+    # average_cost = [137.08,177.15,169.81,219.36]
     bar_plot1 = ax1.bar(x, average_cost, color='#1F77B4')
+    # ax1.set_ylim([100])
     ax1.set_title('(a)', y=-0.075, fontsize=20)
     ax1.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
-    ax1.set_ylabel('Average Cost', fontsize=22)
+    ax1.set_ylabel('Average Cost', fontsize=20)
 
     # plt.subplots(1, 3, 2)
     average_JCT = [summary['MDP_average_JCT'],
                     summary['Selfish_average_JCT'],
                     summary['QAware_average_JCT'],
                     summary['Random_average_JCT']]
+    # average_JCT = [291.97,377.56,361.78,467.28]
     bar_plot2 = ax2.bar(x, average_JCT, color='#1F77B4')
     ax2.set_title('(b)', y=-0.075, fontsize=20)
     ax2.set_xticklabels(['','MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
-    ax2.set_ylabel('Average JCT', fontsize=22)
+    ax2.set_ylabel('Average Job Response Time', fontsize=20)
 
     # plt.subplot(1, 3, 3)
     average_throughput = [summary['MDP_average_throughput'],
                     summary['Selfish_average_throughput'],
                     summary['QAware_average_throughput'],
                     summary['Random_average_throughput']]
+    average_throughput = 1.0 - np.array(average_throughput)
+    # average_throughput = np.array([0.6571764705882352, 0.6211764705882353, 0.7105767195767195, 0.710475073313783])
     bar_plot3 = ax3.bar(x, average_throughput, color='#1F77B4')
+    # ax3.set_ylim([0.0, 1.0])
     ax3.set_title('(c)', y=-0.075, fontsize=20)
     ax3.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
-    ax3.set_ylabel('Average Throughput', fontsize=22)
+    ax3.set_ylabel('Average Job Dropping Rate', fontsize=20)
     
     autolabel(ax1, bar_plot1) #average_cost
     autolabel(ax2, bar_plot2) #average_JCT
@@ -280,7 +286,7 @@ def myPenaltyPlot():
     #Average Throughput v.s. Penalty Weight
     pass
 
-# plot_bar_graph()
+plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
@@ -288,4 +294,4 @@ def myPenaltyPlot():
 
 # myNumAPsPlot()
 # myProcDistPlot()
-myPenaltyPlot()
+# myPenaltyPlot()

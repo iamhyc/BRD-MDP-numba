@@ -63,11 +63,12 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         for j in range(N_JOB):
             for m in range(N_ES):
                 nextStat.es_stat[m,j,0] += off_number[m,j]
-                nextStat.es_stat[m,j,1] -= 1
+                if nextStat.es_stat[m,j,0]>0 or nextStat.es_stat[m,j,1]>0:
+                    nextStat.es_stat[m,j,1] -= 1
 
                 if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]
                     nextStat.es_stat[m,j,0] = LQ            #
-                if nextStat.es_stat[m,j,1] <= 0:            # if first job finished:
+                if nextStat.es_stat[m,j,1] < 0:            # if first job finished:
                     departures[m,j] += 1                    #     <record the departure>
                     if nextStat.es_stat[m,j,0] > 0:         #     if has_next_job:
                         nextStat.es_stat[m,j,0] -= 1        #         next job joins processing
@@ -79,6 +80,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
+        # print(np.sum(departures))
         nextStat.iterate(off_number, departures) #update the accumulation
         lastStat = nextStat
         nextStat = State().clone(lastStat)
@@ -130,8 +132,8 @@ def main():
             RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
 
-            # cprint('Stage-{} Delta Policy'.format(stage), 'red')
-            # print(nowPolicy - oldPolicy)
+            cprint('Stage-{} Delta Policy'.format(stage), 'red')
+            print(nowPolicy - oldPolicy)
             cprint('ES State:', 'green')
             print(nowStat.es_stat[:,:,0])
             
@@ -160,6 +162,9 @@ def main():
             "Random_ap_stat" : RD_nowStat.ap_stat,
             "Random_es_Stat" : RD_nowStat.es_stat
         })
+
+        print('Cost:', nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost())
+        print('Burden:', nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
         pass
 
     #save summary file
@@ -179,7 +184,8 @@ def main():
         'Random_average_throughput' : RD_nowStat.average_throughput()
     })
 
-    print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
+    # print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
+    print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
     # plt.show()
     pass
 
