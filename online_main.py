@@ -60,6 +60,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         #NOTE: process jobs on ES
         # admissions = np.zeros((N_ES, N_JOB), dtype=np.int32)
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
+        #FIXME: Exponential Departure Rate
         for j in range(N_JOB):
             for m in range(N_ES):
                 nextStat.es_stat[m,j,0] += off_number[m,j]

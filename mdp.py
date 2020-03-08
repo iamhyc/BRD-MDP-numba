@@ -103,6 +103,7 @@ def ES2Vec(es_stat):
 def ES2Entry(l,r):
     return l*PROC_MAX + r
 
+#FIXME: Matrix under Exponential departure
 @njit
 def TransES(beta, proc_dist):
     mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
