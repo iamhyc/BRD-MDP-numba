@@ -130,6 +130,7 @@ def TransES(beta, proc_dist):
     
     return mat
 
+#TODO: improve _k randomness?
 @njit
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
