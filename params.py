@@ -33,11 +33,8 @@ UL_MAX     = int( 2.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.50 * N_SLT )    #(inclusive)
-PROC_MAX   = int( 2.00 * N_SLT )    #(exclusive)
-PROC_RNG   = np.arange(PROC_MIN, PROC_MAX,   step=1, dtype=np.int32)
-PROC_RNG_L = len(PROC_RNG)
-DIM_P      = (LQ+1)*PROC_MAX
+PROC_MEAN  = int(2.00 * N_SLT) # previous with [1.50, 2.00)
+DIM_P      = (LQ+1)
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
