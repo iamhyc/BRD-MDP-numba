@@ -74,11 +74,11 @@ def RandomPolicy():
 @njit
 def BaselinePolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
-    proc_rng = np.copy(PROC_RNG).astype(np.float64)
+    # proc_rng = np.copy(PROC_RNG).astype(np.float64)
     for k in prange(N_AP):
         for j in prange(N_JOB):
-            # policy[k,j] = (proc_dist[:,j,:] @ proc_rng).argmin()
-            policy[k,j] = (ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng).argmin()
+            # policy[k,j] = (proc_mean[:,j]).argmin()
+            policy[k,j] = (ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]).argmin()
             # policy[k,j] = (ul_prob[k,:,j,:] @ _tmp).argmin()
     return policy
 
@@ -95,8 +95,8 @@ def AP2Vec(ap_stat, prob):
 @njit
 def ES2Vec(es_stat):
     es_vec = np.zeros((DIM_P), dtype=np.float64)
-    _idx   = es_stat[0] * PROC_MAX + es_stat[1]
-    es_vec[_idx] = 1
+    # _idx   = es_stat[0] * PROC_MAX + es_stat[1]
+    es_vec[es_stat] = 1
     return es_vec
 
 @njit
