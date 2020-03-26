@@ -95,17 +95,12 @@ def AP2Vec(ap_stat, prob):
 @njit
 def ES2Vec(es_stat):
     es_vec = np.zeros((DIM_P), dtype=np.float64)
-    # _idx   = es_stat[0] * PROC_MAX + es_stat[1]
     es_vec[es_stat] = 1
     return es_vec
 
-@njit
-def ES2Entry(l,r):
-    return l*PROC_MAX + r
-
 #FIXME: Matrix under Exponential departure
 @njit
-def TransES(beta, proc_dist):
+def TransES(beta):
     mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
     
     #NOTE: fill-in l==0 && r==0
@@ -130,7 +125,6 @@ def TransES(beta, proc_dist):
     
     return mat
 
-#TODO: improve _k randomness?
 @njit
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
