@@ -68,8 +68,8 @@ def autolabel(ax, rects):
                     ha='center', va='bottom', fontsize=16)
 
 def getCost(ap_stat, es_stat):
-    _penalty = BETA * np.count_nonzero( es_stat[:,:,0]==LQ )
-    return _penalty + np.sum(ap_stat) + np.sum(es_stat[:,:,0])
+    _penalty = BETA * np.count_nonzero( es_stat==LQ )
+    return _penalty + np.sum(ap_stat) + np.sum(es_stat)
 
 def plot_bar_graph():
     summary_file = '{LOG_DIR}/summary'.format(LOG_DIR=log_dir)
@@ -143,10 +143,10 @@ def plot_cost_vs_time():
     pass
 
 def plot_number_vs_time():
-    MDP_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace][CUT_NUM:]
-    QAware_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace][CUT_NUM:]
-    Random_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace][CUT_NUM:]
-    Selfish_cost = [np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace][CUT_NUM:]
+    MDP_cost     = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in MDP_trace][CUT_NUM:]
+    QAware_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in QAware_trace][CUT_NUM:]
+    Random_cost  = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in Random_trace][CUT_NUM:]
+    Selfish_cost = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in Selfish_trace][CUT_NUM:]
 
     fig, axes = plt.subplots()
     axes.grid()
@@ -165,10 +165,10 @@ def plot_number_vs_time():
 
 def plot_number_cdf_vs_time():
     y = [0] * 4
-    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in MDP_trace][CUT_NUM:])
-    y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in QAware_trace][CUT_NUM:])
-    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Random_trace][CUT_NUM:])
-    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat'][:,:,0]) for x in Selfish_trace][CUT_NUM:])
+    y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in MDP_trace][CUT_NUM:])
+    y[1] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in QAware_trace][CUT_NUM:])
+    y[2] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in Random_trace][CUT_NUM:])
+    y[3] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in Selfish_trace][CUT_NUM:])
     
     ylim = max([arr.max() for arr in y])
     pmf_x = np.linspace(0, ylim, num=NUM_DATA)
