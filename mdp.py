@@ -13,7 +13,7 @@ ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 
 @jitclass([
     ('ap_stat', int32[:,:,:,:]),
-    ('es_stat', int32[:,:,:]),
+    ('es_stat', int32[:,:]),
     ('acc_arr', int64),
     ('acc_dep', int64),
     ('acc_cost', int64),
@@ -22,7 +22,7 @@ ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 class State(object):
     def __init__(self):
         self.ap_stat = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
-        self.es_stat = np.zeros((N_ES, N_JOB, 2),           dtype=np.int32)
+        self.es_stat = np.zeros((N_ES, N_JOB),           dtype=np.int32)
         self.acc_arr, self.acc_dep   = 0, 0
         self.acc_cost, self.timeslot = 0, 0
         pass
@@ -35,11 +35,11 @@ class State(object):
         return self
     
     def getNumber(self):
-        return np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
+        return np.sum(self.ap_stat) + np.sum(self.es_stat)
 
     def getCost(self):
-        _penalty = BETA * np.count_nonzero( self.es_stat[:,:,0]==LQ )
-        return _penalty + np.sum(self.ap_stat) + np.sum(self.es_stat[:,:,0])
+        _penalty = BETA * np.count_nonzero( self.es_stat==LQ )
+        return _penalty + np.sum(self.ap_stat) + np.sum(self.es_stat)
 
     def average_JCT(self):
         return self.acc_cost / self.acc_arr

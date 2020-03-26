@@ -17,14 +17,14 @@ def ARandomPolicy(stat, k, j):
 
 @njit
 def ASelfishPolicy(stat, k, j):
-    proc_rng  = np.copy(PROC_RNG).astype(np.float64)
-    eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_dist[:,j,:] @ proc_rng
+    # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
+    eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
     return eval_cost.argmin()
 
 @njit
 def AQueueAwarePolicy(stat, k, j):
-    proc_rng  = np.copy(PROC_RNG).astype(np.float64)
-    eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j,0]+1)*(proc_dist[:,j,:] @ proc_rng)
+    # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
+    eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
     return eval_cost.argmin()
     # return (stat.es_stat[:,j,0]).argmin()
 
@@ -60,7 +60,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         #NOTE: process jobs on ES
         # admissions = np.zeros((N_ES, N_JOB), dtype=np.int32)
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
-        #FIXME: Exponential Departure Rate
+        #FIXME: Exponential Departure Process
         for j in range(N_JOB):
             for m in range(N_ES):
                 nextStat.es_stat[m,j,0] += off_number[m,j]

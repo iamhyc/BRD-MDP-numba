@@ -41,8 +41,8 @@ DIM_P      = (LQ+1)
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
 @njit
-def genProcessingDistribution():
-    dist = np.zeros((N_ES, N_JOB, PROC_RNG_L), dtype=np.float64)
+def genProcessingParameter():
+    dist = np.zeros((N_ES, N_JOB), dtype=np.float64)
     for j in prange(N_JOB):
         for m in prange(N_ES):
             _roll = np.random.randint(2)
@@ -88,7 +88,7 @@ if Path(npzfile).exists():
     _params   = np.load(npzfile)
     arr_prob  = _params['arr_prob']
     br_dist   = _params['br_dist'] #br_dist   = genDelayDistribution() # 
-    proc_dist = _params['proc_dist']
+    proc_mean = _params['proc_mean']
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
@@ -96,14 +96,14 @@ else:
     arr_prob  = 0.010 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
-    proc_dist = genProcessingDistribution()
+    proc_mean = genProcessingParameter()
     ul_trans, off_trans = genTransitionMatrix()
 
     np.savez(npzfile, **{
         'arr_prob' : arr_prob,
         'ul_prob'  : ul_prob,
         'br_dist'  : br_dist,
-        'proc_dist': proc_dist,
+        'proc_mean': proc_mean,
         'ul_trans' : ul_trans,
         'off_trans': off_trans,
         'miscs'    : np.array([
