@@ -26,7 +26,7 @@ def AQueueAwarePolicy(stat, k, j):
     # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
     return eval_cost.argmin()
-    # return (stat.es_stat[:,j,0]).argmin()
+    # return (stat.es_stat[:,j]).argmin()
 
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
@@ -58,26 +58,20 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                             nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
 
         #NOTE: process jobs on ES
-        # admissions = np.zeros((N_ES, N_JOB), dtype=np.int32)
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
-        #FIXME: Exponential Departure Process
         for j in range(N_JOB):
             for m in range(N_ES):
-                nextStat.es_stat[m,j,0] += off_number[m,j]
-                if nextStat.es_stat[m,j,0]>0 or nextStat.es_stat[m,j,1]>0:
-                    nextStat.es_stat[m,j,1] -= 1
+                nextStat.es_stat[m,j] += off_number[m,j]
 
-                if nextStat.es_stat[m,j,0] > LQ:            # CLIP [0, LQ]
-                    nextStat.es_stat[m,j,0] = LQ            #
-                if nextStat.es_stat[m,j,1] < 0:            # if first job finished:
-                    departures[m,j] += 1                    #     <record the departure>
-                    if nextStat.es_stat[m,j,0] > 0:         #     if has_next_job:
-                        nextStat.es_stat[m,j,0] -= 1        #         next job joins processing
-                        nextStat.es_stat[m,j,1]  = PROC_RNG[ multoss(proc_dist[m,j]) ]
-                    else:                                   #     else:
-                        nextStat.es_stat[m,j,1]  = 0        #         clip the remaining time
-                else:                                       # else:
-                    pass                                    #     do nothing.
+                if nextStat.es_stat[m,j] > LQ:                  # CLIP [0, LQ]
+                    nextStat.es_stat[m,j] = LQ                  #
+                _completed = toss(1/proc_mean[m,j])             # toss for the first job, if exist
+                if (nextStat.es_stat[m,j]>0) and _completed:    # if first_job_completed:
+                    departures[m,j]       += 1                  #       record departure;
+                    nextStat.es_stat[m,j] -= 1                  #       job departure;
+                else:                                           # else:
+                    pass                                        #       do nothing.
+                pass
             pass
 
         #NOTE: update the iteration backup
@@ -136,7 +130,7 @@ def main():
             cprint('Stage-{} Delta Policy'.format(stage), 'red')
             print(nowPolicy - oldPolicy)
             cprint('ES State:', 'green')
-            print(nowStat.es_stat[:,:,0])
+            print(nowStat.es_stat)
             
             stage += 1
         pass
