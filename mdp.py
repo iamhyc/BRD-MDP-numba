@@ -98,30 +98,21 @@ def ES2Vec(es_stat):
     es_vec[es_stat] = 1
     return es_vec
 
-#FIXME: Matrix under Exponential departure
 @njit
-def TransES(beta):
+def TransES(beta, job_mean):
     mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
     
-    #NOTE: fill-in l==0 && r==0
-    mat[ES2Entry(0,0), ES2Entry(0,0)] = 1 - beta
-    for idx,prob in enumerate(proc_dist):
-        mat[ES2Entry(0,0), ES2Entry(0,PROC_RNG[idx])] = prob*beta
-
-    #NOTE: fill-in l!=0 && r==0
-    for l in prange(1, LQ+1):
-        e = ES2Entry(l,0)
-        for idx,prob in enumerate(proc_dist):
-            mat[e, ES2Entry(l,   PROC_RNG[idx])] = prob*beta
-            mat[e, ES2Entry(l-1, PROC_RNG[idx])] = prob*(1-beta)
-
-    #NOTE: fill-in r!=0
-    for l in prange(LQ+1):
-        for r in prange(1,PROC_MAX):
-            e  = ES2Entry(l,r)
-            l2 = LQ if l+1>LQ else (l+1)
-            mat[e, ES2Entry(l2, r-1)] += beta
-            mat[e, ES2Entry(l,  r-1)] += 1-beta
+    # fill-in l1==0
+    mat[0, 0] = 1-beta
+    mat[0, 1] = beta
+    # fill-in l1 < LQ
+    for l1 in prange(1, DIM_P-1):
+        mat[l1, l1-1] = (1/job_mean) * (1-beta)
+        mat[l1, l1]   = (1-1/job_mean)*(1-beta) + (1/job_mean)*beta
+        mat[l1, l1+1] = (1-1/job_mean)*beta
+    # fill-in l1==LQ
+    mat[LQ, LQ-1] = 1/job_mean
+    mat[LQ, LQ]   = 1-1/job_mean
     
     return mat
 
@@ -156,7 +147,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
                 if n==_delay: ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update once is okay!
                 pass
-            mat       = TransES(beta.sum(), proc_dist[m,j])
+            mat       = TransES(beta.sum(), proc_mean[m,j])
             es_vec[m] = es_vec[m] @ mat
         pass
     
@@ -177,7 +168,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
                 beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
                 pass
-            mat       = TransES(beta.sum(), proc_dist[m,j])
+            mat       = TransES(beta.sum(), proc_mean[m,j])
             es_vec[m] = es_vec[m] @ mat
             if n%N_SLT == 0:
                 val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
@@ -186,7 +177,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     # calculate value for ES
     for m in prange(N_ES):
         _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY! okay, double-check
-        mat  = TransES(_beta, proc_dist[m,j])
+        mat  = TransES(_beta, proc_mean[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
