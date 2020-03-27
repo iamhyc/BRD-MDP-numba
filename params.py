@@ -50,6 +50,12 @@ def genProcessingParameter():
             dist[m,j] = multoss(_tmp_dist) #get mean computation time
     return dist
 
+@njit
+def genBipartiteMap():
+    bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
+    
+    return bi_map
+
 def genDelayDistribution():
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)
     for k in range(N_AP):
