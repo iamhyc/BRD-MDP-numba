@@ -97,8 +97,34 @@ def genConnectionMap():
     np.random.seed(RANDOM_SEED)
     return bi_map
 
-def genMergedCandidateSet():
-    pass
+def genMergedCandidateSet(bi_map):
+    result = list()
+
+    for k in range(N_AP):
+        _candidate_set = np.where(bi_map[k] == 1) #TODO:
+        result.append([ set([k]), set(_candidate_set) ])
+
+    _tmp = np.ones((1,len(result)))
+    while np.count_nonzero(_tmp):
+        _len = len(result)
+        _tmp = np.zeros((1,_len))
+        for i in range(_len-1):
+            for j in range(i+1, _len):
+                _tmp[i] += 1 if (result[i][1] & result[j][1]) else 0
+        
+        if np.count_nonzero(_tmp):
+            i = np.where(_tmp>0, _tmp, np.inf).argmin()
+            for j in range(_len):
+                if not (result[i][1] & result[j][1]):
+                    result[i][0] = result[i][0] | result[j][0]
+                    result[i][1] = result[i][1] | result[j][1]
+                    result.pop(j)
+                    break
+                pass
+            pass
+        pass
+
+    return result
 
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
