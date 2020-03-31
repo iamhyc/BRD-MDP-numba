@@ -13,8 +13,8 @@ GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 10
-N_ES  = 15
+N_AP  = 15
+N_ES  = 10
 N_JOB = 10
 LQ    = 100 #maximum queue length on ES (inclusive)
 
@@ -50,12 +50,6 @@ def genProcessingParameter():
             dist[m,j] = multoss(_tmp_dist) #get mean computation time
     return dist
 
-@njit
-def genBipartiteMap():
-    bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
-    
-    return bi_map
-
 def genDelayDistribution():
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)
     for k in range(N_AP):
@@ -89,6 +83,22 @@ def genTransitionMatrix():
                     ul_mat[k,m,j,  i,i+1] = 1 - ul_prob[k,m,j,i]
                     off_mat[k,m,j, i,i+1] =     ul_prob[k,m,j,i]
     return ul_mat, off_mat
+
+def genConnectionMap():
+    np.random.seed(1112)
+
+    bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
+    for k in range(N_AP):
+        _num = int(0.2 * N_ES)
+        for idx in np.random.choice(range(N_ES), size=_num):
+            bi_map[k,idx] = 1
+        pass
+
+    np.random.seed(RANDOM_SEED)
+    return bi_map
+
+def genMergedCandidateSet():
+    pass
 
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
