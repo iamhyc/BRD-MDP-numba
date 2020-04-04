@@ -117,7 +117,7 @@ def TransES(beta, job_mean):
     return mat
 
 @njit
-def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
+def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME: add restrict over candidate set
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
     val_ap = np.zeros((N_AP, N_ES),        dtype=np.float64)
@@ -176,7 +176,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     # calculate value for ES
     for m in prange(N_ES):
-        _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY! okay, double-check
+        _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY!
         mat  = TransES(_beta, proc_mean[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
@@ -190,19 +190,22 @@ def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
 
-    _idx = stage % N_SET #NOTE: optimize multiple APs at one time
+    _n = stage % N_SET #NOTE: optimize multiple APs at one time
 
-    # for _k in prange(len(subSet[_idx])):
-    #     for j in prange(N_JOB):
-    #         val_tmp = np.zeros(N_ES, dtype=np.float64)
-    #         for m in prange(N_ES):
-    #             x1         = np.copy(nowPolicy[:, j])
-    #             x1[_k]     = m #FIXME: _k index
-    #             val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1) #FIXME: restrict connection
-    #             pass
-    #         nowPolicy[_k, j]  = val_tmp.argmin()
-    #         val_collection[j] = val_tmp.min()
-    #         pass
+    for k in prange(subset_numba[_n]):                          #iterate over current subset
+        if subset_numba[_n,k]:                                  #(cont.):
+            for j in prange(N_JOB):                             #   iterate the job space:
+                val_tmp = np.zeros(N_ES, dtype=np.float64)      #   |
+                for m in prange(N_ES):                          #   |   iterate its candidate set
+                    if bi_map[k,m]:                             #   |   (cont.):
+                        x1         = np.copy(nowPolicy[:,j])    #   |   |
+                        x1[k]      = m                          #   |   |
+                        val_tmp[m] = evaluate(j, k, systemStat, oldPolicy[:,j], x1)
+                    pass                                        #   |   end
+                nowPolicy[k, j]  = val_tmp.argmin()             #   |
+                val_collection[j] = val_tmp.min()               #   |
+                pass                                            #   end
+        pass                                                    #end
 
     # print(val_collection)
 
