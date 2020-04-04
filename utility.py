@@ -81,6 +81,12 @@ def genSplitDist(size):         #e.g. [1, 1, ..0,0,0.., 1, 1]
     arr = 1 - arr
     return (arr / np.sum(arr))
 
+def itest(param, test=True):
+    if test:
+        print(param)
+        exit()
+    pass
+
 class Timer:
     def __init__(self, output=True):
         self.output = output

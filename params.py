@@ -13,7 +13,7 @@ GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 15
+N_AP  = 8
 N_ES  = 10
 N_JOB = 10
 LQ    = 100 #maximum queue length on ES (inclusive)
@@ -102,19 +102,22 @@ def genMergedCandidateSet(bi_map):
     result = list()
 
     for k in range(N_AP):
-        _candidate_set = np.where(bi_map[k] == 1) #TODO:
+        _candidate_set = list( np.where(bi_map[k] == 1)[0] )
         result.append([ set([k]), set(_candidate_set) ])
 
-    _tmp = np.ones((1,len(result)))
-    while np.count_nonzero(_tmp):
+    itest(result, False)
+
+    tmp = np.ones(len(result))
+    while np.count_nonzero(tmp):
         _len = len(result)
-        _tmp = np.zeros((1,_len))
+        tmp = np.zeros(_len)
         for i in range(_len-1):
             for j in range(i+1, _len):
-                _tmp[i] += 1 if (result[i][1] & result[j][1]) else 0
+                tmp[i] += 1 if (result[i][1] & result[j][1]==set()) else 0
+        print(result, tmp)
         
-        if np.count_nonzero(_tmp):
-            i = np.where(_tmp>0, _tmp, np.inf).argmin()
+        if np.count_nonzero(tmp):
+            i = np.where(tmp>0, tmp, np.inf).argmin()
             for j in range(_len):
                 if not (result[i][1] & result[j][1]):
                     result[i][0] = result[i][0] | result[j][0]
@@ -143,7 +146,7 @@ else:
     proc_mean = genProcessingParameter()
     ul_trans, off_trans = genTransitionMatrix()
     bi_map    = genConnectionMap()
-    subSet    = genMergedCandidateSet(bi_map) #NOTE: generate parallel subset
+    subSet    = genMergedCandidateSet(bi_map) #NOTE: generate parallel subsets
     print(subSet)
 
     np.savez(npzfile, **{
