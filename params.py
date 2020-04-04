@@ -13,7 +13,7 @@ GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 8
+N_AP  = 15
 N_ES  = 10
 N_JOB = 10
 LQ    = 100 #maximum queue length on ES (inclusive)
@@ -114,7 +114,7 @@ def genMergedCandidateSet(bi_map):
         for i in range(_len-1):
             for j in range(i+1, _len):
                 tmp[i] += 1 if (result[i][1] & result[j][1]==set()) else 0
-        print(result, tmp)
+        # print(result, tmp)
         
         if np.count_nonzero(tmp):
             i = np.where(tmp>0, tmp, np.inf).argmin()
@@ -147,7 +147,8 @@ else:
     ul_trans, off_trans = genTransitionMatrix()
     bi_map    = genConnectionMap()
     subSet    = genMergedCandidateSet(bi_map) #NOTE: generate parallel subsets
-    print(subSet)
+    N_SET     = len(subSet)
+    print(N_SET, subSet)
 
     np.savez(npzfile, **{
         'arr_prob' : arr_prob,

@@ -190,18 +190,19 @@ def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
 
-    _k = stage % N_AP #NOTE: optimize one AP at one time
+    _idx = stage % N_SET #NOTE: optimize multiple APs at one time
 
-    for j in prange(N_JOB):
-        val_tmp = np.zeros(N_ES, dtype=np.float64)
-        for m in prange(N_ES):
-            x1         = np.copy(nowPolicy[:, j])
-            x1[_k]     = m
-            val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
+    for _k in prange(len(subSet[_idx])):
+        for j in prange(N_JOB):
+            val_tmp = np.zeros(N_ES, dtype=np.float64)
+            for m in prange(N_ES):
+                x1         = np.copy(nowPolicy[:, j])
+                x1[_k]     = m #FIXME: _k index
+                val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1) #FIXME: restrict connection
+                pass
+            nowPolicy[_k, j]  = val_tmp.argmin()
+            val_collection[j] = val_tmp.min()
             pass
-        nowPolicy[_k, j]  = val_tmp.argmin()
-        val_collection[j] = val_tmp.min()
-        pass
 
     # print(val_collection)
 
