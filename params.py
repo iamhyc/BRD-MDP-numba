@@ -134,12 +134,16 @@ if Path(npzfile).exists():
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
+    bi_map    = _params['bi_map']
 else:
     arr_prob  = 0.010 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()
     ul_trans, off_trans = genTransitionMatrix()
+    bi_map    = genConnectionMap()
+    subSet    = genMergedCandidateSet(bi_map) #NOTE: generate parallel subset
+    print(subSet)
 
     np.savez(npzfile, **{
         'arr_prob' : arr_prob,
@@ -148,6 +152,7 @@ else:
         'proc_mean': proc_mean,
         'ul_trans' : ul_trans,
         'off_trans': off_trans,
+        "bi_map"   : bi_map,
         'miscs'    : np.array([
             N_AP,N_ES,N_JOB,LQ,
             TS,TB,N_SLT,N_CNT,
