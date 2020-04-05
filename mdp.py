@@ -128,18 +128,17 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     es_vec  = np.zeros((N_CAN, DIM_P),       dtype=np.float64)
 
     # generate arrival probability
-    old_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
-    now_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
+    old_prob = np.zeros((N_AP, N_CAN), dtype=np.float64)
+    now_prob = np.zeros((N_AP, N_CAN), dtype=np.float64)
     for k in prange(N_AP):
         old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
         now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
 
     # init vector
-    for m in prange(N_ES):
-        if bi_map[_k,m]:
-            es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                         #only (_k)'s candidate set
-            for k in prange(N_AP):
-                ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
+    for m in can_set:
+        es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                                        #only (_k)'s candidate set
+        for k in prange(N_AP):
+            ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
         pass
     
     # iterate system state to (t+1)

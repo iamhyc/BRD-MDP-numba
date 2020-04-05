@@ -13,7 +13,7 @@ GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 15
+N_AP  = 10
 N_ES  = 10
 N_JOB = 10
 LQ    = 100 #maximum queue length on ES (inclusive)
@@ -170,7 +170,7 @@ sub_set      = genMergedCandidateSet(bi_map) #NOTE: generate parallel subsets
 N_SET        = len(sub_set)
 print(N_SET, sub_set)
 subset_numba = np.zeros((N_SET, N_AP), dtype=np.int32)
-for n in sub_set:
+for n in range(N_SET):
     for k in sub_set[n][0]:
         subset_numba[n, k] = 1
         pass
