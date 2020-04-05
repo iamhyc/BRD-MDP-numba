@@ -28,6 +28,11 @@ def AQueueAwarePolicy(stat, k, j):
     return eval_cost.argmin()
     # return (stat.es_stat[:,j]).argmin()
 
+@njit
+def ARealBenchmark(stat, k, j):
+    eval_cost = [] #TODO: add one benchmark
+    return eval_cost.argmin()
+
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
     lastStat  = State().clone(nowStat)

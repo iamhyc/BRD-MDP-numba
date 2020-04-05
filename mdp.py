@@ -116,14 +116,16 @@ def TransES(beta, job_mean):
     
     return mat
 
-@njit
-def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME: add restrict over candidate set
+@njit(parallel=True)
+def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
-    val_ap = np.zeros((N_AP, N_ES),        dtype=np.float64)
-    val_es = np.zeros((N_ES,),             dtype=np.float64)
-    ap_vec = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float64)
-    es_vec = np.zeros((N_ES, DIM_P),       dtype=np.float64)
+    can_set = np.where( bi_map[_k]==1 )[0]
+    N_CAN   = len(can_set)
+    val_ap  = np.zeros((N_AP, N_CAN),        dtype=np.float64) #here not restrict conflict set size
+    val_es  = np.zeros((N_CAN,),             dtype=np.float64)
+    ap_vec  = np.zeros((N_AP, N_CAN, N_CNT), dtype=np.float64)
+    es_vec  = np.zeros((N_CAN, DIM_P),       dtype=np.float64)
 
     # generate arrival probability
     old_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
@@ -134,9 +136,11 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME: add restrict over
 
     # init vector
     for m in prange(N_ES):
-        es_vec[m] = ES2Vec(nowStat.es_stat[m,j])
-        for k in prange(N_AP):
-            ap_vec[k,m] = AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])
+        if bi_map[_k,m]:
+            es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                         #only (_k)'s candidate set
+            for k in prange(N_AP):
+                ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
+        pass
     
     # iterate system state to (t+1)
     for n in range(N_SLT):
@@ -185,7 +189,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME: add restrict over
 
     return np.sum(val_ap) + np.sum(val_es)
 
-@njit
+@njit(parallel=True)
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
