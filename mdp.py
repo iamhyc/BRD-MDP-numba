@@ -116,13 +116,13 @@ def TransES(beta, job_mean):
     
     return mat
 
-@njit(parallel=True)
+@njit
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
     can_set = np.where( bi_map[_k]==1 )[0]
     N_CAN   = len(can_set)
-    val_ap  = np.zeros((N_AP, N_CAN),        dtype=np.float64) #here not restrict conflict set size
+    val_ap  = np.zeros((N_CAN,),             dtype=np.float64) #NOTE: only val_ap for (_k)
     val_es  = np.zeros((N_CAN,),             dtype=np.float64)
     ap_vec  = np.zeros((N_AP, N_CAN, N_CNT), dtype=np.float64)
     es_vec  = np.zeros((N_CAN, DIM_P),       dtype=np.float64)
@@ -135,7 +135,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
         now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
 
     # init vector
-    for m in can_set:
+    for idx in prange(N_CAN):
+        m = can_set[idx]
         es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                                        #only (_k)'s candidate set
         for k in prange(N_AP):
             ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
@@ -143,30 +144,32 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     
     # iterate system state to (t+1)
     for n in range(N_SLT):
-        for m in prange(N_ES):
-            beta = np.zeros(N_ES, dtype=np.float64)
+        for idx in prange(N_CAN):
+            m    = can_set[idx]
+            beta = np.zeros(N_AP, dtype=np.float64)
             for k in prange(N_AP):
-                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+                beta[k]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
-                if n==_delay: ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update once is okay!
+                if n==_delay: ap_vec[k,m] = bi_map[k,m] * AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update one-time is enough!
                 pass
             mat       = TransES(beta.sum(), proc_mean[m,j])
             es_vec[m] = es_vec[m] @ mat
         pass
     
     # calculate value for AP
-    for m in prange(N_ES):
-        for k in prange(N_AP):
-            mat         = np.copy(ul_trans[k,m,j])
-            trans_mat   = np.linalg.matrix_power(mat, N_SLT)
-            ident_mat   = np.eye(N_CNT, dtype=np.float64)
-            inv_mat     = np.linalg.inv( ident_mat - GAMMA*trans_mat )
-            val_ap[k,m] = np.sum( ap_vec[k,m] @ inv_mat )
+    for idx in prange(N_CAN):
+        m = can_set[idx]
+        mat       = np.copy(ul_trans[_k,m,j])
+        trans_mat = np.linalg.matrix_power(mat, N_SLT)
+        ident_mat = np.eye(N_CNT, dtype=np.float64)
+        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
+        val_ap[m] = np.sum( ap_vec[_k,m] @ inv_mat )
 
     # continue iterate system state to (t+3) and collect cost for ES
     for n in range(2*N_SLT):
-        for m in prange(N_ES):
-            beta = np.zeros(N_ES, dtype=np.float64)
+        for idx in prange(N_CAN):
+            m    = can_set[idx]
+            beta = np.zeros(N_AP, dtype=np.float64)
             for k in prange(N_AP):
                 beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
@@ -178,9 +181,10 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
         pass
 
     # calculate value for ES
-    for m in prange(N_ES):
+    for idx in prange(N_CAN):
+        m     = can_set[idx]
         _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY!
-        mat  = TransES(_beta, proc_mean[m,j])
+        mat   = TransES(_beta, proc_mean[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
