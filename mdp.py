@@ -146,7 +146,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     for n in range(N_SLT):
         for idx in prange(N_CAN):
             m    = can_set[idx]
-            beta = np.zeros(N_AP, dtype=np.float64)
+            beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
             for k in prange(N_AP):
                 beta[k]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
@@ -169,7 +169,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     for n in range(2*N_SLT):
         for idx in prange(N_CAN):
             m    = can_set[idx]
-            beta = np.zeros(N_AP, dtype=np.float64)
+            beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
             for k in prange(N_AP):
                 beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
