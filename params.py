@@ -13,10 +13,10 @@ GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 8
+N_AP  = 15
 N_ES  = 10
-N_JOB = 5
-LQ    = 10 #maximum queue length on ES (inclusive)
+N_JOB = 10
+LQ    = 100 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
