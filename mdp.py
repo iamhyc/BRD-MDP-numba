@@ -106,6 +106,7 @@ def TransES(beta, job_mean):
     mat[0, 0] = 1-beta
     mat[0, 1] = beta
     # fill-in l1 < LQ
+    _tmp = np.divide(1, job_mean)
     for l1 in prange(1, DIM_P-1):
         mat[l1, l1-1] = (1/job_mean) * (1-beta)
         mat[l1, l1]   = (1-1/job_mean)*(1-beta) + (1/job_mean)*beta
@@ -117,7 +118,7 @@ def TransES(beta, job_mean):
     return mat
 
 @njit
-def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME:
+def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
     can_set = np.where( bi_map[_k]==1 )[0]
@@ -130,65 +131,65 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME:
     # generate arrival probability
     old_prob = np.zeros((N_AP, N_CAN), dtype=np.float64)
     now_prob = np.zeros((N_AP, N_CAN), dtype=np.float64)
-    for k in prange(N_AP):
-        old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
-        now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
+    # for k in prange(N_AP):
+    #     old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
+    #     now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
 
-    # init vector
-    for idx in prange(N_CAN):
-        m = can_set[idx]
-        es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                                        #only (_k)'s candidate set
-        for k in prange(N_AP):
-            ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
-        pass
+    # # init vector
+    # for idx in prange(N_CAN):
+    #     m = can_set[idx]
+    #     es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                                        #only (_k)'s candidate set
+    #     for k in prange(N_AP):
+    #         ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
+    #     pass
     
-    # iterate system state to (t+1)
-    for n in range(N_SLT):
-        for idx in prange(N_CAN):
-            m    = can_set[idx]
-            beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
-            for k in prange(N_AP):
-                beta[k]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
-                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
-                if n==_delay: ap_vec[k,m] = bi_map[k,m] * AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update one-time is enough!
-                pass
-            mat       = TransES(beta.sum(), proc_mean[m,j])
-            es_vec[m] = es_vec[m] @ mat
-        pass
+    # # iterate system state to (t+1)
+    # for n in range(N_SLT):
+    #     for idx in prange(N_CAN):
+    #         m    = can_set[idx]
+    #         beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
+    #         for k in prange(N_AP):
+    #             beta[k]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+    #             ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
+    #             if n==_delay: ap_vec[k,m] = bi_map[k,m] * AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update one-time is enough!
+    #             pass
+    #         mat       = TransES(beta.sum(), proc_mean[m,j])
+    #         es_vec[m] = es_vec[m] @ mat
+    #     pass
     
-    # calculate value for AP
-    for idx in prange(N_CAN):
-        m = can_set[idx]
-        mat       = np.copy(ul_trans[_k,m,j])
-        trans_mat = np.linalg.matrix_power(mat, N_SLT)
-        ident_mat = np.eye(N_CNT, dtype=np.float64)
-        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
-        val_ap[m] = np.sum( ap_vec[_k,m] @ inv_mat )
+    # # calculate value for AP
+    # for idx in prange(N_CAN):
+    #     m = can_set[idx]
+    #     mat       = np.copy(ul_trans[_k,m,j])
+    #     trans_mat = np.linalg.matrix_power(mat, N_SLT)
+    #     ident_mat = np.eye(N_CNT, dtype=np.float64)
+    #     inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
+    #     val_ap[m] = np.sum( ap_vec[_k,m] @ inv_mat )
 
-    # continue iterate system state to (t+3) and collect cost for ES
-    for n in range(2*N_SLT):
-        for idx in prange(N_CAN):
-            m    = can_set[idx]
-            beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
-            for k in prange(N_AP):
-                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
-                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
-                pass
-            mat       = TransES(beta.sum(), proc_mean[m,j])
-            es_vec[m] = es_vec[m] @ mat
-            if n%N_SLT == 0:
-                val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
-        pass
+    # # continue iterate system state to (t+3) and collect cost for ES
+    # for n in range(2*N_SLT):
+    #     for idx in prange(N_CAN):
+    #         m    = can_set[idx]
+    #         beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
+    #         for k in prange(N_AP):
+    #             beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
+    #             ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
+    #             pass
+    #         mat       = TransES(beta.sum(), proc_mean[m,j])
+    #         es_vec[m] = es_vec[m] @ mat
+    #         if n%N_SLT == 0:
+    #             val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
+    #     pass
 
-    # calculate value for ES
-    for idx in prange(N_CAN):
-        m     = can_set[idx]
-        _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY!
-        mat   = TransES(_beta, proc_mean[m,j])
-        trans_mat = np.linalg.matrix_power(mat, N_SLT)
-        ident_mat = np.eye(DIM_P, dtype=np.float64)
-        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
-        val_es[m]+= np.power(GAMMA, 2) * (es_vec[m] @ inv_mat @ ESValVec)
+    # # calculate value for ES
+    # for idx in prange(N_CAN):
+    #     m     = can_set[idx]
+    #     _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY!
+    #     mat   = TransES(_beta, proc_mean[m,j])
+    #     trans_mat = np.linalg.matrix_power(mat, N_SLT)
+    #     ident_mat = np.eye(DIM_P, dtype=np.float64)
+    #     inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
+    #     val_es[m]+= np.power(GAMMA, 2) * (es_vec[m] @ inv_mat @ ESValVec)
 
     return np.sum(val_ap) + np.sum(val_es)
 

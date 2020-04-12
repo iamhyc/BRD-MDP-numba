@@ -48,7 +48,7 @@ def genProcessingParameter():
         for m in prange(N_ES):
             _roll = np.random.randint(2)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #1:1
-            param[m,j] = multoss(_tmp_dist) #get mean computation time
+            param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
 
 def genDelayDistribution():
