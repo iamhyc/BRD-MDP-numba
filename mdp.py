@@ -106,7 +106,6 @@ def TransES(beta, job_mean):
     mat[0, 0] = 1-beta
     mat[0, 1] = beta
     # fill-in l1 < LQ
-    _tmp = np.divide(1, job_mean)
     for l1 in prange(1, DIM_P-1):
         mat[l1, l1-1] = (1/job_mean) * (1-beta)
         mat[l1, l1]   = (1-1/job_mean)*(1-beta) + (1/job_mean)*beta
@@ -117,7 +116,7 @@ def TransES(beta, job_mean):
     
     return mat
 
-@njit
+@njit(parallel=True)
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
@@ -125,23 +124,23 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     N_CAN   = len(can_set)
     val_ap  = np.zeros((N_CAN,),             dtype=np.float64) #NOTE: only val_ap for (_k)
     val_es  = np.zeros((N_CAN,),             dtype=np.float64)
-    ap_vec  = np.zeros((N_AP, N_CAN, N_CNT), dtype=np.float64)
-    es_vec  = np.zeros((N_CAN, DIM_P),       dtype=np.float64)
+    ap_vec  = np.zeros((N_AP, N_ES, N_CNT),  dtype=np.float64)
+    es_vec  = np.zeros((N_ES, DIM_P),        dtype=np.float64)
 
     # generate arrival probability
-    old_prob = np.zeros((N_AP, N_CAN), dtype=np.float64)
-    now_prob = np.zeros((N_AP, N_CAN), dtype=np.float64)
-    # for k in prange(N_AP):
-    #     old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
-    #     now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
+    old_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
+    now_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
+    for k in prange(N_AP):
+        old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
+        now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
 
-    # # init vector
-    # for idx in prange(N_CAN):
-    #     m = can_set[idx]
-    #     es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                                        #only (_k)'s candidate set
-    #     for k in prange(N_AP):
-    #         ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
-    #     pass
+    # init vector
+    for idx in prange(N_CAN):
+        m = can_set[idx]
+        es_vec[m] = ES2Vec(nowStat.es_stat[m,j])                                        #only (_k)'s candidate set
+        for k in prange(N_AP):
+            ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
+        pass
     
     # # iterate system state to (t+1)
     # for n in range(N_SLT):
