@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 26131
+# RANDOM_SEED = 26131
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95

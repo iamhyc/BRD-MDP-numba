@@ -7,8 +7,8 @@ from numba import njit, prange, jitclass
 from itertools import product
 
 ul_rng     = np.arange(N_CNT, dtype=np.float64)
-ESValVec   = np.repeat(np.arange(LQ), repeats=PROC_MAX).astype(np.float64)
-PenaltyVec = BETA * np.ones(PROC_MAX, dtype=np.float64)
+ESValVec   = np.arange(LQ, dtype=np.float64)
+PenaltyVec = np.array([BETA], dtype=np.float64)
 ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 
 @jitclass([
@@ -162,7 +162,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
         mat       = np.copy(ul_trans[_k,m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(N_CNT, dtype=np.float64)
-        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat ) #FIXME:
+        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
         val_ap[m] = np.sum( ap_vec[_k,m] @ inv_mat )
 
     # continue iterate system state to (t+3) and collect cost for ES
@@ -187,7 +187,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
         mat   = TransES(_beta, proc_mean[m,j])
         trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
-        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat ) #FIXME:
+        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
         val_es[m]+= np.power(GAMMA, 2) * (es_vec[m] @ inv_mat @ ESValVec)
 
     return np.sum(val_ap) + np.sum(val_es)
