@@ -6,17 +6,17 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 48265
+# RANDOM_SEED = 48265
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 10
+N_AP  = 8
 N_ES  = 10
-N_JOB = 3
-LQ    = 15 #maximum queue length on ES (inclusive)
+N_JOB = 5
+LQ    = 10 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -35,21 +35,21 @@ UL_RNG_L   = len(UL_RNG)
 
 PROC_MIN   = int( 2.00 * N_SLT ) #(inclusive)
 PROC_MAX   = int( 5.00 * N_SLT ) #(inclusive)
-PROC_RNG   = np.arange(PROC_MIN, PROC_MAX+1, step=1, dtype=np.int32)
-PROC_RNG_L   = len(PROC_RNG)
+PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
+PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
 @njit
 def genProcessingParameter():
-    dist = np.zeros((N_ES, N_JOB), dtype=np.int32)
+    param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
             _roll = np.random.randint(2)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #1:1
-            dist[m,j] = multoss(_tmp_dist) #get mean computation time
-    return dist
+            param[m,j] = multoss(_tmp_dist) #get mean computation time
+    return param
 
 def genDelayDistribution():
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)

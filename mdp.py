@@ -192,15 +192,14 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     return np.sum(val_ap) + np.sum(val_es)
 
-@njit(parallel=True)
+@njit
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
 
     _n = stage % N_SET #NOTE: optimize multiple APs at one time
-    _subset = np.where(subset_numba[_n] == 1)
+    _subset = np.where(subset_numba[_n] == 1)[0]
     _N_SET  = len(_subset)
-    print(_subset)
 
     for idx in prange(_N_SET):                          #iterate over current subset
         k = _subset[idx]
