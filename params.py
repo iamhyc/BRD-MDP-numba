@@ -6,17 +6,17 @@ from utility import *
 from scipy.stats import norm
 
 RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 61937
+RANDOM_SEED = 48265
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 20
 STAGE   = 100
 
-N_AP  = 15
+N_AP  = 10
 N_ES  = 10
-N_JOB = 10
-LQ    = 100 #maximum queue length on ES (inclusive)
+N_JOB = 3
+LQ    = 15 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -166,7 +166,7 @@ else:
     })
     pass
 
-sub_set      = genMergedCandidateSet(bi_map) #NOTE: generate parallel subsets
+sub_set      = genMergedCandidateSet(bi_map)
 N_SET        = len(sub_set)
 print(N_SET, sub_set)
 subset_numba = np.zeros((N_SET, N_AP), dtype=np.int32)

@@ -7,9 +7,11 @@ from utility import *
 import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
-matplotlib.use("Qt5agg")
 
 ul_rng    = np.arange(N_CNT, dtype=np.float64)
+
+PLOT_FLAG = False
+if PLOT_FLAG: matplotlib.use("Qt5agg")
 
 @njit
 def ARandomPolicy(stat, k, j):
@@ -102,7 +104,7 @@ def main():
 
     print('Baseline Policy\n{}'.format(nowPolicy))
 
-    plt.ion()
+    if PLOT_FLAG: plt.ion()
     while stage < STAGE:
         with Timer(output=True):
             #NOTE: toss job arrival for APs in each time slot
@@ -140,15 +142,16 @@ def main():
             stage += 1
         pass
 
-        #---------------------------------------------------------------------
-        plt.plot([stage, stage+1], [oldStat.getNumber(), nowStat.getNumber()], '-ro')
-        plt.plot([stage, stage+1], [SF_oldStat.getNumber(), SF_nowStat.getNumber()], '-bo')
-        plt.plot([stage, stage+1], [QA_oldStat.getNumber(), QA_nowStat.getNumber()], '-go')
-        plt.plot([stage, stage+1], [RD_oldStat.getNumber(), RD_nowStat.getNumber()], '-co')
-        plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
-        #---------------------------------------------------------------------
-        plt.gcf().canvas.draw_idle()
-        plt.gcf().canvas.start_event_loop(0.3)
+        if PLOT_FLAG:
+            #---------------------------------------------------------------------
+            plt.plot([stage, stage+1], [oldStat.getNumber(), nowStat.getNumber()], '-ro')
+            plt.plot([stage, stage+1], [SF_oldStat.getNumber(), SF_nowStat.getNumber()], '-bo')
+            plt.plot([stage, stage+1], [QA_oldStat.getNumber(), QA_nowStat.getNumber()], '-go')
+            plt.plot([stage, stage+1], [RD_oldStat.getNumber(), RD_nowStat.getNumber()], '-co')
+            plt.legend(['MDP Policy', 'Selfish Policy', 'SQF Policy', 'Random Policy'])
+            #---------------------------------------------------------------------
+            plt.gcf().canvas.draw_idle()
+            plt.gcf().canvas.start_event_loop(0.3)
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
@@ -186,7 +189,7 @@ def main():
 
     # print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
     print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
-    # plt.show()
+    # if PLOT_FLAG: plt.show()
     pass
 
 if __name__ == "__main__":
