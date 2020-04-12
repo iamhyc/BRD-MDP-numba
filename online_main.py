@@ -193,9 +193,10 @@ def main():
     pass
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        raise e
-    finally:
-        pass
+    main()
+    # try:
+    #     main()
+    # except Exception as e:
+    #     raise e
+    # finally:
+    #     pass
