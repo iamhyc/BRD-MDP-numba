@@ -152,8 +152,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
                 if n==_delay: ap_vec[k,m] = bi_map[k,m] * AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update one-time is enough!
                 pass
-            _mat      = TransES(beta.sum(), proc_mean[m,j])
-            es_vec[m] = es_vec[m] @ _mat
+            mat       = TransES(beta.sum(), proc_mean[m,j])
+            es_vec[m] = es_vec[m] @ mat
         pass
     
     # calculate value for AP
@@ -174,8 +174,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
                 beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
                 pass
-            mat3      = TransES(beta.sum(), proc_mean[m,j])
-            es_vec[m] = es_vec[m] @ mat3
+            mat       = TransES(beta.sum(), proc_mean[m,j])
+            es_vec[m] = es_vec[m] @ mat
             if n%N_SLT == 0:
                 val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
         pass
@@ -184,8 +184,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     for idx in prange(N_CAN):
         m     = can_set[idx]
         _beta = np.sum(now_prob[:,m]) #NOTE:: TRUE STORY!
-        mat4   = TransES(_beta, proc_mean[m,j])
-        trans_mat = np.linalg.matrix_power(mat4, N_SLT)
+        mat   = TransES(_beta, proc_mean[m,j])
+        trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(DIM_P, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
         val_es[m]+= np.power(GAMMA, 2) * (es_vec[m] @ inv_mat @ ESValVec)
