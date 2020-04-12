@@ -117,7 +117,7 @@ def TransES(beta, job_mean):
     return mat
 
 @njit
-def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
+def evaluate(j, _k, systemStat, oldPolicy, nowPolicy): #FIXME:
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
     can_set = np.where( bi_map[_k]==1 )[0]
@@ -160,7 +160,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     for idx in prange(N_CAN):
         m = can_set[idx]
         mat       = np.copy(ul_trans[_k,m,j])
-        trans_mat = np.linalg.matrix_power(mat, N_SLT) #FIXME:
+        trans_mat = np.linalg.matrix_power(mat, N_SLT)
         ident_mat = np.eye(N_CNT, dtype=np.float64)
         inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
         val_ap[m] = np.sum( ap_vec[_k,m] @ inv_mat )
