@@ -152,8 +152,8 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
                 if n==_delay: ap_vec[k,m] = bi_map[k,m] * AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update one-time is enough!
                 pass
-            mat       = TransES(beta.sum(), proc_mean[m,j])
-            es_vec[m] = es_vec[m] @ mat
+            trans_mat = TransES(beta.sum(), proc_mean[m,j])
+            es_vec[m] = es_vec[m] @ trans_mat
         pass
     
     # calculate value for AP
