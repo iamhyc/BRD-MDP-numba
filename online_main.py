@@ -11,7 +11,6 @@ from termcolor import cprint
 ul_rng    = np.arange(N_CNT, dtype=np.float64)
 
 PLOT_FLAG = False
-if PLOT_FLAG: matplotlib.use("Qt5agg")
 
 @njit
 def ARandomPolicy(stat, k, j):
@@ -104,7 +103,10 @@ def main():
 
     print('Baseline Policy\n{}'.format(nowPolicy))
 
-    if PLOT_FLAG: plt.ion()
+    if PLOT_FLAG:
+        matplotlib.use("Qt5agg")
+        plt.ion()
+    
     while stage < STAGE:
         with Timer(output=True):
             #NOTE: toss job arrival for APs in each time slot
@@ -152,6 +154,11 @@ def main():
             #---------------------------------------------------------------------
             plt.gcf().canvas.draw_idle()
             plt.gcf().canvas.start_event_loop(0.3)
+        else:
+            m1, m2, m3, m4 = nowStat.getNumber(),SF_nowStat.getNumber(),QA_nowStat.getNumber(),RD_nowStat.getNumber()
+            print('MDP \t Selfish \t Queue \t Random')
+            print('%3d \t %2d \t %2d \t %2d'.format(m1,m2-m1,m3-m1,m4-m1))
+            pass
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
         np.savez(trace_file, **{
@@ -166,8 +173,8 @@ def main():
             "Random_es_Stat" : RD_nowStat.es_stat
         })
 
-        print('Cost:', nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost())
-        print('Burden:', nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
+        # print('Cost:', nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost())
+        # print('Burden:', nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
         pass
 
     #save summary file
@@ -188,7 +195,7 @@ def main():
     })
 
     # print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
-    print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
+    # print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
     # if PLOT_FLAG: plt.show()
     pass
 
