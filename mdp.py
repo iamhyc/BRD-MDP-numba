@@ -116,7 +116,7 @@ def TransES(beta, job_mean):
     
     return mat
 
-@njit
+@njit(parallel=True)
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
@@ -192,7 +192,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     return np.sum(val_ap) + np.sum(val_es)
 
-@njit
+@njit(parallel=True)
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)

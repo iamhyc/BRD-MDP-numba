@@ -105,8 +105,6 @@ def genMergedCandidateSet(bi_map):
         _candidate_set = list( np.where(bi_map[k] == 1)[0] )
         result.append([ set([k]), set(_candidate_set) ])
 
-    itest(result, False)
-
     tmp = np.ones(len(result))
     while np.count_nonzero(tmp):
         _len = len(result)
@@ -140,7 +138,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
 else:
-    arr_prob  = 0.010 + 0.010 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = 0.002 + 0.002 * np.random.rand(N_AP, N_JOB).astype(np.float64)
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()
