@@ -18,4 +18,4 @@ watch:
 clean:
 	@rm -f *.err *.out
 	@rm -f logs/$(ID).npz logs/$(ID).log
-	@rm -f traces-$(ID)
+	@rm -rf traces-$(ID)
