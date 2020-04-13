@@ -1,6 +1,7 @@
 
 import time
 import pathlib
+import logging
 import numpy as np
 from scipy.stats import norm
 from numba import njit, prange
@@ -112,3 +113,21 @@ class Timer:
         self.delta = self._stop - self._start
         return self.delta
     pass
+
+def getLogger(filename=''):
+    logger = logging.getLogger('Basic Logger')
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    if filename:
+        fh = logging.FileHandler('logs/{}.log'.format(filename))
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+    else:
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+    
+    return logger

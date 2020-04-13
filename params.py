@@ -39,6 +39,9 @@ PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
+GRAPH_RATIO = 0.2
+U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
+
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
 @njit
@@ -90,7 +93,7 @@ def genConnectionMap():
 
     bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
     for k in range(N_AP):
-        _num = int(0.2 * N_ES)
+        _num = int(GRAPH_RATIO * N_ES)
         for idx in np.random.choice(range(N_ES), size=_num):
             bi_map[k,idx] = 1
         pass
@@ -138,7 +141,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
 else:
-    arr_prob  = 0.002 + 0.002 * np.random.rand(N_AP, N_JOB).astype(np.float64)
+    arr_prob  = U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()

@@ -90,6 +90,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main():
+    logger = getLogger(RANDOM_SEED)
     pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
     
     stage = 0
@@ -136,10 +137,11 @@ def main():
             RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
 
-            cprint('Stage-{} Delta Policy'.format(stage), 'red')
-            print(nowPolicy - oldPolicy)
-            cprint('ES State:', 'green')
-            print(nowStat.es_stat)
+            #NOTE: console output with State and Policy deviation
+            # cprint('Stage-{} Delta Policy'.format(stage), 'red')
+            # print(nowPolicy - oldPolicy)
+            # cprint('ES State:', 'green')
+            # print(nowStat.es_stat)
             
             stage += 1
         pass
@@ -156,8 +158,8 @@ def main():
             plt.gcf().canvas.start_event_loop(0.3)
         else:
             m1, m2, m3, m4 = nowStat.getNumber(),SF_nowStat.getNumber(),QA_nowStat.getNumber(),RD_nowStat.getNumber()
-            print('MDP \t Selfish \t Queue \t Random')
-            print('%3d \t %2d \t %2d \t %2d'%(m1,m2-m1,m3-m1,m4-m1))
+            logger.debug('MDP \t Selfish \t Queue \t Random')
+            logger.debug('%3d \t %2d \t %2d \t %2d'%(m1, m2-m1, m3-m1, m4-m1))
             pass
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
@@ -173,8 +175,8 @@ def main():
             "Random_es_Stat" : RD_nowStat.es_stat
         })
 
-        # print('Cost:', nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost())
-        # print('Burden:', nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
+        logger.debug( 'Cost:{}, {}, {}, {}'.format(nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost()) )
+        logger.debug( 'Burden:{}, {}, {}, {}'.format(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility()) )
         pass
 
     #save summary file
@@ -194,16 +196,15 @@ def main():
         'Random_average_throughput' : RD_nowStat.average_throughput()
     })
 
-    # print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
-    # print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
+    print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
+    print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
     # if PLOT_FLAG: plt.show()
     pass
 
 if __name__ == "__main__":
-    main()
-    # try:
-    #     main()
-    # except Exception as e:
-    #     raise e
-    # finally:
-    #     pass
+    try:
+        main()
+    except Exception as e:
+        raise e
+    finally:
+        pass
