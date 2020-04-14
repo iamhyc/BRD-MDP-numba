@@ -10,7 +10,7 @@ run:
 	@python3 ./online_main.py
 
 submit:
-	bsub -q short -n 80 -R "span[ptile=40]" -e %J.err -o %J.out "NUMBA_NUM_THREADS=80 python3 ./online_main.py"
+	bsub -q short -n 40 -R "span[ptile=40]" -e %J.err -o %J.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py"
 
 watch:
 	watch -n 1 bjobs

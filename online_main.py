@@ -14,25 +14,23 @@ PLOT_FLAG = False
 
 @njit
 def ARandomPolicy(stat, k, j):
-    return np.random.randint(N_ES)
+    _can_set = np.where( bi_map[k]==1 )[0]
+    return np.random.choice(_can_set)
 
 @njit
 def ASelfishPolicy(stat, k, j):
     # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
+    eval_cost += int(1E6) * bi_map[k] #restrict for candidate set
     return eval_cost.argmin()
 
 @njit
 def AQueueAwarePolicy(stat, k, j):
     # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
+    eval_cost += int(1E6) * bi_map[k] #restrict for candidate set
     return eval_cost.argmin()
     # return (stat.es_stat[:,j]).argmin()
-
-@njit
-def ARealBenchmark(stat, k, j):
-    eval_cost = [] #TODO: add one benchmark
-    return eval_cost.argmin()
 
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
