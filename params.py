@@ -11,7 +11,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 20
-STAGE   = 50
+STAGE   = 50 #FIXME: now for test; at least 500 stages
 
 N_AP  = 15
 N_ES  = 10
