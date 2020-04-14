@@ -90,7 +90,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main():
-    logger = getLogger(RANDOM_SEED)
+    logger = getLogger('{:05d}'.format(RANDOM_SEED))
     pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
     
     stage = 0
@@ -202,9 +202,10 @@ def main():
     pass
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        raise e
-    finally:
-        pass
+    main()
+    # try:
+    #     main()
+    # except Exception as e:
+    #     raise e
+    # finally:
+    #     pass
