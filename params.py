@@ -18,7 +18,6 @@ N_ES  = 10
 N_JOB = 10
 LQ    = 80 #maximum queue length on ES (inclusive)
 GRAPH_RATIO = 0.3
-U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -41,6 +40,7 @@ PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
+U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
