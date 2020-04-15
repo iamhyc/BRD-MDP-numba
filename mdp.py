@@ -201,8 +201,8 @@ def optimize(stage, systemStat, oldPolicy):
     _subset = np.where(subset_numba[_n] == 1)[0]
     _N_SET  = len(_subset)
 
-    for idx in prange(_N_SET):                          #iterate over current subset
-        k = _subset[idx]
+    for idx in prange(_N_SET):                              #iterate over current subset
+        k = _subset[idx]                                    #
         for j in prange(N_JOB):                             #   iterate the job space:
             val_tmp = np.zeros(N_ES, dtype=np.float64)      #   |
             for m in prange(N_ES):                          #   |   iterate its candidate set
@@ -211,7 +211,7 @@ def optimize(stage, systemStat, oldPolicy):
                     x1[k]      = m                          #   |   |
                     val_tmp[m] = evaluate(j, k, systemStat, oldPolicy[:,j], x1)
                 pass                                        #   |   end
-            nowPolicy[k, j]  = val_tmp.argmin()             #   |
+            nowPolicy[k, j]   = val_tmp.argmin()            #   |
             val_collection[j] = val_tmp.min()               #   |
             pass                                            #   end
     pass                                                    #end
