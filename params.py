@@ -10,7 +10,7 @@ RANDOM_SEED = random.randint(0, 2**16)
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 20
+BETA    = 50
 STAGE   = 200 #FIXME: now for test; at least 500 stages
 
 N_AP  = 15

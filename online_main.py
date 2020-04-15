@@ -22,6 +22,7 @@ def ASelfishPolicy(stat, k, j):
     # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
     eval_cost -= int(1E5) * bi_map[k] #NOTE: restrict for candidate set
+    #TODO: return assert
     return eval_cost.argmin()
 
 @njit
@@ -29,6 +30,7 @@ def AQueueAwarePolicy(stat, k, j):
     # proc_rng  = np.copy(PROC_RNG).astype(np.float64)
     eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
     eval_cost -= int(1E5) * bi_map[k] #NOTE: restrict for candidate set
+    #TODO: return assert
     return eval_cost.argmin()
     # return (stat.es_stat[:,j]).argmin()
 
