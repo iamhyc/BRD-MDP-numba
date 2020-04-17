@@ -19,18 +19,18 @@ def ARandomPolicy(stat, k, j):
 
 @njit
 def ASelfishPolicy(stat, k, j):
-    eval_cost = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
-    eval_cost -= int(1E5) * bi_map[k] #NOTE: restrict for candidate set
+    eval_cost     = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
+    eval_cost    -= int(1E5) * bi_map[k]
     return_choice = eval_cost.argmin()
-    assert( np.isin(return_choice, bi_map[k]) ) #TODO: return assert
+    assert( np.isin(return_choice, bi_map[k]) ) #NOTE: restrict for candidate set
     return return_choice
 
 @njit
 def AQueueAwarePolicy(stat, k, j):
-    eval_cost = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
-    eval_cost -= int(1E5) * bi_map[k] #NOTE: restrict for candidate set
+    eval_cost     = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
+    eval_cost    -= int(1E5) * bi_map[k]
     return_choice = eval_cost.argmin() #(stat.es_stat[:,j]).argmin()
-    assert( np.isin(return_choice, bi_map[k]) ) #TODO: return assert
+    assert( np.isin(return_choice, bi_map[k]) ) #NOTE: restrict for candidate set
     return return_choice
 
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
