@@ -39,7 +39,7 @@ PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
-GRAPH_RATIO = 0.4
+GRAPH_RATIO = 0.3
 U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
@@ -167,11 +167,11 @@ else:
     })
     pass
 
-sub_set      = genMergedCandidateSet(bi_map)
-N_SET        = len(sub_set)
+the_subset      = genMergedCandidateSet(bi_map)
+N_SET        = len(the_subset)
 subset_numba = np.zeros((N_SET, N_AP), dtype=np.int32)
 for n in range(N_SET):
-    for k in sub_set[n][0]:
+    for k in the_subset[n][0]:
         subset_numba[n, k] = 1
 
-print(N_SET, sub_set)
+print(N_SET, the_subset)
