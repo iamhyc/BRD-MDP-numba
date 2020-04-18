@@ -89,6 +89,9 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main():
+    if PLOT_FLAG:
+        matplotlib.use("Qt5agg")
+        plt.ion()
     logger = getLogger('{:05d}'.format(RANDOM_SEED))
     pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
     
@@ -102,10 +105,6 @@ def main():
     #-----------------------------------------------------------
 
     print('Baseline Policy\n{}'.format(nowPolicy))
-
-    if PLOT_FLAG:
-        matplotlib.use("Qt5agg")
-        plt.ion()
     
     while stage < STAGE:
         with Timer(output=True):
