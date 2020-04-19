@@ -167,7 +167,8 @@ else:
     })
     pass
 
-the_subset      = genMergedCandidateSet(bi_map)
+ul_rng       = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
+the_subset   = genMergedCandidateSet(bi_map)
 N_SET        = len(the_subset)
 subset_numba = np.zeros((N_SET, N_AP), dtype=np.int32)
 for n in range(N_SET):
