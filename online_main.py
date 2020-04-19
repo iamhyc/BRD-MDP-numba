@@ -80,7 +80,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
-        # print(np.sum(departures))
+        print(np.sum(departures))
         nextStat.iterate(off_number, departures) #update the accumulation
         lastStat = nextStat
         nextStat = State().clone(lastStat)
@@ -194,8 +194,8 @@ def main():
         'Random_average_throughput' : RD_nowStat.average_throughput()
     })
 
-    print(nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost())
-    print(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility())
+    logger.debug('Average Cost: {}, {}, {}, {}'.format( nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost() ))
+    logger.debug('Utility: {}, {}, {}, {}'.foramt( nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility() ))
     # if PLOT_FLAG: plt.show()
     pass
 
