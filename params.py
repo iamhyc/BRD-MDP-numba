@@ -168,11 +168,11 @@ else:
     pass
 
 ul_rng       = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
-the_subset   = genMergedCandidateSet(bi_map)
-N_SET        = len(the_subset)
-subset_numba = np.zeros((N_SET, N_AP), dtype=np.int32)
+subset_map   = genMergedCandidateSet(bi_map)
+N_SET        = len(subset_map)
+subset_ind = np.zeros((N_SET, N_AP), dtype=np.int32)
 for n in range(N_SET):
-    for k in the_subset[n][0]:
-        subset_numba[n, k] = 1
+    for k in subset_map[n][0]:
+        subset_ind[n, k] = 1
 
-print(N_SET, the_subset)
+print(N_SET, subset_map)

@@ -142,7 +142,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
             ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
         pass
     
-    # iterate system state to (t+1)
+    # iterate system state to (t+1) #FIXME: evaluation need check!
     for n in range(N_SLT):
         for idx in prange(N_CAN):
             m    = can_set[idx]
@@ -197,8 +197,8 @@ def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
 
-    _n = stage % N_SET #NOTE: optimize multiple APs at one time
-    _subset = np.where(subset_numba[_n] == 1)[0]
+    _n = stage % N_SET
+    _subset = np.where(subset_ind[_n] == 1)[0]
     _N_SET  = len(_subset)
 
     for idx in prange(_N_SET):                              #iterate over current subset
