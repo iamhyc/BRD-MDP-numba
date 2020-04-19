@@ -74,7 +74,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                     departures[m,j]       += 1                  #       record departure;
                     nextStat.es_stat[m,j] -= 1                  #       job departure;
                 else:                                           # else:
-                    nextStat.es_stat[m,j]  = 0                  #       clip lower value (in case for unexpectedly logic error)
+                    nextStat.es_stat[m,j]  = 0                  #       clip lower-bound (in case for unexpectedly logic error)
                 pass
             pass
 
