@@ -67,15 +67,14 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         for j in range(N_JOB):
             for m in range(N_ES):
                 nextStat.es_stat[m,j] += off_number[m,j]
-
                 if nextStat.es_stat[m,j] > LQ:                  # CLIP [0, LQ]
                     nextStat.es_stat[m,j] = LQ                  #
-                _completed = toss(1/proc_mean[m,j])             # toss for the first job, if exist
-                if (nextStat.es_stat[m,j]>0) and _completed:    # if first_job_completed:
+                completed_b = toss(1/proc_mean[m,j])            # toss for the first job (if exist)
+                if (nextStat.es_stat[m,j]>0) and completed_b:   # if first_job_exist and first_job_completed:
                     departures[m,j]       += 1                  #       record departure;
                     nextStat.es_stat[m,j] -= 1                  #       job departure;
                 else:                                           # else:
-                    pass                                        #       do nothing.
+                    nextStat.es_stat[m,j]  = 0                  #       clip lower value (in case for unexpectedly logic error)
                 pass
             pass
 
@@ -92,6 +91,7 @@ def main():
     if PLOT_FLAG:
         matplotlib.use("Qt5agg")
         plt.ion()
+    print('{:05d}'.format(RANDOM_SEED))
     logger = getLogger('{:05d}'.format(RANDOM_SEED))
     pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
     
