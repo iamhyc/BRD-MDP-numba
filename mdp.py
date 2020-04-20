@@ -146,7 +146,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     for n in range(N_SLT):
         for idx in prange(N_CAN):
             m    = can_set[idx]
-            beta = np.zeros(N_AP, dtype=np.float32)
+            beta = np.zeros(N_AP, dtype=np.float64)
             for k in prange(N_AP):
                 beta[k]         = np.sum(ap_vec[k,m] @ off_trans[k,m,j]) if bi_map[k,m] else 0.0
                 ap_vec[k,m]     =        ap_vec[k,m] @ ul_trans[k,m,j]   if bi_map[k,m] else ap_vec[k,m]
@@ -177,7 +177,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
             m    = can_set[idx]
             beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
             for k in prange(N_AP):
-                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j]) if bi_map[k,m] else 0.0
+                beta[k]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j]) if bi_map[k,m] else 0.0
                 ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]   if bi_map[k,m] else ap_vec[k,m]
                 pass
             mat       = TransES(beta.sum(), proc_mean[m,j])
