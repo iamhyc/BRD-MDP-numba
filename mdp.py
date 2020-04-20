@@ -106,7 +106,7 @@ def TransES(beta, job_mean):
     mat[0, 0] = 1-beta
     mat[0, 1] = beta
     # fill-in l1 < LQ
-    for l1 in prange(1, DIM_P-1):
+    for l1 in prange(1, LQ):
         mat[l1, l1-1] = (1/job_mean) * (1-beta)
         mat[l1, l1]   = (1-1/job_mean)*(1-beta) + (1/job_mean)*beta
         mat[l1, l1+1] = (1-1/job_mean)*beta
@@ -122,7 +122,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     _delay                       = br_delay[_k]
     can_set = np.where( bi_map[_k]==1 )[0]
     N_CAN   = len(can_set)
-    val_ap  = np.zeros((N_ES,),             dtype=np.float64) #only val_ap for (_k)
+    val_ap  = np.zeros((N_AP,N_ES,),        dtype=np.float64) #only val_ap for (_k)
     val_es  = np.zeros((N_ES,),             dtype=np.float64)
     ap_vec  = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float64)
     es_vec  = np.zeros((N_ES, DIM_P),       dtype=np.float64)
