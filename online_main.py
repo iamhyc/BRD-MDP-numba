@@ -18,7 +18,7 @@ def ARandomPolicy(stat, k, j):
 @njit
 def ASelfishPolicy(stat, k, j):
     eval_cost     = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
-    eval_cost    -= int(1E7) * bi_map[k]
+    eval_cost    -= int(1E9) * bi_map[k]
     return_choice = eval_cost.argmin()
     assert( bi_map[k,return_choice]==1 ) #NOTE: restrict for candidate set
     return return_choice
@@ -26,7 +26,7 @@ def ASelfishPolicy(stat, k, j):
 @njit
 def AQueueAwarePolicy(stat, k, j):
     eval_cost     = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
-    eval_cost    -= int(1E7) * bi_map[k]
+    eval_cost    -= int(1E9) * bi_map[k]
     return_choice = eval_cost.argmin() #(stat.es_stat[:,j]).argmin()
     assert( bi_map[k,return_choice]==1 ) #NOTE: restrict for candidate set
     return return_choice
