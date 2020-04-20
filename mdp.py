@@ -211,6 +211,7 @@ def optimize(stage, systemStat, oldPolicy):
                     x1[k]      = m                          #   |   |
                     val_tmp[m] = evaluate(j, k, systemStat, oldPolicy[:,j], x1)
                 pass                                        #   |   end
+            assert( bi_map[k, val_tmp.argmin()]==1 )        #   |
             nowPolicy[k, j]   = val_tmp.argmin()            #   |
             val_collection[j] = val_tmp.min()               #   |
             pass                                            #   end
