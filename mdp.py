@@ -122,7 +122,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     _delay                       = br_delay[_k]
     can_set = np.where( bi_map[_k]==1 )[0]
     N_CAN   = len(can_set)
-    val_ap  = np.zeros((N_AP,N_ES,),        dtype=np.float64) #only val_ap for (_k)
+    val_ap  = np.zeros((N_AP,N_ES),         dtype=np.float64)
     val_es  = np.zeros((N_ES,),             dtype=np.float64)
     ap_vec  = np.zeros((N_AP, N_ES, N_CNT), dtype=np.float64)
     es_vec  = np.zeros((N_ES, DIM_P),       dtype=np.float64)
@@ -142,28 +142,34 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
             ap_vec[k,m] = bi_map[k,m] * AP2Vec(nowStat.ap_stat[k,m,j], old_prob[k,m])   #only (m)'s conflict set
         pass
     
-    # iterate system state to (t+1) #FIXME: evaluation need check!
+    # iterate system state to (t+1)
     for n in range(N_SLT):
         for idx in prange(N_CAN):
             m    = can_set[idx]
-            beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
+            beta = np.zeros(N_AP, dtype=np.float32)
             for k in prange(N_AP):
-                beta[k]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
-                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]                
-                if n==_delay: ap_vec[k,m] = bi_map[k,m] * AP2Vec(ap_vec[k,m], now_prob[k,m]) #NOTE: update one-time is enough!
+                beta[k]         = np.sum(ap_vec[k,m] @ off_trans[k,m,j]) if bi_map[k,m] else 0.0
+                ap_vec[k,m]     =        ap_vec[k,m] @ ul_trans[k,m,j]   if bi_map[k,m] else ap_vec[k,m]
+                if n==_delay: #update one-time is enough
+                    ap_vec[k,m] = AP2Vec(ap_vec[k,m], now_prob[k,m])     if bi_map[k,m] else ap_vec[k,m]
                 pass
             mat       = TransES(beta.sum(), proc_mean[m,j])
             es_vec[m] = es_vec[m] @ mat
+            pass
         pass
     
-    # calculate value for (_k)-th AP
+    # calculate value for all APs in conflict set
     for idx in prange(N_CAN):
         m = can_set[idx]
-        mat       = np.copy(ul_trans[_k,m,j])
-        trans_mat = np.linalg.matrix_power(mat, N_SLT)
-        ident_mat = np.eye(N_CNT, dtype=np.float64)
-        inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
-        val_ap[m] = np.sum( ap_vec[_k,m] @ inv_mat )
+        for k in prange(N_AP):
+            if bi_map[k,m]:
+                mat       = np.copy(ul_trans[k,m,j])
+                trans_mat = np.linalg.matrix_power(mat, N_SLT)
+                ident_mat = np.eye(N_CNT, dtype=np.float64)
+                inv_mat   = np.linalg.inv( ident_mat - GAMMA*trans_mat )
+                val_ap[k,m] = np.sum( ap_vec[k,m] @ inv_mat )
+            pass
+        pass
 
     # continue iterate system state to (t+3) and collect cost for ES
     for n in range(2*N_SLT):
@@ -171,13 +177,14 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
             m    = can_set[idx]
             beta = np.zeros(N_AP, dtype=np.float64) #NOTE: perviously wrong, now fixed.
             for k in prange(N_AP):
-                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j])
-                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]
+                beta[m]     = np.sum(ap_vec[k,m] @ off_trans[k,m,j]) if bi_map[k,m] else 0.0
+                ap_vec[k,m] =        ap_vec[k,m] @ ul_trans[k,m,j]   if bi_map[k,m] else ap_vec[k,m]
                 pass
             mat       = TransES(beta.sum(), proc_mean[m,j])
             es_vec[m] = es_vec[m] @ mat
             if n%N_SLT == 0:
                 val_es[m] += (es_vec[m] @ ESValVec) * np.power(GAMMA, n//N_SLT)
+            pass
         pass
 
     # calculate value for ES
