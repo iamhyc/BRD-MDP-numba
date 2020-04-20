@@ -102,14 +102,14 @@ def ES2Vec(es_stat):
 def TransES(beta, job_mean):
     mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
     
-    # fill-in l1==0
-    mat[0, 0] = 1-beta
-    mat[0, 1] = beta
     # fill-in l1 < LQ
     for l1 in prange(1, LQ):
         mat[l1, l1-1] = (1/job_mean) * (1-beta)
         mat[l1, l1]   = (1-1/job_mean)*(1-beta) + (1/job_mean)*beta
         mat[l1, l1+1] = (1-1/job_mean)*beta
+    # fill-in l1==0
+    mat[0, 0] = 1-beta
+    mat[0, 1] = beta
     # fill-in l1==LQ
     mat[LQ, LQ-1] = 1/job_mean
     mat[LQ, LQ]   = 1-1/job_mean
