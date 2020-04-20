@@ -211,7 +211,7 @@ def optimize(stage, systemStat, oldPolicy):
     for idx in prange(_N_SET):                              #iterate over current subset
         k = _subset[idx]                                    #
         for j in prange(N_JOB):                             #   iterate the job space:
-            val_tmp = np.zeros(N_ES, dtype=np.float64)      #   |
+            val_tmp = np.full(N_ES, 1E9, dtype=np.float64)  #   |(fill-in infinity)
             for m in prange(N_ES):                          #   |   iterate its candidate set
                 if bi_map[k,m]:                             #   |   (cont.):
                     x1         = np.copy(nowPolicy[:,j])    #   |   |
