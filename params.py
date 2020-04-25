@@ -39,7 +39,7 @@ PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
-GRAPH_RATIO = 0.3
+GRAPH_RATIO = 0.4
 U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
@@ -141,7 +141,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
 else:
-    arr_prob  = 0.9*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
+    arr_prob  = U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()
