@@ -15,9 +15,10 @@ rc('text', usetex=True)
 MDP_LABEL  = 'MDP Policy'
 CUT_NUM    = 0
 LABEL_SIZE = 24
-SAVE_FLAG  = True
+DISP_FLAG  = True
 
 log_dir  = argv[1]
+log_num  = argv[1].split('-')[1]
 npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
 npzfiles.sort()
 n_files  = len(npzfiles)
@@ -110,7 +111,8 @@ def plot_bar_graph():
     autolabel(ax2, bar_plot2) #average_JCT
     autolabel(ax3, bar_plot3) #average_throughput
 
-    plt.show()
+    plt.savefig('figures/%s_bar_graph.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def plot_cost_vs_time():
@@ -128,7 +130,9 @@ def plot_cost_vs_time():
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('Cost', fontsize=16)
     plt.xlabel('Index of Broadcast Interval', fontsize=16)
-    plt.show()
+
+    plt.savefig('figures/%s_cost_vs_time.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def plot_number_vs_time():
@@ -149,7 +153,9 @@ def plot_number_vs_time():
     axes.set_xlabel('Index of Broadcast Interval', fontsize=24)
     [tick.label.set_fontsize(24) for tick in axes.xaxis.get_major_ticks()]
     [tick.label.set_fontsize(24) for tick in axes.yaxis.get_major_ticks()]
-    plt.show()
+
+    plt.savefig('figures/%s_number_vs_time.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def plot_number_cdf_vs_time():
@@ -183,7 +189,9 @@ def plot_number_cdf_vs_time():
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('CDF', fontsize=16)
     plt.xlabel('Number per Broadcast Interval', fontsize=16)
-    plt.show()
+
+    plt.savefig('figures/%s_num_cdf.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def plot_cost_cdf_vs_time():
@@ -217,7 +225,9 @@ def plot_cost_cdf_vs_time():
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('CDF', fontsize=16)
     plt.xlabel('Cost per Broadcast Interval', fontsize=16)
-    plt.show()
+
+    plt.savefig('figures/%s_cost_cdf.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def myNumAPsPlot():
@@ -242,8 +252,9 @@ def myNumAPsPlot():
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(['3', '4', '5', '6', '7'])
     ax.tick_params(axis='both', which='major', labelsize=14)
-    plt.show()
 
+    plt.savefig('figures/%s_ap_compare.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def myProcDistPlot():
@@ -268,7 +279,9 @@ def myProcDistPlot():
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
     ax.tick_params(axis='both', which='major', labelsize=14)
-    plt.show()
+
+    plt.savefig('figures/%s_proc_compare.pdf'%log_num, format='pdf')
+    if DISP_FLAG: plt.show()
     pass
 
 def myPenaltyPlot():
@@ -276,10 +289,10 @@ def myPenaltyPlot():
     pass
 
 plot_bar_graph()
-# plot_number_vs_time()
-# plot_cost_vs_time()
-# plot_number_cdf_vs_time()
-# plot_cost_cdf_vs_time()
+plot_number_vs_time()
+plot_cost_vs_time()
+plot_number_cdf_vs_time()
+plot_cost_cdf_vs_time()
 
 # myNumAPsPlot()
 # myProcDistPlot()
