@@ -171,8 +171,8 @@ def main():
             "Random_es_Stat" : RD_nowStat.es_stat
         })
 
-        logger.debug( 'Cost:{}, {}, {}, {}'.format(nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost()) )
-        logger.debug( 'Burden:{}, {}, {}, {}'.format(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility()) )
+        # logger.debug( 'Cost:{}, {}, {}, {}'.format(nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost()) )
+        # logger.debug( 'Burden:{}, {}, {}, {}'.format(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility()) )
         pass
 
     #save summary file
