@@ -9,13 +9,13 @@ from params import BETA,LQ
 
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-## for Palatino and other serif fonts use:
-#rc('font',**{'family':'serif','serif':['Palatino']})
+# rc('font',**{'family':'serif','serif':['Palatino']}) # Palatino font
 rc('text', usetex=True)
 
-MDP_LABEL = 'MDP Policy'
-CUT_NUM = 0
+MDP_LABEL  = 'MDP Policy'
+CUT_NUM    = 0
 LABEL_SIZE = 24
+SAVE_FLAG  = True
 
 log_dir  = argv[1]
 npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
@@ -49,14 +49,6 @@ for i,_file in enumerate(npzfiles):
     })
     pass
 
-# def autolabel(bar_plot, labels):
-#     for idx,rect in enumerate(bar_plot):
-#         height = rect.get_height()
-#         plt.text(rect.get_x() + rect.get_width()/2.,
-#                 height,
-#                 '%.2f'%labels[idx],
-#                 ha='center', va='bottom', rotation=0, fontsize=14)
-
 def autolabel(ax, rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
     for rect in rects:
@@ -81,7 +73,6 @@ def plot_bar_graph():
     ax2.tick_params(axis='both', which='major', labelsize=20)
     ax3.tick_params(axis='both', which='major', labelsize=20)
 
-    # plt.subplots(1, 3, 1)
     average_cost = [summary['MDP_average_cost'],
                     summary['Selfish_average_cost'],
                     summary['QAware_average_cost'],
@@ -93,7 +84,6 @@ def plot_bar_graph():
     ax1.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
     ax1.set_ylabel('Average Cost', fontsize=20)
 
-    # plt.subplots(1, 3, 2)
     average_JCT = [summary['MDP_average_JCT'],
                     summary['Selfish_average_JCT'],
                     summary['QAware_average_JCT'],
@@ -104,7 +94,6 @@ def plot_bar_graph():
     ax2.set_xticklabels(['','MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
     ax2.set_ylabel('Average Job Response Time', fontsize=20)
 
-    # plt.subplot(1, 3, 3)
     average_throughput = [summary['MDP_average_throughput'],
                     summary['Selfish_average_throughput'],
                     summary['QAware_average_throughput'],
