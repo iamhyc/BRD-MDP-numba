@@ -117,7 +117,7 @@ class Timer:
 def getLogger(filename=''):
     logger = logging.getLogger('Basic Logger')
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
 
     if filename:
         fh = logging.FileHandler('logs/{}.log'.format(filename))
