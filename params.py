@@ -9,9 +9,9 @@ RANDOM_SEED = random.randint(0, 2**16)
 # RANDOM_SEED = 26131
 np.random.seed(RANDOM_SEED)
 
-GAMMA   = 0.90
-BETA    = 25
-STAGE   = 500
+GAMMA   = 0.95
+BETA    = 15
+STAGE   = 300
 
 N_AP  = 15
 N_ES  = 10
