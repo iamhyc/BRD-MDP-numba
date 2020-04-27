@@ -49,8 +49,8 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(3)
-            _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #1:2
+            _roll = np.random.randint(4)
+            _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #3:1
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
 
@@ -141,7 +141,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
 else:
-    arr_prob  = 3*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
+    arr_prob  = 4*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()
