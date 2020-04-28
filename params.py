@@ -5,13 +5,15 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
+
+MAP_SEED    = 11112
 RANDOM_SEED = random.randint(0, 2**16)
 # RANDOM_SEED = 26131
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 15
-STAGE   = 300
+BETA    = 20
+STAGE   = 200
 
 N_AP  = 15
 N_ES  = 10
@@ -39,7 +41,7 @@ PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
-GRAPH_RATIO = 0.3
+GRAPH_RATIO = 0.4
 U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
@@ -89,7 +91,7 @@ def genTransitionMatrix():
     return ul_mat, off_mat
 
 def genConnectionMap():
-    np.random.seed(11112)    #generate static map
+    np.random.seed(MAP_SEED)    #generate static map
 
     bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
     for k in range(N_AP):
