@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import pathlib
 import numpy as np
 from mdp import *
@@ -191,6 +192,10 @@ def main():
         'QAware_average_throughput' : QA_nowStat.average_throughput(),
         'Random_average_throughput' : RD_nowStat.average_throughput()
     })
+    try:
+        os.rename(summary_file+'.npz', summary_file) #remove ".npz" for summary file
+    except Exception as e:
+        print('No summary file found.')
 
     logger.debug('Average Cost: {}, {}, {}, {}'.format( nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost() ))
     logger.debug('Utility: {}, {}, {}, {}'.format( nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility() ))
