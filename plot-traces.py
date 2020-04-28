@@ -113,6 +113,7 @@ def plot_bar_graph():
 
     plt.savefig('figures/%s_bar_graph.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def plot_cost_vs_time():
@@ -133,6 +134,7 @@ def plot_cost_vs_time():
 
     plt.savefig('figures/%s_cost_vs_time.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def plot_number_vs_time():
@@ -156,6 +158,7 @@ def plot_number_vs_time():
 
     plt.savefig('figures/%s_number_vs_time.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def plot_number_cdf_vs_time():
@@ -192,6 +195,7 @@ def plot_number_cdf_vs_time():
 
     plt.savefig('figures/%s_num_cdf.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def plot_cost_cdf_vs_time():
@@ -228,6 +232,7 @@ def plot_cost_cdf_vs_time():
 
     plt.savefig('figures/%s_cost_cdf.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def myNumAPsPlot():
@@ -282,6 +287,7 @@ def myProcDistPlot():
 
     plt.savefig('figures/%s_proc_compare.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def myPenaltyPlot():
