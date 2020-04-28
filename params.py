@@ -16,7 +16,7 @@ STAGE   = 300
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 60 #maximum queue length on ES (inclusive)
+LQ    = 100 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -141,7 +141,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
 else:
-    arr_prob  = 5*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
+    arr_prob  = 4*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()
