@@ -155,7 +155,7 @@ def main():
         else:
             m1, m2, m3, m4 = nowStat.getNumber(),SF_nowStat.getNumber(),QA_nowStat.getNumber(),RD_nowStat.getNumber()
             logger.debug('Stage-{}: MDP \t Selfish \t Queue \t Random'.format(stage))
-            logger.debug('\t\t%3d \t %2d \t\t %2d \t %2d'%(m1, m2-m1, m3-m1, m4-m1))
+            logger.debug('\t\t\t%3d \t %2d \t\t %2d \t %2d'%(m1, m2-m1, m3-m1, m4-m1))
             pass
 
         trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
