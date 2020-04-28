@@ -77,7 +77,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
             pass
 
         #NOTE: update the iteration backup
-        print(np.sum(departures))
+        # print(np.sum(departures))
         nextStat.iterate(off_number, departures) #update the accumulation
         lastStat = nextStat
         nextStat = State().clone(lastStat)
