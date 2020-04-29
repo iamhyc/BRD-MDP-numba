@@ -111,7 +111,7 @@ def plot_bar_graph():
     autolabel(ax2, bar_plot2) #average_JCT
     autolabel(ax3, bar_plot3) #average_throughput
 
-    plt.savefig('figures/%s_bar_graph.pdf'%log_num, format='pdf')
+    plt.savefig('figures/%s_bar_graph.pdf'%log_num, format='pdf', dpi=300)
     if DISP_FLAG: plt.show()
     plt.clf()
     pass
@@ -132,7 +132,7 @@ def plot_cost_vs_time():
     plt.ylabel('Cost', fontsize=16)
     plt.xlabel('Index of Broadcast Interval', fontsize=16)
 
-    plt.savefig('figures/%s_cost_vs_time.pdf'%log_num, format='pdf')
+    plt.savefig('figures/%s_cost_vs_time.pdf'%log_num, format='pdf', dpi=300)
     if DISP_FLAG: plt.show()
     plt.clf()
     pass
@@ -156,7 +156,7 @@ def plot_number_vs_time():
     [tick.label.set_fontsize(24) for tick in axes.xaxis.get_major_ticks()]
     [tick.label.set_fontsize(24) for tick in axes.yaxis.get_major_ticks()]
 
-    plt.savefig('figures/%s_number_vs_time.pdf'%log_num, format='pdf')
+    plt.savefig('figures/%s_number_vs_time.pdf'%log_num, format='pdf', dpi=300)
     if DISP_FLAG: plt.show()
     plt.clf()
     pass
