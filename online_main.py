@@ -69,7 +69,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                 if nextStat.es_stat[m,j] > LQ:                  # CLIP [0, LQ]
                     nextStat.es_stat[m,j] = LQ                  #
                 completed_b = toss(1/proc_mean[m,j])            # toss for the first job (if exist)
-                if (nextStat.es_stat[m,j]>0) and completed_b:   # if first_job_exist and first_job_completed:
+                if (nextStat.es_stat[m,j]>=0) and completed_b:   # if first_job_exist and first_job_completed:
                     departures[m,j]       += 1                  #       record departure;
                     nextStat.es_stat[m,j] -= 1                  #       job departure;
                 else:                                           # else:
