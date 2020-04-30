@@ -18,4 +18,5 @@ watch:
 clean:
 	@rm -f *.err *.out
 	@rm -f logs/$(ID).npz logs/$(ID).log
+	@rm -rf figures/$(ID)-*.pdf
 	@rm -rf traces-$(ID)

@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 
 ARR_SCALE   = 3
-MAP_SEED    = 520
+MAP_SEED    = 1112
 RANDOM_SEED = random.randint(0, 2**16)
 # RANDOM_SEED = 26131
 np.random.seed(RANDOM_SEED)
