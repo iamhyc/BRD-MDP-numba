@@ -5,18 +5,18 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-ARR_SCALE   = 3
-MAP_SEED    = 1112
+ARR_SCALE   = 1.5
+MAP_SEED    = 11112
 RANDOM_SEED = random.randint(0, 2**16)
 # RANDOM_SEED = 26131
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 20
+BETA    = 40
 STAGE   = 200
 
 N_AP  = 15
-N_ES  = 10
+N_ES  = 12
 N_JOB = 10
 LQ    = 80 #maximum queue length on ES (inclusive)
 
@@ -41,7 +41,7 @@ PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
 
-GRAPH_RATIO = 0.4
+GRAPH_RATIO = 0.3
 U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
