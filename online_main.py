@@ -69,11 +69,11 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         for j in range(N_JOB):
             for m in range(N_ES):
                 if nextStat.es_stat[m,j]>0:
-                    completed_num    = 1 if toss(1/proc_mean[m,j]) else 0
-                    nextStat[m,j]   -= completed_num
-                    departures[m,j] += completed_num
+                    completed_num            = 1 if toss(1/proc_mean[m,j]) else 0
+                    nextStat.es_stat[m,j]   -= completed_num
+                    departures[m,j]         += completed_num
                 else:
-                    nextStat.es_stat[m,j]=0
+                    nextStat.es_stat[m,j]    = 0
                 pass
             pass
 
