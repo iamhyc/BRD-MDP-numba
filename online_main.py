@@ -64,19 +64,32 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
 
         #NOTE: process jobs on ES
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
+        nextStat.es_stat += off_number
+        np.clip(nextStat.es_stat, 0, LQ)
         for j in range(N_JOB):
             for m in range(N_ES):
-                nextStat.es_stat[m,j] += off_number[m,j]
-                if nextStat.es_stat[m,j] > LQ:                  # CLIP [0, LQ]
-                    nextStat.es_stat[m,j] = LQ                  #
-                completed_b = toss(1/proc_mean[m,j])            # toss for the first job (if exist)
-                if (nextStat.es_stat[m,j]>0) and completed_b:   # if first_job_exist and first_job_completed:
-                    departures[m,j]       += 1                  #       record departure;
-                    nextStat.es_stat[m,j] -= 1                  #       job departure;
-                else:                                           # else:
-                    nextStat.es_stat[m,j]  = 0                  #       clip lower-bound (in case for unexpectedly logic error)
+                if nextStat.es_stat[m,j]>0:
+                    completed_num    = 1 if toss(1/proc_mean[m,j]) else 0
+                    nextStat[m,j]   -= completed_num
+                    departures[m,j] += completed_num
+                else:
+                    nextStat.es_stat[m,j]=0
                 pass
             pass
+
+        # for j in range(N_JOB):
+        #     for m in range(N_ES):
+        #         nextStat.es_stat[m,j] += off_number[m,j]
+        #         if nextStat.es_stat[m,j] > LQ:                  # CLIP [0, LQ]
+        #             nextStat.es_stat[m,j] = LQ                  #
+        #         completed_b = toss(1/proc_mean[m,j])            # toss for the first job (if exist)
+        #         if (nextStat.es_stat[m,j]>0) and completed_b:   # if first_job_exist and first_job_completed:
+        #             departures[m,j]       += 1                  #       record departure;
+        #             nextStat.es_stat[m,j] -= 1                  #       job departure;
+        #         else:                                           # else:
+        #             nextStat.es_stat[m,j]  = 0                  #       clip lower-bound (in case for unexpectedly logic error)
+        #         pass
+        #     pass
 
         #NOTE: update the iteration backup
         # print(np.sum(departures))
