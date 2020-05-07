@@ -47,21 +47,22 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                     _m = oldPolicy(oldStat, k, j) if n<br_delay[k] else nowPolicy(nowStat, k, j)
                 else:
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
+                assert( bi_map[k,_m]==1 )
                 nextStat.ap_stat[k, _m, j, 0] = arrivals[n, k, j]
         
-        #NOTE: count uploading & offloading jobs
+        #NOTE: count uploading & offloading jobs (AP to ES)
         off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
         for xi in range(N_CNT):
             for j in range(N_JOB):
                 for m in range(N_ES):
                     for k in range(N_AP):
-                        toss_ul = toss(ul_prob[k,m,j,xi]) #NOTE: hidden_assert(if xi==N_CNT-1 then: ul_prob==1)
+                        toss_ul = toss(ul_prob[k,m,j,xi]) #NOTE: hidden_assert(ul_prob==1, when xi==N_CNT-1)
                         if toss_ul:
                             off_number[m,j]             += lastStat.ap_stat[k,m,j,xi]
                         else:
                             nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
 
-        #NOTE: process jobs on ES #FIXME:
+        #NOTE: process jobs on ES
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
         for j in range(N_JOB):
             for m in range(N_ES):
