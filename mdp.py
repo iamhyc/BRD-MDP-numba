@@ -74,12 +74,12 @@ def RandomPolicy():
 @njit
 def BaselinePolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
-    # proc_rng = np.copy(PROC_RNG).astype(np.float64)
     for k in prange(N_AP):
         for j in prange(N_JOB):
-            # policy[k,j] = (proc_mean[:,j]).argmin()
-            policy[k,j] = (ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]).argmin()
-            # policy[k,j] = (ul_prob[k,:,j,:] @ _tmp).argmin()
+            eval_cost   = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
+            eval_cost  -= int(1E9) * bi_map[k]
+            policy[k,j] = eval_cost.argmin()
+            assert( bi_map[k,policy[k,j]]==1 )
     return policy
 
 @njit
