@@ -59,6 +59,7 @@ def autolabel(ax, rects):
                     xytext=(0, 3),  # 3 points vertical offset
                     textcoords="offset points",
                     ha='center', va='bottom', fontsize=16)
+    pass
 
 def getCost(ap_stat, es_stat):
     _penalty = BETA * np.count_nonzero( es_stat==LQ )
@@ -260,6 +261,7 @@ def myNumAPsPlot():
 
     plt.savefig('figures/%s_ap_compare.pdf'%log_num, format='pdf')
     if DISP_FLAG: plt.show()
+    plt.clf()
     pass
 
 def myProcDistPlot():
