@@ -5,7 +5,7 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-ARR_SCALE   = 1.0
+A_SCALE     = 1.5
 MAP_SEED    = 512
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 5702
@@ -143,7 +143,7 @@ if Path(npzfile).exists():
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
 else:
-    arr_prob  = ARR_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
+    arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter()
