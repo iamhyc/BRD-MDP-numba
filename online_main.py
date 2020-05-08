@@ -77,20 +77,6 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
                 pass
             pass
 
-        # for j in range(N_JOB):
-        #     for m in range(N_ES):
-        #         nextStat.es_stat[m,j] += off_number[m,j]
-        #         if nextStat.es_stat[m,j] > LQ:                  # CLIP [0, LQ]
-        #             nextStat.es_stat[m,j] = LQ                  #
-        #         completed_b = toss(1/proc_mean[m,j])            # toss for the first job (if exist)
-        #         if (nextStat.es_stat[m,j]>0) and completed_b:   # if first_job_exist and first_job_completed:
-        #             departures[m,j]       += 1                  #       record departure;
-        #             nextStat.es_stat[m,j] -= 1                  #       job departure;
-        #         else:                                           # else:
-        #             nextStat.es_stat[m,j]  = 0                  #       clip lower-bound (in case for unexpectedly logic error)
-        #         pass
-        #     pass
-
         #NOTE: update the iteration backup
         # print(np.sum(departures))
         nextStat.iterate(off_number, departures) #update the accumulation
@@ -217,10 +203,9 @@ def main():
     pass
 
 if __name__ == "__main__":
-    main()
-    # try:
-    #     main()
-    # except Exception as e:
-    #     raise e
-    # finally:
-    #     pass
+    try:
+        main()
+    except Exception as e:
+        raise e
+    finally:
+        pass

@@ -8,12 +8,12 @@ from scipy.stats import norm
 ARR_SCALE   = 1.0
 MAP_SEED    = 512
 RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 26131
+RANDOM_SEED = 5702
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 40
-STAGE   = 200
+STAGE   = 400
 
 N_AP  = 15
 N_ES  = 10
