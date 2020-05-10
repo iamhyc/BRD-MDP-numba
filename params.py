@@ -5,7 +5,7 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-A_SCALE     = 1.5
+A_SCALE     = 2.5
 MAP_SEED    = 512
 # RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 58454
