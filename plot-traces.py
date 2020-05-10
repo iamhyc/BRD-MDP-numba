@@ -163,6 +163,41 @@ def plot_number_vs_time():
     plt.clf()
     pass
 
+def plot_update_vs_time(id1, id2):
+    n1 = glob.glob(path_join(id1, '*.npz')), n1.sort()
+    n2 = glob.glob(path_join(id1, '*.npz')), n2.sort()
+    for i,_file in enumerate(n1):
+        trace = np.load(_file)
+        y1_trace.append({
+            'ap_stat': trace['MDP_ap_stat'],
+            'es_stat': trace['MDP_es_stat'],
+            'value'  : trace['MDP_value']
+        })
+    for i,_file in enumerate(n2):
+        trace = np.load(_file)
+        y2_trace.append({
+            'ap_stat': trace['MDP_ap_stat'],
+            'es_stat': trace['MDP_es_stat'],
+            'value'  : trace['MDP_value']
+        })
+    y1 = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in y1_trace][CUT_NUM:]
+    y2 = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in y2_trace][CUT_NUM:]
+
+    fig, axes = plt.subplots()
+    axes.grid()
+    axes.plot(range(n_files-CUT_NUM), y1, '-ro')
+    axes.plot(range(n_files-CUT_NUM), y2, '-ko')
+    axes.legend(['Parallel Update', 'Serial Update'], fontsize=20)
+    axes.set_ylabel('Number of Jobs in System', fontsize=24)
+    axes.set_xlabel('Index of Broadcast Interval', fontsize=24)
+    [tick.label.set_fontsize(24) for tick in axes.xaxis.get_major_ticks()]
+    [tick.label.set_fontsize(24) for tick in axes.yaxis.get_major_ticks()]
+
+    plt.savefig(path_join('figures','%s_update.pdf'%log_num), format='pdf')
+    if DISP_FLAG: plt.show()
+    plt.clf()
+    pass
+
 def plot_number_cdf_vs_time():
     y = [0] * 4
     y[0] = np.sort([np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in MDP_trace][CUT_NUM:])
@@ -298,11 +333,11 @@ def myPenaltyPlot():
     pass
 
 # plot_bar_graph()
-# plot_number_vs_time()
+plot_number_vs_time()
 # plot_cost_vs_time()
-plot_number_cdf_vs_time()
-plot_cost_cdf_vs_time()
+# plot_number_cdf_vs_time()
+# plot_cost_cdf_vs_time()
 
+# plot_update_vs_time('traces-58454', 'traces-58454')
 # myNumAPsPlot()
 # myProcDistPlot()
-# myPenaltyPlot()
