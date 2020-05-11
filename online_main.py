@@ -9,6 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
 
+SERIAL_FLAG=True
 PLOT_FLAG = False
 
 @njit
@@ -122,7 +123,7 @@ def main():
             #NOTE: optimize and update the backup
             systemStat     = (oldStat, nowStat, br_delay)
             oldPolicy      = nowPolicy
-            nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+            nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy) if SERIAL_FLAG else optimize(stage, systemStat, oldPolicy)
             oldStat        = nowStat
             nowStat        = NextState(arrivals, systemStat, oldPolicy, nowPolicy)
             #----------------------------------------------------------------

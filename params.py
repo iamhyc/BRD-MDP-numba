@@ -13,12 +13,12 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 40
-STAGE   = 400
+STAGE   = 100
 
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 80 #maximum queue length on ES (inclusive)
+LQ    = 60 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -51,7 +51,7 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(3)
+            _roll = np.random.randint(4)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #2:1
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param

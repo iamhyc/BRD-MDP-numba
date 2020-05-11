@@ -227,3 +227,24 @@ def optimize(stage, systemStat, oldPolicy):
     # print(val_collection)
 
     return nowPolicy, val_collection
+
+@njit
+def serial_optimize(stage, systemStat, oldPolicy):
+    nowPolicy      = np.copy(oldPolicy)
+    val_collection = np.zeros(N_JOB, dtype=np.float64)
+
+    _k = stage % N_AP
+    for j in prange(N_JOB):                             #   iterate the job space:
+        val_tmp = np.full(N_ES, 1E9, dtype=np.float64)  #   |(fill-in infinity)
+        for m in prange(N_ES):                          #   |   iterate its candidate set
+            if bi_map[_k,m]:                            #   |   (cont.):
+                x1         = np.copy(nowPolicy[:,j])    #   |   |
+                x1[_k]      = m                         #   |   |
+                val_tmp[m] = evaluate(j, _k, systemStat, oldPolicy[:,j], x1)
+            pass                                        #   |   end
+        assert( bi_map[_k, val_tmp.argmin()]==1 )       #   |
+        nowPolicy[_k, j]  = val_tmp.argmin()            #   |
+        val_collection[j] = val_tmp.min()               #   |
+        pass                                            #   end
+
+    return nowPolicy, val_collection
