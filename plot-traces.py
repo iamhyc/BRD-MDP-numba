@@ -164,8 +164,11 @@ def plot_number_vs_time():
     pass
 
 def plot_update_vs_time(id1, id2):
-    n1 = glob.glob(path_join(id1, '*.npz')), n1.sort()
-    n2 = glob.glob(path_join(id1, '*.npz')), n2.sort()
+    n1 = glob.glob(path_join(id1, '*.npz'))
+    n1.sort()
+    n2 = glob.glob(path_join(id2, '*.npz'))
+    n2.sort()
+    y1_trace, y2_trace = list(), list()
     for i,_file in enumerate(n1):
         trace = np.load(_file)
         y1_trace.append({
@@ -333,11 +336,11 @@ def myPenaltyPlot():
     pass
 
 # plot_bar_graph()
-plot_number_vs_time()
+# plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
-# plot_update_vs_time('traces-58454', 'traces-58454')
+plot_update_vs_time('traces-58454-y1', 'traces-58454-y2')
 # myNumAPsPlot()
 # myProcDistPlot()
