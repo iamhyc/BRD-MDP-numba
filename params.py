@@ -5,7 +5,7 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-A_SCALE     = 4.5
+A_SCALE     = 2.6
 MAP_SEED    = 512
 # RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 58454
@@ -18,7 +18,7 @@ STAGE   = 250
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 60 #maximum queue length on ES (inclusive)
+LQ    = 50 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
