@@ -9,8 +9,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
 
-SERIAL_FLAG=False
-PLOT_FLAG = False
+SERIAL_FLAG = False
+PLOT_FLAG   = True
 
 @njit
 def ARandomPolicy(stat, k, j):
