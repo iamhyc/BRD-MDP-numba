@@ -66,7 +66,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         #NOTE: process jobs on ES
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
         nextStat.es_stat += off_number
-        np.clip(nextStat.es_stat, 0, LQ)
+        nextStat.es_stat = np.clip(nextStat.es_stat, 0, LQ)
         for j in range(N_JOB):
             for m in range(N_ES):
                 if nextStat.es_stat[m,j]>0:
@@ -136,10 +136,10 @@ def main():
             #----------------------------------------------------------------
 
             #NOTE: console output with State and Policy deviation
-            # cprint('Stage-{} Delta Policy'.format(stage), 'red')
-            # print(nowPolicy - oldPolicy)
-            # cprint('ES State:', 'green')
-            # print(nowStat.es_stat)
+            cprint('Stage-{} Delta Policy'.format(stage), 'red')
+            print(nowPolicy - oldPolicy)
+            cprint('ES State:', 'green')
+            print(nowStat.es_stat)
             
             stage += 1
         pass
@@ -204,9 +204,10 @@ def main():
     pass
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        raise e
-    finally:
-        pass
+    main()
+    # try:
+    #     main()
+    # except Exception as e:
+    #     raise e
+    # finally:
+    #     pass
