@@ -66,7 +66,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         #NOTE: process jobs on ES
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
         nextStat.es_stat += off_number
-        nextStat.es_stat = np.clip(nextStat.es_stat, 0, LQ)
+        nextStat.es_stat  = np.clip(nextStat.es_stat, 0, LQ)
         for j in range(N_JOB):
             for m in range(N_ES):
                 if nextStat.es_stat[m,j]>0:
@@ -91,7 +91,8 @@ def main():
     if PLOT_FLAG:
         matplotlib.use("Qt5agg")
         plt.ion()
-    print('{:05d}'.format(RANDOM_SEED))
+    # print('{:05d}'.format(RANDOM_SEED))
+    os.system('touch {:05d}'.format(RANDOM_SEED))
     logger = getLogger('{:05d}'.format(RANDOM_SEED))
     pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
     

@@ -7,18 +7,18 @@ from scipy.stats import norm
 
 A_SCALE     = 2.0
 MAP_SEED    = 512
-# RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 58454
+RANDOM_SEED = random.randint(0, 2**16)
+# RANDOM_SEED = 58454
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 40
-STAGE   = 300
+BETA    = 60
+STAGE   = 400
 
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 50 #maximum queue length on ES (inclusive)
+LQ    = 40 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
