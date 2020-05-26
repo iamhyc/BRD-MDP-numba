@@ -91,8 +91,8 @@ def main():
     if PLOT_FLAG:
         matplotlib.use("Qt5agg")
         plt.ion()
-    # print('{:05d}'.format(RANDOM_SEED))
-    os.system('touch {:05d}'.format(RANDOM_SEED))
+    print('{:05d}'.format(RANDOM_SEED))
+    # os.system('touch {:05d}'.format(RANDOM_SEED))
     logger = getLogger('{:05d}'.format(RANDOM_SEED))
     pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
     
