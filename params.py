@@ -5,20 +5,20 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-A_SCALE     = 3.0
+A_SCALE     = 2.35
 MAP_SEED    = 1254
-RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 50555
+# RANDOM_SEED = random.randint(0, 2**16)
+RANDOM_SEED = 40093
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 80
-STAGE   = 300
+BETA    = 95
+STAGE   = 250
 
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 50 #maximum queue length on ES (inclusive)
+LQ    = 80 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -26,17 +26,17 @@ N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
 BR_MIN     = int( 0.50 * N_SLT )    #(inclusive)
-BR_MAX     = int( 0.80 * N_SLT )    #(exclusive)
+BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
-UL_MIN     = int( 1.50 * N_SLT )    #(inclusive)
+UL_MIN     = int( 2.00 * N_SLT )    #(inclusive)
 UL_MAX     = int( 2.50 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
 PROC_MIN   = int( 2.00 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 4.00 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 3.00 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
