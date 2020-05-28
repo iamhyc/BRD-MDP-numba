@@ -5,15 +5,15 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 
-A_SCALE     = 2.35
+A_SCALE     = 1.00
 MAP_SEED    = 1254
 # RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 40093
+RANDOM_SEED = 47948
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 95
-STAGE   = 250
+BETA    = 120
+STAGE   = 200
 
 N_AP  = 15
 N_ES  = 10
@@ -36,7 +36,7 @@ UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
 PROC_MIN   = int( 2.00 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 3.00 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 2.50 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
