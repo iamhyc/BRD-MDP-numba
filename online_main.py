@@ -177,7 +177,14 @@ def main():
         # logger.debug( 'Cost:{}, {}, {}, {}'.format(nowStat.getCost(), SF_nowStat.getCost(), QA_nowStat.getCost(), RD_nowStat.getCost()) )
         # logger.debug( 'Burden:{}, {}, {}, {}'.format(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility()) )
         pass
-
+    
+    #TODO: blame remaining jobs to throughput
+    empty_admissions = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
+    nowStat.iterate(empty_admissions, nowStat.es_stat)
+    SF_nowStat.iterate(empty_admissions, SF_nowStat.es_stat)
+    QA_nowStat.iterate(empty_admissions, QA_nowStat.es_stat)
+    RD_nowStat.iterate(empty_admissions, RD_nowStat.es_stat)
+    
     #save summary file
     summary_file = 'traces-{:05d}/summary'.format(RANDOM_SEED)
     np.savez(summary_file, **{
