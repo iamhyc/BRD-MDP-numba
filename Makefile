@@ -1,11 +1,7 @@
 
 
 all:
-	pip3 install --user numpy
-	pip3 install --user numba
-	pip3 install --user scipy
-	pip3 install --user matplotlib
-	pip3 install --user termcolor
+	pip3 install numpy numba scipy matplotlib termcolor --user -i https://mirrors.sustc.us/pypi/simple
 
 run:
 	@python3 ./online_main.py
