@@ -1,9 +1,15 @@
 
+from distutils.version import StrictVersion
 import numpy as np
 from params import *
 from utility import *
+import numba
 from numba import int32, int64, float64
-from numba import njit, prange, jitclass
+from numba import njit, prange
+if StrictVersion(numba.__version__) < StrictVersion('0.49.0'):
+    from numba import jitclass
+else:
+    from numba.experimental import jitclass
 from itertools import product
 
 ul_rng     = np.arange(N_CNT, dtype=np.float64)

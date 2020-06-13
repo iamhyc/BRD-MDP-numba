@@ -4,11 +4,12 @@ import numpy as np
 from pathlib import *
 from utility import *
 from scipy.stats import norm
+from termcolor import cprint
 
 A_SCALE     = 1.20
-MAP_SEED    = 1254
-# RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 47948
+MAP_SEED    = 3491
+RANDOM_SEED = random.randint(0, 2**16)
+# RANDOM_SEED = 47948
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
@@ -51,7 +52,7 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(3)
+            _roll = np.random.randint(2)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #2:1
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
@@ -169,6 +170,7 @@ else:
     })
     pass
 
+bi_map    = genConnectionMap() #FIXME: remove later
 ul_rng       = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 subset_map   = genMergedCandidateSet(bi_map)
 N_SET        = len(subset_map)
@@ -177,4 +179,19 @@ for n in range(N_SET):
     for k in subset_map[n][0]:
         subset_ind[n, k] = 1
 
-print(N_SET, subset_map)
+cprint('Subset Number: {}'.format(N_SET), 'red')
+for item in subset_map:
+    cprint(item, 'magenta')
+print()
+# cprint('{n} {map}'.format(n=N_SET, map=subset_map), 'green')
+
+#NOTE: Test Code
+# tmp_n, cnt = 100, 0
+# while tmp_n>=7 and cnt<1000:
+#     MAP_SEED = random.randint(0, 4096)
+#     bi_map = genConnectionMap()
+#     subset_map = genMergedCandidateSet(bi_map)
+#     tmp_n = len(subset_map)
+#     print(cnt, (tmp_n, MAP_SEED))
+#     cnt += 1
+#     pass
