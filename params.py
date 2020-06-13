@@ -6,10 +6,10 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 1.20
+A_SCALE     = 1.80
 MAP_SEED    = 3491
-RANDOM_SEED = random.randint(0, 2**16)
-# RANDOM_SEED = 47948
+# RANDOM_SEED = random.randint(0, 2**16)
+RANDOM_SEED = 14070
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
@@ -52,7 +52,7 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(2)
+            _roll = np.random.randint(3)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #2:1
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
