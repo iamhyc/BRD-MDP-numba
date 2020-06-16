@@ -6,27 +6,27 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 1.80
+A_SCALE     = 2.25
 MAP_SEED    = 3491
-# RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 14070
+RANDOM_SEED = random.randint(0, 2**16)
+RANDOM_SEED = 31033
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 120
+BETA    = 150
 STAGE   = 200
 
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 80 #maximum queue length on ES (inclusive)
+LQ    = 50 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 0.50 * N_SLT )    #(inclusive)
+BR_MIN     = int( 0.60 * N_SLT )    #(inclusive)
 BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
@@ -52,7 +52,7 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(3)
+            _roll = np.random.randint(5)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #2:1
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
@@ -136,13 +136,13 @@ def genMergedCandidateSet(bi_map):
 
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
-    arr_prob  = _params['arr_prob']
+    # arr_prob  = _params['arr_prob'] #2
     br_dist   = _params['br_dist'] #br_dist   = genDelayDistribution() # 
     proc_mean = _params['proc_mean']
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
-    bi_map    = _params['bi_map']
+    bi_map    = _params['bi_map'] #1
 else:
     arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
@@ -169,9 +169,11 @@ else:
         ])
     })
     pass
+#NOTE: Finally:
+# bi_map  = genConnectionMap() #1
+arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #2
+ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 
-bi_map    = genConnectionMap() #FIXME: remove later
-ul_rng       = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 subset_map   = genMergedCandidateSet(bi_map)
 N_SET        = len(subset_map)
 subset_ind = np.zeros((N_SET, N_AP), dtype=np.int32)
