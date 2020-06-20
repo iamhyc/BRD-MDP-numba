@@ -6,20 +6,20 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 2.25
+A_SCALE     = 2.15
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
-RANDOM_SEED = 31033
+RANDOM_SEED = 3896
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
-BETA    = 150
-STAGE   = 200
+BETA    = 120
+STAGE   = 250
 
 N_AP  = 15
 N_ES  = 10
 N_JOB = 10
-LQ    = 50 #maximum queue length on ES (inclusive)
+LQ    = 60 #maximum queue length on ES (inclusive)
 
 TS    = 0.02         #timeslot, 20ms
 TB    = 0.50         #interval, 500ms
@@ -31,8 +31,8 @@ BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
-UL_MIN     = int( 2.00 * N_SLT )    #(inclusive)
-UL_MAX     = int( 2.50 * N_SLT )    #(exclusive)
+UL_MIN     = int( 2.50 * N_SLT )    #(inclusive)
+UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
@@ -53,7 +53,7 @@ def genProcessingParameter():
     for j in prange(N_JOB):
         for m in prange(N_ES):
             _roll = np.random.randint(5)
-            _tmp_dist = genHeavyHeadDist(PROC_RNG_L) if _roll==0 else genHeavyTailDist(PROC_RNG_L) #2:1
+            _tmp_dist = genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
 
