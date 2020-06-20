@@ -14,7 +14,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 120
-STAGE   = 250
+STAGE   = 500
 
 N_AP  = 15
 N_ES  = 10
@@ -52,7 +52,7 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(5)
+            _roll = np.random.randint(15)
             _tmp_dist = genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param

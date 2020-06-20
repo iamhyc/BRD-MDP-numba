@@ -85,7 +85,7 @@ def plot_bar_graph():
     # ax1.set_ylim([100])
     ax1.set_title('(a)', y=-0.075, fontsize=20)
     ax1.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
-    ax1.set_ylabel('Average Cost', fontsize=20)
+    ax1.set_ylabel('Average Cost', fontsize=16)
 
     average_JCT = [summary['MDP_average_JCT'],
                     summary['Selfish_average_JCT'],
@@ -95,7 +95,7 @@ def plot_bar_graph():
     bar_plot2 = ax2.bar(x, average_JCT, color='#1F77B4')
     ax2.set_title('(b)', y=-0.075, fontsize=20)
     ax2.set_xticklabels(['','MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
-    ax2.set_ylabel('Average Job Response Time', fontsize=20)
+    ax2.set_ylabel('Average Job Response Time', fontsize=16)
 
     average_throughput = [summary['MDP_average_throughput'],
                     summary['Selfish_average_throughput'],
@@ -107,7 +107,7 @@ def plot_bar_graph():
     # ax3.set_ylim([0.0, 1.0])
     ax3.set_title('(c)', y=-0.075, fontsize=20)
     ax3.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
-    ax3.set_ylabel('Average Job Dropping Rate', fontsize=20)
+    ax3.set_ylabel('Average Job Dropping Rate', fontsize=16)
     
     autolabel(ax1, bar_plot1) #average_cost
     autolabel(ax2, bar_plot2) #average_JCT
