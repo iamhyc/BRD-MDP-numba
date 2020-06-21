@@ -1,6 +1,7 @@
 .vscode
 __pycache__
 __selected__
+__test__
 logs
 traces*
 figures
