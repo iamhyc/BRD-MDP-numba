@@ -14,42 +14,45 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
 MDP_LABEL  = 'MDP Policy'
-CUT_NUM    = 0
+CUT_NUM    = 100
 LABEL_SIZE = 24
 DISP_FLAG  = True
 
-log_dir  = argv[1]
-log_num  = argv[1].split('-')[1]
-npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
-npzfiles.sort()
-n_files  = len(npzfiles)
-NUM_DATA = n_files
+try:
+    log_dir  = argv[1]
+    log_num  = argv[1].split('-')[1]
+    npzfiles = glob.glob('{LOG_DIR}/*.npz'.format(LOG_DIR=log_dir))
+    npzfiles.sort()
+    n_files  = len(npzfiles)
+    NUM_DATA = n_files
 
-MDP_trace     = list()
-Selfish_trace = list()
-QAware_trace  = list()
-Random_trace  = list()
+    MDP_trace     = list()
+    Selfish_trace = list()
+    QAware_trace  = list()
+    Random_trace  = list()
 
-for i,_file in enumerate(npzfiles):
-    trace = np.load(_file)
-    MDP_trace.append({
-        'ap_stat': trace['MDP_ap_stat'],
-        'es_stat': trace['MDP_es_stat'],
-        'value'  : trace['MDP_value']
-    })
-    QAware_trace.append({
-        'ap_stat': trace['QAware_ap_stat'],
-        'es_stat': trace['QAware_es_stat'],
-    })
-    Random_trace.append({
-        'ap_stat': trace['Random_ap_stat'],
-        'es_stat': trace['Random_es_Stat'],
-    })
-    Selfish_trace.append({
-        'ap_stat': trace['Selfish_ap_stat'],
-        'es_stat': trace['Selfish_es_stat'],
-    })
-    pass
+    for i,_file in enumerate(npzfiles):
+        trace = np.load(_file)
+        MDP_trace.append({
+            'ap_stat': trace['MDP_ap_stat'],
+            'es_stat': trace['MDP_es_stat'],
+            'value'  : trace['MDP_value']
+        })
+        QAware_trace.append({
+            'ap_stat': trace['QAware_ap_stat'],
+            'es_stat': trace['QAware_es_stat'],
+        })
+        Random_trace.append({
+            'ap_stat': trace['Random_ap_stat'],
+            'es_stat': trace['Random_es_Stat'],
+        })
+        Selfish_trace.append({
+            'ap_stat': trace['Selfish_ap_stat'],
+            'es_stat': trace['Selfish_es_stat'],
+        })
+        pass
+except Exception as e:
+    print('No arguments input.')
 
 def autolabel(ax, rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -163,11 +166,13 @@ def plot_number_vs_time():
     plt.clf()
     pass
 
-def plot_update_vs_time(id1, id2):
-    n1 = glob.glob(path_join(id1, '*.npz'))
+def plot_update_vs_time(serial, parallel):
+    n1 = glob.glob(path_join(serial, '*.npz'))
     n1.sort()
-    n2 = glob.glob(path_join(id2, '*.npz'))
+    n2 = glob.glob(path_join(parallel, '*.npz'))
     n2.sort()
+    n_files  = len(n1)
+
     y1_trace, y2_trace = list(), list()
     for i,_file in enumerate(n1):
         trace = np.load(_file)
@@ -183,20 +188,25 @@ def plot_update_vs_time(id1, id2):
             'es_stat': trace['MDP_es_stat'],
             'value'  : trace['MDP_value']
         })
-    y1 = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in y1_trace][CUT_NUM:]
-    y2 = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in y2_trace][CUT_NUM:]
+    
+    # getNumber
+    # y1 = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in y1_trace][CUT_NUM:]
+    # y2 = [np.sum(x['ap_stat'])+np.sum(x['es_stat']) for x in y2_trace][CUT_NUM:]
+    # getCost
+    y1 = [getCost(x['ap_stat'], x['es_stat']) for x in y1_trace][CUT_NUM:]
+    y2 = [getCost(x['ap_stat'], x['es_stat']) for x in y2_trace][CUT_NUM:]
 
     fig, axes = plt.subplots()
     axes.grid()
-    axes.plot(range(n_files-CUT_NUM), y1, '-ro')
-    axes.plot(range(n_files-CUT_NUM), y2, '-ko')
-    axes.legend(['Parallel Update', 'Serial Update'], fontsize=20)
+    axes.plot(range(n_files-CUT_NUM), y1, '-ko')
+    axes.plot(range(n_files-CUT_NUM), y2, '-ro')
+    axes.legend(['Serial Update', 'Parallel Update'], fontsize=20)
     axes.set_ylabel('Number of Jobs in System', fontsize=24)
     axes.set_xlabel('Index of Broadcast Interval', fontsize=24)
     [tick.label.set_fontsize(24) for tick in axes.xaxis.get_major_ticks()]
     [tick.label.set_fontsize(24) for tick in axes.yaxis.get_major_ticks()]
 
-    plt.savefig(path_join('figures','%s_update.pdf'%log_num), format='pdf')
+    # plt.savefig(path_join('figures','%s_update.pdf'%log_num), format='pdf')
     if DISP_FLAG: plt.show()
     plt.clf()
     pass
@@ -335,12 +345,12 @@ def myPenaltyPlot():
     #Average Throughput v.s. Penalty Weight
     pass
 
-plot_bar_graph()
+# plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
-# plot_cost_cdf_vs_time()
+plot_cost_cdf_vs_time()
 
-# plot_update_vs_time('traces-58454-y1', 'traces-58454-y2')
+# plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
 # myNumAPsPlot()
 # myProcDistPlot()
