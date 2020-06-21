@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 2.15
+A_SCALE     = 2.25
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
