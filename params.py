@@ -136,8 +136,8 @@ def genMergedCandidateSet(bi_map):
 
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
-    # arr_prob  = _params['arr_prob'] #2
-    br_dist   = _params['br_dist'] #br_dist   = genDelayDistribution() # 
+    arr_prob  = _params['arr_prob'] #2
+    br_dist   = _params['br_dist']
     proc_mean = _params['proc_mean']
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
@@ -171,7 +171,7 @@ else:
     pass
 #NOTE: Finally:
 # bi_map  = genConnectionMap() #1
-arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #2
+# arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #2
 ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 
 subset_map   = genMergedCandidateSet(bi_map)

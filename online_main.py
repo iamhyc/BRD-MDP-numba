@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from termcolor import cprint
 
 PLOT_FLAG   = True
+RECORD_MARK = '{:05d}'.format(RANDOM_SEED)
 
 @njit
 def ARandomPolicy(stat, k, j):
@@ -87,13 +88,13 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main(args):
+    RECORD_MARK += args.postfix
     if PLOT_FLAG:
         matplotlib.use("Qt5agg")
         plt.ion()
-    print('{:05d}'.format(RANDOM_SEED))
-    # os.system('touch {:05d}'.format(RANDOM_SEED))
-    logger = getLogger('{:05d}'.format(RANDOM_SEED))
-    pathlib.Path('./traces-{:05d}'.format(RANDOM_SEED)).mkdir(exist_ok=True)
+    print(RECORD_MARK)
+    logger = getLogger(RECORD_MARK)
+    pathlib.Path('./traces-{}'.format(RECORD_MARK)).mkdir(exist_ok=True)
     
     stage = 0
     oldStat,   nowStat   = State(),          State()
@@ -163,7 +164,7 @@ def main(args):
             logger.debug('\t\t\t%3d \t %2d \t\t %2d \t %2d'%(m1, m2-m1, m3-m1, m4-m1))
             pass
 
-        trace_file = 'traces-{:05d}/{:04d}.npz'.format(RANDOM_SEED, stage)
+        trace_file = 'traces-{}/{:04d}.npz'.format(RECORD_MARK, stage)
         np.savez(trace_file, **{
             'MDP_value'   : val,
             'MDP_ap_stat' : nowStat.ap_stat,
@@ -219,6 +220,8 @@ if __name__ == "__main__":
             description='Main entry to BRD MDP simulation.')
         parser.add_argument('--serial-optimize', dest='serial_flag', action='store_true', default=False,
             help='Use serial optimization in MDP method.')
+        parser.add_argument('--postfix', dest='postfix', type=str, default='',
+            help='specify postfix for record path/files.')
         args = parser.parse_args()
 
         main(args)
