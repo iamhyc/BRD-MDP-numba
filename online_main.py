@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import os
-import pathlib
+import os, pathlib
+import argparse
 import numpy as np
 from mdp import *
 from params import *
@@ -9,7 +9,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
 
-SERIAL_FLAG = False
 PLOT_FLAG   = True
 
 @njit
@@ -87,7 +86,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
 
     return nextStat
 
-def main():
+def main(args):
     if PLOT_FLAG:
         matplotlib.use("Qt5agg")
         plt.ion()
@@ -124,7 +123,10 @@ def main():
             #NOTE: optimize and update the backup
             systemStat     = (oldStat, nowStat, br_delay)
             oldPolicy      = nowPolicy
-            nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy) if SERIAL_FLAG else optimize(stage, systemStat, oldPolicy)
+            if args.serial_flag:
+                nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy)
+            else:
+                nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             oldStat        = nowStat
             nowStat        = NextState(arrivals, systemStat, oldPolicy, nowPolicy)
             #----------------------------------------------------------------
@@ -212,10 +214,15 @@ def main():
     pass
 
 if __name__ == "__main__":
-    main()
-    # try:
-    #     main()
-    # except Exception as e:
-    #     raise e
-    # finally:
-    #     pass
+    try:
+        parser = argparse.ArgumentParser(
+            description='Main entry to BRD MDP simulation.')
+        parser.add_argument('--serial-optimize', dest='serial_flag', action='store_true', default=False,
+            help='Use serial optimization in MDP method.')
+        args = parser.parse_args()
+
+        main(args)
+    except Exception as e:
+        raise e
+    finally:
+        pass
