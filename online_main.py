@@ -9,7 +9,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
 
-PLOT_FLAG   = True
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
 
 @njit
@@ -88,8 +87,8 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main(args):
-    record_mark = RECORD_PREFIX + args.postfix
-    if PLOT_FLAG:
+    record_mark = '{prefix}-{postfix}'.format(prefix=RECORD_PREFIX, postfix=args.postfix)
+    if args.plot_flag:
         matplotlib.use("Qt5agg")
         plt.ion()
     print(record_mark)
@@ -148,7 +147,7 @@ def main(args):
             stage += 1
         pass
 
-        if PLOT_FLAG:
+        if args.plot_flag:
             #---------------------------------------------------------------------
             plt.plot([stage, stage+1], [oldStat.getCost(), nowStat.getCost()], '-ro')
             plt.plot([stage, stage+1], [SF_oldStat.getCost(), SF_nowStat.getCost()], '-bo')
@@ -211,7 +210,7 @@ def main(args):
 
     logger.debug('Average Cost: {}, {}, {}, {}'.format( nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost() ))
     logger.debug('Utility: {}, {}, {}, {}'.format( nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility() ))
-    # if PLOT_FLAG: plt.show()
+    # if args.plot_flag: plt.show()
     pass
 
 if __name__ == "__main__":
@@ -220,6 +219,8 @@ if __name__ == "__main__":
             description='Main entry to BRD MDP simulation.')
         parser.add_argument('--serial-optimize', dest='serial_flag', action='store_true', default=False,
             help='Use serial optimization in MDP method.')
+        parser.add_argument('--plot', dest='plot_flag', action='store_true', default=False,
+            help='Plot figure (with Qt5) while running simulation.')
         parser.add_argument('--postfix', dest='postfix', type=str, default='',
             help='specify postfix for record path/files.')
         args = parser.parse_args()
