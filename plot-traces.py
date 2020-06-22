@@ -349,8 +349,8 @@ def myPenaltyPlot():
 # plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
-plot_cost_cdf_vs_time()
+# plot_cost_cdf_vs_time()
 
-# plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
+plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
 # myNumAPsPlot()
 # myProcDistPlot()
