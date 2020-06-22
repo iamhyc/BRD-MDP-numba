@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 2.35
+A_SCALE     = 2.25
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
@@ -14,7 +14,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 120
-STAGE   = 300
+STAGE   = 450
 
 N_AP  = 15
 N_ES  = 10
@@ -136,13 +136,13 @@ def genMergedCandidateSet(bi_map):
 
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
-    arr_prob  = _params['arr_prob'] #2
-    # br_dist   = _params['br_dist'] #3
-    proc_mean = _params['proc_mean']
+    # arr_prob  = _params['arr_prob'] #1
+    # br_dist   = _params['br_dist'] #2
+    # proc_mean = _params['proc_mean'] #3
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
-    bi_map    = _params['bi_map'] #1
+    bi_map    = _params['bi_map'] #0
 else:
     arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
@@ -170,9 +170,10 @@ else:
     })
     pass
 #NOTE: Finally:
-# bi_map  = genConnectionMap() #1
-# arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #2
-br_dist   = genDelayDistribution() #3
+# bi_map  = genConnectionMap() #0
+arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
+br_dist   = genDelayDistribution() #2
+proc_mean = genProcessingParameter() #3
 ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 
 subset_map   = genMergedCandidateSet(bi_map)
