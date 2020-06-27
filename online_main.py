@@ -194,10 +194,17 @@ def main(args):
         'Selfish_average_cost': SF_nowStat.average_cost(),
         'QAware_average_cost' : QA_nowStat.average_cost(),
         'Random_average_cost' : RD_nowStat.average_cost(),
+
         'MDP_average_JCT'    : nowStat.average_JCT(),
         'Selfish_average_JCT': SF_nowStat.average_JCT(),
         'QAware_average_JCT' : QA_nowStat.average_JCT(),
         'Random_average_JCT' : RD_nowStat.average_JCT(),
+
+        '_MDP_average_JCT'    : nowStat._average_JCT(),
+        '_Selfish_average_JCT': SF_nowStat._average_JCT(),
+        '_QAware_average_JCT' : QA_nowStat._average_JCT(),
+        '_Random_average_JCT' : RD_nowStat._average_JCT(),
+
         'MDP_average_throughput'    : nowStat.average_throughput(),
         'Selfish_average_throughput': SF_nowStat.average_throughput(),
         'QAware_average_throughput' : QA_nowStat.average_throughput(),

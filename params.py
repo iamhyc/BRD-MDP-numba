@@ -14,7 +14,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 120
-STAGE   = 450
+STAGE   = 250
 
 N_AP  = 15
 N_ES  = 10
@@ -136,9 +136,9 @@ def genMergedCandidateSet(bi_map):
 
 if Path(npzfile).exists():
     _params   = np.load(npzfile)
-    # arr_prob  = _params['arr_prob'] #1
-    # br_dist   = _params['br_dist'] #2
-    # proc_mean = _params['proc_mean'] #3
+    arr_prob  = _params['arr_prob'] #1
+    br_dist   = _params['br_dist'] #2
+    proc_mean = _params['proc_mean'] #3
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
@@ -171,9 +171,9 @@ else:
     pass
 #NOTE: Finally:
 # bi_map  = genConnectionMap() #0
-arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
-br_dist   = genDelayDistribution() #2
-proc_mean = genProcessingParameter() #3
+# arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
+# br_dist   = genDelayDistribution() #2
+# proc_mean = genProcessingParameter() #3
 ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 
 subset_map   = genMergedCandidateSet(bi_map)
