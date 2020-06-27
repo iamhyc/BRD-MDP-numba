@@ -31,6 +31,7 @@ class State(object):
         self.es_stat = np.zeros((N_ES, N_JOB),           dtype=np.int32)
         self.acc_arr, self.acc_dep   = 0, 0
         self.acc_cost, self.timeslot = 0, 0
+        self.acc_num                 = 0
         pass
 
     def clone(self, stat):
@@ -38,6 +39,7 @@ class State(object):
         self.es_stat = np.copy(stat.es_stat)
         self.acc_arr, self.acc_dep  = stat.acc_arr, stat.acc_dep
         self.acc_cost, self.timeslot= stat.acc_cost, stat.timeslot
+        self.acc_num                = stat.acc_num
         return self
     
     def getNumber(self):
@@ -46,6 +48,9 @@ class State(object):
     def getCost(self):
         _penalty = BETA * np.count_nonzero( self.es_stat==LQ )
         return _penalty + np.sum(self.ap_stat) + np.sum(self.es_stat)
+
+    def _average_JCT(self):
+        return self.acc_num / self.acc_arr
 
     def average_JCT(self):
         return self.acc_cost / self.acc_arr
@@ -63,6 +68,7 @@ class State(object):
     def iterate(self, admissions, departures):
         self.timeslot += 1
         self.acc_cost += self.getCost()
+        self.acc_num  += self.getNumber()
         self.acc_arr  += np.sum(admissions)
         self.acc_dep  += np.sum(departures)
         pass
