@@ -160,12 +160,13 @@ else:
         'off_trans': off_trans,
         "bi_map"   : bi_map,
         'miscs'    : np.array([
-            N_AP,N_ES,N_JOB,LQ,
-            TS,TB,N_SLT,N_CNT,
-            BR_MIN,BR_MAX,BR_RNG_L,
-            UL_MIN,UL_MAX,UL_RNG_L,
-            PROC_MIN,PROC_MAX,PROC_RNG_L,
-            DIM_P
+            A_SCALE,MAP_SEED,RANDOM_SEED,       0.0,
+            GAMMA,BETA,STAGE,                   0.0,
+            N_AP,N_ES,N_JOB,LQ,                 0.0,
+            TS,TB,N_SLT,N_CNT,                  0.0,
+            BR_MIN,BR_MAX,BR_RNG_L,             0.0,
+            UL_MIN,UL_MAX,UL_RNG_L,             0.0,
+            PROC_MIN,PROC_MAX,PROC_RNG_L,DIM_P, 0.0
         ])
     })
     pass
