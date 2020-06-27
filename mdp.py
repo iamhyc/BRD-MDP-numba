@@ -23,6 +23,7 @@ ESValVec   = np.concatenate((ESValVec, PenaltyVec))
     ('acc_arr', int64),
     ('acc_dep', int64),
     ('acc_cost', int64),
+    ('acc_num',  int64)
     ('timeslot', int64)
 ])
 class State(object):
