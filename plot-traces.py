@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sys import argv
 from os.path import join as path_join
 import glob
+from parse import parse
 from params import BETA,LQ
 
 from matplotlib import rc
@@ -285,7 +286,43 @@ def plot_cost_cdf_vs_time():
     plt.clf()
     pass
 
-def myArrivalPlot():
+def plot_traces_study(prefix):
+    fig, ax = plt.subplots(figsize=(8,6))
+    _type   = prefix.split('-')[-2]
+    traces  = glob.glob(prefix+'*')
+    traces.sort()
+    _format = prefix+'{}'
+    x_ticks = [i for i,x in enumerate(traces)]
+    x_ticklabels = [parse(_format,x)[0] for x in traces]
+
+    mdp_cost, sf_cost, qf_cost, rd_cost = [], [], [], []
+    for trace in traces:
+        summary_file = '{}/summary'.format(trace)
+        summary = np.load(summary_file)
+        mdp_cost.append(summary['MDP_average_cost'])
+        sf_cost.append(summary['Selfish_average_cost'])
+        qf_cost.append(summary['QAware_average_cost'])
+        rd_cost.append(summary['Random_average_cost'])
+        pass
+
+    ax.plot(x_ticks, mdp_cost, '-r^')
+    ax.plot(x_ticks, qf_cost,  '-go')
+    ax.plot(x_ticks, rd_cost,  '-cv')
+    ax.plot(x_ticks, sf_cost,  '-bs')
+    ax.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
+    ax.set_ylabel('Average Cost', fontsize=16)
+    if _type=='arrival':
+        ax.set_xlabel('Range of Expectation $\lambda_{m,j}$ of Arrival Rate', fontsize=16)
+    elif _type=='proc':
+        ax.set_xlabel('Range of Expectation $c_{m,j}$ of Processing Time Distribution', fontsize=16)
+    else:
+        ax.set_xlabel(_type, fontsize=16)
+
+    ax.grid()
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels(x_ticklabels)
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    plt.show()
     pass
 
 def myNumAPsPlot():
@@ -316,38 +353,6 @@ def myNumAPsPlot():
     plt.clf()
     pass
 
-def myProcDistPlot():
-    fig, ax = plt.subplots(figsize=(8,6))
-
-    x_ticks  = [1,2,3,4,5]
-    mdp_cost = [25.21, 58.65,  116.51, 139.72, 141.99]
-    sf_cost  = [39.73, 124.39, 158.33, 191.98, 201.36]
-    qf_cost  = [31.57, 63.13,  129.11, 186.61, 187.82]
-    rd_cost  = [28.48, 64.36,  159.03, 235.14, 230.37]
-
-    ax.plot(x_ticks, mdp_cost, '-r^')
-    ax.plot(x_ticks, qf_cost,  '-go')
-    ax.plot(x_ticks, rd_cost,  '-cv')
-    ax.plot(x_ticks, sf_cost,  '-bs')
-
-    ax.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
-    ax.set_ylabel('Average Cost', fontsize=16)
-    ax.set_xlabel('Range of Expectation $c_{m,j}$ of Processing Time Distribution', fontsize=16)
-
-    ax.grid()
-    ax.set_xticks(x_ticks)
-    ax.set_xticklabels(['[10,20]', '[20,30]', '[30,40]', '[40,50]', '[50,60]'])
-    ax.tick_params(axis='both', which='major', labelsize=14)
-
-    plt.savefig(path_join('figures','%s_proc_compare.pdf'%log_num), format='pdf')
-    if DISP_FLAG: plt.show()
-    plt.clf()
-    pass
-
-def myPenaltyPlot():
-    #Average Throughput v.s. Penalty Weight
-    pass
-
 # plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
@@ -355,6 +360,6 @@ def myPenaltyPlot():
 # plot_cost_cdf_vs_time()
 
 # plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
-# myArrivalPlot()
+plot_traces_study(argv[1])
 # myNumAPsPlot()
 # myProcDistPlot()

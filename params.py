@@ -187,7 +187,6 @@ cprint('Subset Number: {}'.format(N_SET), 'red')
 for item in subset_map:
     cprint(item, 'magenta')
 print()
-# cprint('{n} {map}'.format(n=N_SET, map=subset_map), 'green')
 
 #NOTE: Test Code
 # tmp_n, cnt = 100, 0
