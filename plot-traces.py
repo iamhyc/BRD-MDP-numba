@@ -285,10 +285,13 @@ def plot_cost_cdf_vs_time():
     plt.clf()
     pass
 
+def myArrivalPlot():
+    pass
+
 def myNumAPsPlot():
     fig, ax = plt.subplots(figsize=(8,6))
 
-    x_ticks = [3,4,5,6,7]
+    x_ticks  = [3,4,5,6,7]
     mdp_cost = [29.47, 83.98,  120.19, 142.58, 151.60]
     sf_cost  = [81.77, 137.51, 151.37, 208.47, 230.31]
     qf_cost  = [30.81, 92.72,  139.87, 186.08, 212.33]
@@ -316,7 +319,7 @@ def myNumAPsPlot():
 def myProcDistPlot():
     fig, ax = plt.subplots(figsize=(8,6))
 
-    x_ticks = [1,2,3,4,5]
+    x_ticks  = [1,2,3,4,5]
     mdp_cost = [25.21, 58.65,  116.51, 139.72, 141.99]
     sf_cost  = [39.73, 124.39, 158.33, 191.98, 201.36]
     qf_cost  = [31.57, 63.13,  129.11, 186.61, 187.82]
@@ -351,6 +354,7 @@ def myPenaltyPlot():
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
-plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
+# plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
+# myArrivalPlot()
 # myNumAPsPlot()
 # myProcDistPlot()
