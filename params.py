@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 2.25
+A_SCALE     = 2.00
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
@@ -36,8 +36,8 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 2.00 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 2.50 * N_SLT ) #(inclusive)
+PROC_MIN   = int( 1.00 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 1.50 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
