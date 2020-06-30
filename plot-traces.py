@@ -354,9 +354,9 @@ def myNumAPsPlot():
     plt.clf()
     pass
 
-# plot_bar_graph()
+plot_bar_graph()
 # plot_number_vs_time()
-plot_cost_vs_time()
+# plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
