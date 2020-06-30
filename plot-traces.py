@@ -15,7 +15,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
 MDP_LABEL  = 'MDP Policy'
-CUT_NUM    = 100
+CUT_NUM    = 0
 LABEL_SIZE = 24
 DISP_FLAG  = True
 
@@ -84,18 +84,18 @@ def plot_bar_graph():
                     summary['Selfish_average_cost'],
                     summary['QAware_average_cost'],
                     summary['Random_average_cost']]
-    # average_cost = [137.08,177.15,169.81,219.36]
+    print('Average Cost:', average_cost)
     bar_plot1 = ax1.bar(x, average_cost, color='#1F77B4')
     # ax1.set_ylim([100])
     ax1.set_title('(a)', y=-0.075, fontsize=20)
     ax1.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
     ax1.set_ylabel('Average Cost', fontsize=16)
 
-    average_JCT = [summary['MDP_average_JCT'],
-                    summary['Selfish_average_JCT'],
-                    summary['QAware_average_JCT'],
-                    summary['Random_average_JCT']]
-    # average_JCT = [291.97,377.56,361.78,467.28]
+    average_JCT = [summary['_MDP_average_JCT'],
+                    summary['_Selfish_average_JCT'],
+                    summary['_QAware_average_JCT'],
+                    summary['_Random_average_JCT']]
+    print('Average JCT:', average_JCT)
     bar_plot2 = ax2.bar(x, average_JCT, color='#1F77B4')
     ax2.set_title('(b)', y=-0.075, fontsize=20)
     ax2.set_xticklabels(['','MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
@@ -106,6 +106,7 @@ def plot_bar_graph():
                     summary['QAware_average_throughput'],
                     summary['Random_average_throughput']]
     average_throughput = 1.0 - np.array(average_throughput)
+    print('Average Throughput:', average_throughput)
     # average_throughput = np.array([0.6571764705882352, 0.6211764705882353, 0.7105767195767195, 0.710475073313783])
     bar_plot3 = ax3.bar(x, average_throughput, color='#1F77B4')
     # ax3.set_ylim([0.0, 1.0])
@@ -117,9 +118,9 @@ def plot_bar_graph():
     autolabel(ax2, bar_plot2) #average_JCT
     autolabel(ax3, bar_plot3) #average_throughput
 
-    plt.savefig(path_join('figures','%s_bar_graph.pdf'%log_num), format='pdf', dpi=300)
+    # plt.savefig(path_join('figures','%s_bar_graph.pdf'%log_num), format='pdf', dpi=300)
     if DISP_FLAG: plt.show()
-    plt.clf()
+    # plt.clf()
     pass
 
 def plot_cost_vs_time():
@@ -353,9 +354,9 @@ def myNumAPsPlot():
     plt.clf()
     pass
 
-plot_bar_graph()
+# plot_bar_graph()
 # plot_number_vs_time()
-# plot_cost_vs_time()
+plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 

@@ -6,7 +6,7 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 
-A_SCALE     = 2.00
+A_SCALE     = 1.90
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
@@ -26,8 +26,8 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 0.60 * N_SLT )    #(inclusive)
-BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
+BR_MIN     = int( 0.70 * N_SLT )    #(inclusive)
+BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
@@ -36,8 +36,8 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.00 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 1.50 * N_SLT ) #(inclusive)
+PROC_MIN   = int( 0.50 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 1.00 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
@@ -52,8 +52,8 @@ def genProcessingParameter():
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
-            _roll = np.random.randint(15)
-            _tmp_dist = genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
+            # _roll = np.random.randint(30)
+            _tmp_dist = genHeavyHeadDist(PROC_RNG_L) #genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
     return param
 
@@ -166,7 +166,7 @@ else:
             TS,TB,N_SLT,N_CNT,                  0.0,
             BR_MIN,BR_MAX,BR_RNG_L,             0.0,
             UL_MIN,UL_MAX,UL_RNG_L,             0.0,
-            PROC_MIN,PROC_MAX,PROC_RNG_L,DIM_P, 0.0
+            PROC_MIN,PROC_MAX,PROC_RNG_L,DIM_P, 0.0,
         ])
     })
     pass
