@@ -93,12 +93,14 @@ def genTransitionMatrix():
     return ul_mat, off_mat
 
 def genConnectionMap():
-    g = nx.barabasi_albert_graph(N_AP, 3)
+    g = nx.barabasi_albert_graph(N_AP, 3, seed=42)
     bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
     _flag = True
-    _cnt = 2798
+    _cnt = 1770
+    _result = (0,N_AP,0)
 
-    while _flag and _cnt < 65535:
+    while _cnt < 1E7:
+        if _result[1]<7: break
         bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
         np.random.seed( _cnt )
         es_nodes = np.sort( np.random.choice(range(N_AP), N_ES, replace=False) )
@@ -109,10 +111,15 @@ def genConnectionMap():
                 bi_map[k,idx] = 1 if (m in _neighbors or m==k) else 0
         
         _flag = np.any( np.sum(bi_map, axis=1)==0 )
+        if not _flag:
+            _tmp = genMergedCandidateSet(bi_map)
+            if _result[1] > len(_tmp):
+                _result = (_cnt, len(_tmp), bi_map)
+        
         _cnt += 1
         pass
 
-    print(_cnt-1, bi_map)
+    print(_result)
     np.random.seed(RANDOM_SEED)
     return bi_map
 
