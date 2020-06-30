@@ -217,7 +217,7 @@ def main(args):
 
     logger.debug('Average Cost: {}, {}, {}, {}'.format( nowStat.average_cost(), SF_nowStat.average_cost(), QA_nowStat.average_cost(), RD_nowStat.average_cost() ))
     logger.debug('Utility: {}, {}, {}, {}'.format( nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility() ))
-    # if args.plot_flag: plt.show()
+    if args.plot_flag: plt.show()
     pass
 
 if __name__ == "__main__":

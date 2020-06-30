@@ -5,6 +5,7 @@ from pathlib import *
 from utility import *
 from scipy.stats import norm
 from termcolor import cprint
+import networkx as nx
 
 A_SCALE     = 1.90
 MAP_SEED    = 3491
@@ -92,16 +93,27 @@ def genTransitionMatrix():
     return ul_mat, off_mat
 
 def genConnectionMap():
-    np.random.seed(MAP_SEED)    #generate static map
-
+    g = nx.barabasi_albert_graph(N_AP, 3)
     bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
-    for k in range(N_AP):
-        _num = int(GRAPH_RATIO * N_ES)
-        for idx in np.random.choice(range(N_ES), size=_num):
-            bi_map[k,idx] = 1
+    _flag = True
+    _cnt = 2798
+
+    while _flag and _cnt < 65535:
+        bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
+        np.random.seed( _cnt )
+        es_nodes = np.sort( np.random.choice(range(N_AP), N_ES, replace=False) )
+
+        for k in range(N_AP):
+            _neighbors = g.neighbors(k)
+            for idx,m in enumerate(es_nodes):
+                bi_map[k,idx] = 1 if (m in _neighbors or m==k) else 0
+        
+        _flag = np.any( np.sum(bi_map, axis=1)==0 )
+        _cnt += 1
         pass
 
-    np.random.seed(RANDOM_SEED) #resume the RandomSeed
+    print(_cnt-1, bi_map)
+    np.random.seed(RANDOM_SEED)
     return bi_map
 
 def genMergedCandidateSet(bi_map):
@@ -134,7 +146,8 @@ def genMergedCandidateSet(bi_map):
 
     return result
 
-if Path(npzfile).exists():
+try:
+    assert( Path(npzfile).exists() )
     _params   = np.load(npzfile)
     arr_prob  = _params['arr_prob'] #1
     br_dist   = _params['br_dist'] #2
@@ -143,7 +156,7 @@ if Path(npzfile).exists():
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map'] #0
-else:
+except AssertionError:
     arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
     ul_prob   = genUploadingProbabilities()
     br_dist   = genDelayDistribution()
@@ -169,14 +182,15 @@ else:
             PROC_MIN,PROC_MAX,PROC_RNG_L,DIM_P, 0.0,
         ])
     })
+finally:
+    # bi_map    = genConnectionMap() #0
+    # arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
+    # br_dist   = genDelayDistribution() #2
+    # proc_mean = genProcessingParameter() #3
+    ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
     pass
-#NOTE: Finally:
-# bi_map  = genConnectionMap() #0
-# arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
-# br_dist   = genDelayDistribution() #2
-# proc_mean = genProcessingParameter() #3
-ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
 
+#NOTE: generate subset partition
 subset_map   = genMergedCandidateSet(bi_map)
 N_SET        = len(subset_map)
 subset_ind = np.zeros((N_SET, N_AP), dtype=np.int32)
@@ -184,6 +198,7 @@ for n in range(N_SET):
     for k in subset_map[n][0]:
         subset_ind[n, k] = 1
 
+#NOTE: print subset partition
 cprint('Subset Number: {}'.format(N_SET), 'red')
 for item in subset_map:
     cprint(item, 'magenta')
