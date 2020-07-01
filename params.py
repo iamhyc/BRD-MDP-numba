@@ -7,7 +7,7 @@ from scipy.stats import norm
 from termcolor import cprint
 import networkx as nx
 
-A_SCALE     = 1.90
+A_SCALE     = 2.00
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
@@ -37,8 +37,8 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 0.50 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 1.00 * N_SLT ) #(inclusive)
+PROC_MIN   = int( 1.50 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 2.00 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
@@ -49,13 +49,14 @@ U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
 @njit
-def genProcessingParameter():
+def genProcessingParameter(es2ap_map):
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
             # _roll = np.random.randint(30)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) #genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
+            if m==0: param[m,j] = param[m,j] / 5 #for cloud server computation time
     return param
 
 def genDelayDistribution():
@@ -64,18 +65,22 @@ def genDelayDistribution():
         dist[k] = genFlatDist(BR_RNG_L)
     return dist
 
-def genUploadingProbabilities():
+def genUploadingProbabilities(es2ap_map):
     probs = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
     choice_dist = genFlatDist(UL_RNG_L)
     for j in range(N_JOB):
         for m in range(N_ES):
             for k in range(N_AP):
-                mean = UL_RNG[ multoss(choice_dist) ]
-                var  = (N_CNT - mean) / 3 #3-sigma-rule
-                rv   = norm(loc=mean, scale=var)
-                rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
-                rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
-                probs[k,m,j] = rv_prob #NOTE: true story, the last uploading is a ONE.
+                if k==es2ap_map[m]: #co-location
+                    probs[k,m,j] = np.ones(N_CNT, dtype=np.float64) #NOTE: uploaded at once (double-check needed)
+                else: #follow some normal distribution
+                    mean = UL_RNG[ multoss(choice_dist) ]
+                    var  = (N_CNT - mean) / 3 #3-sigma-rule
+                    rv   = norm(loc=mean, scale=var)
+                    rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
+                    rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
+                    probs[k,m,j] = rv_prob #true story, the last uploading is a ONE.
+                    pass
     return probs
 
 @njit
@@ -95,33 +100,16 @@ def genTransitionMatrix():
 def genConnectionMap():
     g = nx.barabasi_albert_graph(N_AP, 3, seed=42)
     bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
-    _flag = True
-    _cnt = 1770
-    _result = (0,N_AP,0)
 
-    while _cnt < 1E7:
-        if _result[1]<7: break
-        bi_map = np.zeros((N_AP, N_ES), dtype=np.int32)
-        np.random.seed( _cnt )
-        es_nodes = np.sort( np.random.choice(range(N_AP), N_ES, replace=False) )
+    np.random.seed( 1776 )
+    es_nodes = np.sort( np.random.choice(range(N_AP), N_ES, replace=False) )
+    for k in range(N_AP):
+        _neighbors = g.neighbors(k)
+        for idx,m in enumerate(es_nodes):
+            bi_map[k,idx] = 1 if (m in _neighbors or m==k) else 0
+    np.random.seed(RANDOM_SEED) #resume the seed
 
-        for k in range(N_AP):
-            _neighbors = g.neighbors(k)
-            for idx,m in enumerate(es_nodes):
-                bi_map[k,idx] = 1 if (m in _neighbors or m==k) else 0
-        
-        _flag = np.any( np.sum(bi_map, axis=1)==0 )
-        if not _flag:
-            _tmp = genMergedCandidateSet(bi_map)
-            if _result[1] > len(_tmp):
-                _result = (_cnt, len(_tmp), bi_map)
-        
-        _cnt += 1
-        pass
-
-    print(_result)
-    np.random.seed(RANDOM_SEED)
-    return bi_map
+    return bi_map, es_nodes
 
 def genMergedCandidateSet(bi_map):
     result = list()
@@ -162,23 +150,25 @@ try:
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
-    bi_map    = _params['bi_map'] #0
+    bi_map    = _params['bi_map']
+    es2ap_map = _params['es2ap_map']
 except AssertionError:
+    bi_map, es2ap_map = genConnectionMap()
     arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
-    ul_prob   = genUploadingProbabilities()
+    ul_prob   = genUploadingProbabilities(es2ap_map)
     br_dist   = genDelayDistribution()
-    proc_mean = genProcessingParameter()
+    proc_mean = genProcessingParameter(es2ap_map)
     ul_trans, off_trans = genTransitionMatrix()
-    bi_map    = genConnectionMap()
 
     np.savez(npzfile, **{
+        'bi_map'   : bi_map,
+        'es2ap_map': es2ap_map,
         'arr_prob' : arr_prob,
         'ul_prob'  : ul_prob,
         'br_dist'  : br_dist,
         'proc_mean': proc_mean,
         'ul_trans' : ul_trans,
         'off_trans': off_trans,
-        "bi_map"   : bi_map,
         'miscs'    : np.array([
             A_SCALE,MAP_SEED,RANDOM_SEED,       0.0,
             GAMMA,BETA,STAGE,                   0.0,
@@ -190,7 +180,6 @@ except AssertionError:
         ])
     })
 finally:
-    # bi_map    = genConnectionMap() #0
     # arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
     # br_dist   = genDelayDistribution() #2
     # proc_mean = genProcessingParameter() #3
