@@ -8,3 +8,4 @@ figures
 *.err
 *.out
 *backup-*
+*.raw

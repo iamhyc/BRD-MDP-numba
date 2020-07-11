@@ -7,8 +7,9 @@ import glob
 
 T_SCALE = 1E-9
 NUM_JOB_TYPE = 10
+NUM_AP       = 15
 
-SKIP_RAW_PROCESS = False
+SKIP_RAW_PROCESS = True
 SKIP_SUMMARY     = False
 
 selected_idxs   = range(1)
@@ -27,7 +28,7 @@ if not SKIP_RAW_PROCESS:
         trace_file = path.join(output_dir, 'trace-{}.raw'.format(postfix))
         proc_file  = path.join(output_dir, 'proc-{}.raw'.format(postfix))
         # iteratively reading csv file and summarize
-        count = 0
+        count = -1
         with open(trace, newline='') as fin, open(trace_file, 'w') as f_trace, open(proc_file, 'w') as f_proc:
             datatrace = csv.reader(fin, delimiter=',')
             ptr = next(datatrace)
@@ -41,10 +42,10 @@ if not SKIP_RAW_PROCESS:
                     proc_time = T_SCALE * ( int(cur_job[1]) - int(cur_job[0]) )
                     count = (count+1) % NUM_JOB_TYPE
                     f_trace.write('{:.3f},{}\n'.format(start_time, count)) #(proc_time, job_type)
-                    f_proc.write('{:.3f},{}\n'.format(proc_time, count)) #(proc_time, job_type)
+                    f_proc.write('{:.3f}\n'.format(proc_time)) #(proc_time)
                     pass
             except StopIteration as e:
-                print('Part {} done.')
+                print('Part-{:05d} done.'.format(idx))
                 pass
             pass
         pass
@@ -66,13 +67,24 @@ if not SKIP_SUMMARY:
             pass
         trace_out= path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
         with open(trace_out, 'w') as fout:
-            for item in sorted(trace_record.items()):
-                _data = [min(x,1) for x in item[1]]
+            for i,item in enumerate(sorted(trace_record.items())):
+                _data = [min(x,2) for x in item[1]] #normalize
                 _data = ','.join(map(str, _data))
-                _tmp = ','.join( [item[0], _data] )
+                _tmp = ','.join( [item[0], _data] ) #[str(idx), _data]
                 fout.write(_tmp+'\n')
                 pass
             pass
-
         # process proc-*.raw
+        proc_in = path.join(output_dir, 'proc-{:05d}.raw'.format(idx))
+        proc_record = [list() for _ in range(NUM_JOB_TYPE)]
+        with open(proc_in, 'r') as fin:
+            _data = fin.readlines()
+            for i in range(NUM_JOB_TYPE):
+                proc_record[i] = _data[i:][::10]
+            pass
+        proc_out= path.join(output_dir, 'proc-{:05d}.stat'.format(idx))
+        with open(proc_out, 'w') as fout:
+            for i in range(NUM_JOB_TYPE):
+                fout.write( str(proc_record[i])+'\n' )
+            pass
         pass
