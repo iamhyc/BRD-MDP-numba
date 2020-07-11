@@ -4,15 +4,18 @@ from parse import parse
 from sys import argv
 from os import path
 import glob
+import numpy as np
+from pathlib import Path
+from itertools import chain
 
 T_SCALE      = 1E-9
-NUM_JOB_TYPE = 10
 NUM_AP       = 15
+NUM_JOB_TYPE = 10
 RANDOM_SEED  = 11112
 
-SKIP_RAW_PROCESS  = False
-SKIP_POST_PROCESS = False
-SKIP_SUMMARY      = False
+SKIP_RAW_PROCESS = True
+SKIP_SUMMARY     = False
+SKIP_TRACE_GEN   = False
 
 selected_idxs   = range(1)
 input_dir       = argv[1] if len(argv)>2 else '../google-datatrace/task_usage/'
@@ -53,9 +56,9 @@ if not SKIP_RAW_PROCESS:
         pass
 
 #NOTE: Step 2: Get statistics
-if not SKIP_POST_PROCESS:
+if not SKIP_SUMMARY:
     for idx in selected_idxs:
-        # process trace-*.raw
+        # generate trace-*.raw
         trace_in = path.join(output_dir, 'trace-{:05d}.raw'.format(idx))
         trace_record = dict()
         with open(trace_in, 'r') as fin:
@@ -67,17 +70,17 @@ if not SKIP_POST_PROCESS:
                 trace_record[_item[0]][_item[1]] += 1
                 pass
             pass
-        trace_out= path.join(output_dir, 'trace-{:05d}-post.raw'.format(idx))
+        trace_out= path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
         with open(trace_out, 'w') as fout:
             for i,item in enumerate(sorted(trace_record.items())):
                 _data = [min(x,2) for x in item[1]] #normalize
                 _data = ','.join(map(str, _data))
-                _tmp = ','.join( [item[0], _data] ) #[str(idx), _data]
+                _tmp = ','.join( [str(i), _data] ) #[str(i), _data] / [item[0], _data]
                 fout.write(_tmp+'\n')
                 pass
             pass
 
-        # process proc-*.raw
+        # generate proc-*.raw
         proc_in = path.join(output_dir, 'proc-{:05d}.raw'.format(idx))
         proc_out= path.join(output_dir, 'proc-{:05d}.stat'.format(idx))
         proc_record = [list() for _ in range(NUM_JOB_TYPE)]
@@ -93,8 +96,28 @@ if not SKIP_POST_PROCESS:
         pass
 
 #NOTE: Step 3: get arrival probability \lambda_{k,j}, and arrival trace
-if not SKIP_SUMMARY:
+if not SKIP_TRACE_GEN:
+    np.random.seed(RANDOM_SEED)
     for idx in selected_idxs:
-        trace_in = path.join(output_dir, 'trace-{:05d}-post.raw'.format(idx))
-        trace_out= path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
+        trace_in = path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}'.format(idx))
+        Path( trace_folder ).mkdir(exist_ok=True)
+        with open(trace_in, 'r') as fin:
+            for line in fin.readlines():
+                _idx, _arr_list = line.strip().split(',', 1)
+                _arr_list = [int(x) for x in _arr_list.split(',')] #[str --> int]
+                _arr_list = [[i]*x for i,x in enumerate(_arr_list)] #[(0,2) --> [0,0]]
+                _arr_list = list( chain.from_iterable(_arr_list) )
+
+                _alloc = np.random.permutation(NUM_AP)
+                _result = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
+                for i,k in enumerate(_alloc):
+                    # print(i, len(_arr_list))
+                    if i>len(_arr_list)-1: break
+                    _result[k, _arr_list[i]] = 1
+                # print(_result)
+                _file_name = '{:05d}'.format(int(_idx))
+                np.save(Path(trace_folder,_file_name), _result)
+                pass
+            pass
         pass
