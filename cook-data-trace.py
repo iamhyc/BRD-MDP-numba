@@ -76,15 +76,15 @@ if not SKIP_SUMMARY:
             pass
         # process proc-*.raw
         proc_in = path.join(output_dir, 'proc-{:05d}.raw'.format(idx))
+        proc_out= path.join(output_dir, 'proc-{:05d}.stat'.format(idx))
         proc_record = [list() for _ in range(NUM_JOB_TYPE)]
-        with open(proc_in, 'r') as fin:
+        with open(proc_in, 'r') as fin, open(proc_out, 'w') as fout:
             _data = fin.readlines()
             for i in range(NUM_JOB_TYPE):
-                proc_record[i] = _data[i:][::10]
-            pass
-        proc_out= path.join(output_dir, 'proc-{:05d}.stat'.format(idx))
-        with open(proc_out, 'w') as fout:
-            for i in range(NUM_JOB_TYPE):
-                fout.write( str(proc_record[i])+'\n' )
+                proc_record[i] = sorted([ x.strip() for x in _data[i:][::10] ])
+                _val = [float(x) for x in proc_record[i]]
+                # _num, _sum = len(_val), sum(_val) #NOTE: (num=11508, avg=0.205)
+                # fout.write('%d,%.3f\n'%(_num, _sum/_num))
+                fout.write( ','.join(proc_record[i]) + '\n\n' )
             pass
         pass
