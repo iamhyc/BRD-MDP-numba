@@ -5,12 +5,14 @@ from sys import argv
 from os import path
 import glob
 
-T_SCALE = 1E-9
+T_SCALE      = 1E-9
 NUM_JOB_TYPE = 10
 NUM_AP       = 15
+RANDOM_SEED  = 11112
 
-SKIP_RAW_PROCESS = True
-SKIP_SUMMARY     = False
+SKIP_RAW_PROCESS  = False
+SKIP_POST_PROCESS = False
+SKIP_SUMMARY      = False
 
 selected_idxs   = range(1)
 input_dir       = argv[1] if len(argv)>2 else '../google-datatrace/task_usage/'
@@ -51,7 +53,7 @@ if not SKIP_RAW_PROCESS:
         pass
 
 #NOTE: Step 2: Get statistics
-if not SKIP_SUMMARY:
+if not SKIP_POST_PROCESS:
     for idx in selected_idxs:
         # process trace-*.raw
         trace_in = path.join(output_dir, 'trace-{:05d}.raw'.format(idx))
@@ -65,7 +67,7 @@ if not SKIP_SUMMARY:
                 trace_record[_item[0]][_item[1]] += 1
                 pass
             pass
-        trace_out= path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
+        trace_out= path.join(output_dir, 'trace-{:05d}-post.raw'.format(idx))
         with open(trace_out, 'w') as fout:
             for i,item in enumerate(sorted(trace_record.items())):
                 _data = [min(x,2) for x in item[1]] #normalize
@@ -74,6 +76,7 @@ if not SKIP_SUMMARY:
                 fout.write(_tmp+'\n')
                 pass
             pass
+
         # process proc-*.raw
         proc_in = path.join(output_dir, 'proc-{:05d}.raw'.format(idx))
         proc_out= path.join(output_dir, 'proc-{:05d}.stat'.format(idx))
@@ -85,6 +88,13 @@ if not SKIP_SUMMARY:
                 _val = [float(x) for x in proc_record[i]]
                 # _num, _sum = len(_val), sum(_val) #NOTE: (num=11508, avg=0.205)
                 # fout.write('%d,%.3f\n'%(_num, _sum/_num))
-                fout.write( ','.join(proc_record[i]) + '\n\n' )
+                fout.write( ','.join(proc_record[i]) + '\n' )
             pass
+        pass
+
+#NOTE: Step 3: get arrival probability \lambda_{k,j}, and arrival trace
+if not SKIP_SUMMARY:
+    for idx in selected_idxs:
+        trace_in = path.join(output_dir, 'trace-{:05d}-post.raw'.format(idx))
+        trace_out= path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
         pass

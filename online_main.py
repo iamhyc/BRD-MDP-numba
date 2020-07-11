@@ -108,14 +108,10 @@ def main(args):
     
     while stage < STAGE:
         with Timer(output=True):
-            # toss job arrival for APs in each time slot
-            # arrivals = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
-            # for n in range(N_SLT):
-            #     for j in range(N_JOB):
-            #         for k in range(N_AP):
-            #             arrivals[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
+            
             #FIXME: read job arrivals from data traces
             arrivals = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
+            # arrivals[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
 
             #NOTE: toss broadcast delay for each AP
             br_delay = np.zeros((N_AP), dtype=np.int32)

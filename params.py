@@ -55,7 +55,7 @@ def genProcessingParameter(es2ap_map):
         for m in prange(N_ES):
             # _roll = np.random.randint(30)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) #genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
-            param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #get mean computation time
+            param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #FIXME: mean computation time, 0.205
             if m==0: param[m,j] = param[m,j] / 5 #for cloud server computation time
     return param
 
