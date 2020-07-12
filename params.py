@@ -6,6 +6,10 @@ from utility import *
 from scipy.stats import norm
 from termcolor import cprint
 import networkx as nx
+from pathlib import Path
+
+TRACE_NUM   = 0
+TRACE_FOLDER='./data/trace-{:05d}'.format(TRACE_NUM)
 
 A_SCALE     = 2.00
 MAP_SEED    = 3491
@@ -154,7 +158,7 @@ try:
     es2ap_map = _params['es2ap_map']
 except AssertionError:
     bi_map, es2ap_map = genConnectionMap()
-    arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) )
+    arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics.npy')) #*A_SCALE
     ul_prob   = genUploadingProbabilities(es2ap_map)
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter(es2ap_map)

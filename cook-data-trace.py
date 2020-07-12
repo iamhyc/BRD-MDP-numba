@@ -14,7 +14,7 @@ NUM_JOB_TYPE = 10
 RANDOM_SEED  = 11112
 
 SKIP_RAW_PROCESS = True
-SKIP_SUMMARY     = False
+SKIP_SUMMARY     = True
 SKIP_TRACE_GEN   = False
 
 selected_idxs   = range(1)
@@ -100,9 +100,11 @@ if not SKIP_TRACE_GEN:
     np.random.seed(RANDOM_SEED)
     for idx in selected_idxs:
         trace_in = path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-{:05d}'.format(idx))
+        
+        trace_folder = path.join(output_dir, 'trace-1x-{:05d}'.format(idx))
         Path( trace_folder ).mkdir(exist_ok=True)
         with open(trace_in, 'r') as fin:
+            _statistics = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
             for line in fin.readlines():
                 _idx, _arr_list = line.strip().split(',', 1)
                 _arr_list = [int(x) for x in _arr_list.split(',')] #[str --> int]
@@ -116,8 +118,17 @@ if not SKIP_TRACE_GEN:
                     if i>len(_arr_list)-1: break
                     _result[k, _arr_list[i]] = 1
                 # print(_result)
+                _statistics += _result
                 _file_name = '{:05d}'.format(int(_idx))
                 np.save(Path(trace_folder,_file_name), _result)
                 pass
+            _statistics = _statistics / np.sum(_statistics)
+            np.save(Path(trace_folder, 'statistics'))
             pass
+
+        trace_folder = path.join(output_dir, 'trace-0.25x-{:05d}'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-0.5x-{:05d}'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-1x-{:05d}'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-2x-{:05d}'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-3x-{:05d}'.format(idx))
         pass
