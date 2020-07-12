@@ -11,8 +11,7 @@ import glob
 from os import path
 
 TRACE_NUM   = 0
-A_MAP       = ['0.25x', '0.5x', '1x', '2x', '3x']
-A_SCALE     = A_MAP[2]
+A_SCALE     = ['1x', '1_2x', '1_3x', '1_4x', '1_5x'][2]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
 MAP_SEED    = 3491
@@ -44,8 +43,8 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,   step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 8 ) #(inclusive)
-PROC_MAX   = int( 10 ) #(inclusive)
+PROC_MIN   = int( 0.80 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 1.20 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
@@ -63,7 +62,7 @@ def genProcessingParameter(es2ap_map):
             # _roll = np.random.randint(30)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) #genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ]
-            if m==0: param[m,j] = param[m,j] / 8 #for cloud server computation time
+            if m==0: param[m,j] = param[m,j] / 10 #for cloud server computation time
     return param
 
 def genDelayDistribution():
@@ -148,12 +147,13 @@ def genMergedCandidateSet(bi_map):
 
     return result
 
-def loadArrivalTrace(index, arr_trace, loop=True):
+def loadArrivalTrace(index, loop=True):
+    trace_files = glob.glob( path.join(TRACE_FOLDER, '*.npy') )
     result = np.zeros((N_SLT,N_AP,N_JOB), dtype=np.int32)
-    start_index = (N_SLT*index) % len(arr_trace)
-    # print('[{}, {})'.format(start_index, start_index+N_SLT))
+    start_index = (N_SLT*index) % len(trace_files) # [start_idx, start_idx+N_SLT)
     for i in range(N_SLT):
-        result[i] = np.copy( arr_trace[(start_index+i)%len(arr_trace)] )
+        _idx = (start_index+i) % len(trace_files)
+        result[i] = np.load( trace_files[_idx] )
     return result
 
 try:
@@ -169,7 +169,7 @@ try:
     es2ap_map = _params['es2ap_map']
 except AssertionError:
     bi_map, es2ap_map = genConnectionMap()
-    arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics')) #*A_SCALE
+    arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics'))
     ul_prob   = genUploadingProbabilities(es2ap_map)
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter(es2ap_map)
@@ -200,13 +200,6 @@ finally:
     # proc_mean = genProcessingParameter() #3
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
     pass
-
-#NOTE: load arrivals according to A_SCALE
-_trace_files = glob.glob( path.join(TRACE_FOLDER, '*.npy') )
-_trace_num   = len( _trace_files )
-arr_trace    = np.zeros((_trace_num,N_AP,N_JOB), dtype=np.int32)
-for i,_file in enumerate(_trace_files):
-    arr_trace[i] = np.load(_file)
 
 #NOTE: generate subset partition
 subset_map   = genMergedCandidateSet(bi_map)

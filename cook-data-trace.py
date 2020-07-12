@@ -14,7 +14,7 @@ NUM_JOB_TYPE = 10
 RANDOM_SEED  = 11112
 
 SKIP_RAW_PROCESS = True
-SKIP_SUMMARY     = False
+SKIP_SUMMARY     = True
 SKIP_TRACE_GEN   = False
 
 selected_idxs   = range(1)
@@ -95,42 +95,53 @@ if not SKIP_SUMMARY:
             pass
         pass
 
-#NOTE: Step 3: get arrival probability \lambda_{k,j}, and arrival trace
+#NOTE: Step 3: get arrival trace, and arrival statistics \lambda_{k,j}
+Scales = ['1x', '1_2x', '1_3x', '1_4x', '1_5x']
+zero_padding = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
 if not SKIP_TRACE_GEN:
     np.random.seed(RANDOM_SEED)
     for idx in selected_idxs:
         trace_in = path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
-        
-        trace_folder = path.join(output_dir, 'trace-{:05d}-1x'.format(idx))
-        Path( trace_folder ).mkdir(exist_ok=True)
+        #NOTE: a) ensure trace folders for all scales
+        trace_folders = [path.join(output_dir, 'trace-{:05d}-{}'.format(idx, scale)) for scale in Scales]
+        for folder in trace_folders:
+            Path( folder ).mkdir(exist_ok=True)
+        #NOTE: b) generate statistics for all scales
+        _statistics = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
         with open(trace_in, 'r') as fin:
-            _statistics = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
-            for line in fin.readlines():
-                _idx, _arr_list = line.strip().split(',', 1)
+            for cnt,line in enumerate(fin.readlines()):
+                #NOTE: b1) parse from raw trace
+                _, _arr_list = line.strip().split(',', 1)
                 _arr_list = [int(x) for x in _arr_list.split(',')] #[str --> int]
                 _arr_list = [[i]*x for i,x in enumerate(_arr_list)] #[(0,2) --> [0,0]]
                 _arr_list = list( chain.from_iterable(_arr_list) )
-
+                #NOTE: b2) allocate arrivals onto APs
                 _alloc = np.random.permutation(NUM_AP)
                 _result = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
                 for i,k in enumerate(_alloc):
                     # print(i, len(_arr_list))
                     if i>len(_arr_list)-1: break
                     _result[k, _arr_list[i]] = 1
-                # print(_result)
+                    pass
                 _statistics += _result
-                _file_name = '{:05d}'.format(int(_idx))
-                np.save(Path(trace_folder,_file_name), _result)
+                #NOTE: b3) save trace*.npy for all scales
+                for i,folder in enumerate(trace_folders):
+                    _start_idx = cnt*(i+1)
+                    _end_idx   = _start_idx + i
+                    np.save(Path(folder,'%05d'%_start_idx), _result)
+                    for _ in range(_start_idx+1,_end_idx+1):
+                        np.save(Path(folder,'%05d'%_), zero_padding)
+                        pass
+                    pass
                 pass
-            _statistics = _statistics / np.sum(_statistics)
-            _tmp_path   = path.join(trace_folder, 'statistics')
-            np.save(_tmp_path, _statistics)
+            pass
+        #NOTE: c) save statics for all scales
+        print(_statistics / np.sum(_statistics))
+        for scale,folder in zip(Scales,trace_folders):
+            _num = len( glob.glob( path.join(folder,'*.npy')) )
+            _tmp = _statistics / _num
+            _tmp_path   = path.join(folder, 'statistics')
+            np.save(_tmp_path, _tmp)
             os.rename(_tmp_path+'.npy', _tmp_path)
             pass
-
-        trace_folder = path.join(output_dir, 'trace-{:05d}-0.25x'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-{:05d}-0.5x'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-{:05d}-1x'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-{:05d}-2x'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-{:05d}-3x'.format(idx))
         pass

@@ -109,7 +109,7 @@ def main(args):
     while stage < STAGE:
         with Timer(output=True):
             #NOTE: load trace from pre-defined trace folder (looped)
-            arrivals = loadArrivalTrace(stage, arr_trace) #toss(arr_prob[k,j])
+            arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
             assert( np.any(arrivals==1) )
 
             #NOTE: toss broadcast delay for each AP
