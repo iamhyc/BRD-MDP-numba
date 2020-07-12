@@ -3,7 +3,7 @@ import csv
 from parse import parse
 from sys import argv
 from os import path
-import glob
+import glob, os
 import numpy as np
 from pathlib import Path
 from itertools import chain
@@ -14,7 +14,7 @@ NUM_JOB_TYPE = 10
 RANDOM_SEED  = 11112
 
 SKIP_RAW_PROCESS = True
-SKIP_SUMMARY     = True
+SKIP_SUMMARY     = False
 SKIP_TRACE_GEN   = False
 
 selected_idxs   = range(1)
@@ -101,7 +101,7 @@ if not SKIP_TRACE_GEN:
     for idx in selected_idxs:
         trace_in = path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
         
-        trace_folder = path.join(output_dir, 'trace-1x-{:05d}'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}-1x'.format(idx))
         Path( trace_folder ).mkdir(exist_ok=True)
         with open(trace_in, 'r') as fin:
             _statistics = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
@@ -123,12 +123,14 @@ if not SKIP_TRACE_GEN:
                 np.save(Path(trace_folder,_file_name), _result)
                 pass
             _statistics = _statistics / np.sum(_statistics)
-            np.save(Path(trace_folder, 'statistics'))
+            _tmp_path   = path.join(trace_folder, 'statistics')
+            np.save(_tmp_path, _statistics)
+            os.rename(_tmp_path+'.npy', _tmp_path)
             pass
 
-        trace_folder = path.join(output_dir, 'trace-0.25x-{:05d}'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-0.5x-{:05d}'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-1x-{:05d}'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-2x-{:05d}'.format(idx))
-        trace_folder = path.join(output_dir, 'trace-3x-{:05d}'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}-0.25x'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}-0.5x'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}-1x'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}-2x'.format(idx))
+        trace_folder = path.join(output_dir, 'trace-{:05d}-3x'.format(idx))
         pass

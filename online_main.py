@@ -108,10 +108,9 @@ def main(args):
     
     while stage < STAGE:
         with Timer(output=True):
-            
-            #FIXME: read job arrivals from data traces
-            arrivals = np.zeros((N_SLT, N_AP, N_JOB), dtype=np.int32)
-            # arrivals[n,k,j] = toss(arr_prob[k,j]) #m = policy[k,j]
+            #NOTE: load trace from pre-defined trace folder (looped)
+            arrivals = loadArrivalTrace(stage, arr_trace) #toss(arr_prob[k,j])
+            assert( np.any(arrivals==1) )
 
             #NOTE: toss broadcast delay for each AP
             br_delay = np.zeros((N_AP), dtype=np.int32)
@@ -178,7 +177,7 @@ def main(args):
         # logger.debug( 'Burden:{}, {}, {}, {}'.format(nowStat.getUtility(), SF_nowStat.getUtility(), QA_nowStat.getUtility(), RD_nowStat.getUtility()) )
         pass
     
-    #TODO: blame remaining jobs to throughput
+    #NOTE: blame remaining jobs to throughput
     empty_admissions = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
     nowStat.iterate(empty_admissions, nowStat.es_stat)
     SF_nowStat.iterate(empty_admissions, SF_nowStat.es_stat)

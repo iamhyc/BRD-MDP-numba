@@ -7,11 +7,14 @@ from scipy.stats import norm
 from termcolor import cprint
 import networkx as nx
 from pathlib import Path
+import glob
+from os import path
 
 TRACE_NUM   = 0
-TRACE_FOLDER='./data/trace-{:05d}'.format(TRACE_NUM)
+A_MAP       = ['0.25x', '0.5x', '1x', '2x', '3x']
+A_SCALE     = A_MAP[2]
+TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
-A_SCALE     = 2.00
 MAP_SEED    = 3491
 RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
@@ -33,16 +36,16 @@ N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
 BR_MIN     = int( 0.70 * N_SLT )    #(inclusive)
 BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
-BR_RNG     = np.arange(BR_MIN, BR_MAX,       step=1, dtype=np.int32)
+BR_RNG     = np.arange(BR_MIN, BR_MAX,     step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
 UL_MIN     = int( 2.50 * N_SLT )    #(inclusive)
 UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
-UL_RNG     = np.arange(UL_MIN, UL_MAX+1,     step=1, dtype=np.int32)
+UL_RNG     = np.arange(UL_MIN, UL_MAX+1,   step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.50 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 2.00 * N_SLT ) #(inclusive)
+PROC_MIN   = int( 8 ) #(inclusive)
+PROC_MAX   = int( 10 ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
@@ -59,8 +62,8 @@ def genProcessingParameter(es2ap_map):
         for m in prange(N_ES):
             # _roll = np.random.randint(30)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) #genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
-            param[m,j] = PROC_RNG[ multoss(_tmp_dist) ] #FIXME: mean computation time, 0.205
-            if m==0: param[m,j] = param[m,j] / 5 #for cloud server computation time
+            param[m,j] = PROC_RNG[ multoss(_tmp_dist) ]
+            if m==0: param[m,j] = param[m,j] / 8 #for cloud server computation time
     return param
 
 def genDelayDistribution():
@@ -145,6 +148,14 @@ def genMergedCandidateSet(bi_map):
 
     return result
 
+def loadArrivalTrace(index, arr_trace, loop=True):
+    result = np.zeros((N_SLT,N_AP,N_JOB), dtype=np.int32)
+    start_index = (N_SLT*index) % len(arr_trace)
+    # print('[{}, {})'.format(start_index, start_index+N_SLT))
+    for i in range(N_SLT):
+        result[i] = np.copy( arr_trace[(start_index+i)%len(arr_trace)] )
+    return result
+
 try:
     assert( Path(npzfile).exists() )
     _params   = np.load(npzfile)
@@ -158,7 +169,7 @@ try:
     es2ap_map = _params['es2ap_map']
 except AssertionError:
     bi_map, es2ap_map = genConnectionMap()
-    arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics.npy')) #*A_SCALE
+    arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics')) #*A_SCALE
     ul_prob   = genUploadingProbabilities(es2ap_map)
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter(es2ap_map)
@@ -189,6 +200,13 @@ finally:
     # proc_mean = genProcessingParameter() #3
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
     pass
+
+#NOTE: load arrivals according to A_SCALE
+_trace_files = glob.glob( path.join(TRACE_FOLDER, '*.npy') )
+_trace_num   = len( _trace_files )
+arr_trace    = np.zeros((_trace_num,N_AP,N_JOB), dtype=np.int32)
+for i,_file in enumerate(_trace_files):
+    arr_trace[i] = np.load(_file)
 
 #NOTE: generate subset partition
 subset_map   = genMergedCandidateSet(bi_map)
