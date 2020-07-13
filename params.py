@@ -9,9 +9,10 @@ import networkx as nx
 from pathlib import Path
 import glob
 from os import path
+from sys import argv
 
 TRACE_NUM   = 0
-A_SCALE     = ['1x', '1_2x', '1_3x', '1_4x', '1_5x'][2]
+A_SCALE     = ['1x', '1_2x', '1_3x', '1_4x', '1_5x'][1]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
 MAP_SEED    = 3491
@@ -21,7 +22,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 120
-STAGE   = 250
+STAGE   = 300
 
 N_AP  = 15
 N_ES  = 10
@@ -43,7 +44,7 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,   step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 0.80 * N_SLT ) #(inclusive)
+PROC_MIN   = int( 1.00 * N_SLT ) #(inclusive)
 PROC_MAX   = int( 1.20 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
@@ -62,7 +63,7 @@ def genProcessingParameter(es2ap_map):
             # _roll = np.random.randint(30)
             _tmp_dist = genHeavyHeadDist(PROC_RNG_L) #genHeavyTailDist(PROC_RNG_L) if _roll==0 else genHeavyHeadDist(PROC_RNG_L)
             param[m,j] = PROC_RNG[ multoss(_tmp_dist) ]
-            if m==0: param[m,j] = param[m,j] / 10 #for cloud server computation time
+            if m==0: param[m,j] = param[m,j] / 6 #for cloud server computation time
     return param
 
 def genDelayDistribution():
@@ -159,9 +160,9 @@ def loadArrivalTrace(index, loop=True):
 try:
     assert( Path(npzfile).exists() )
     _params   = np.load(npzfile)
-    arr_prob  = _params['arr_prob'] #1
-    br_dist   = _params['br_dist'] #2
-    proc_mean = _params['proc_mean'] #3
+    arr_prob  = _params['arr_prob']
+    br_dist   = _params['br_dist']
+    proc_mean = _params['proc_mean']
     ul_prob   = _params['ul_prob']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
@@ -195,10 +196,8 @@ except AssertionError:
         ])
     })
 finally:
-    # arr_prob  = A_SCALE*U_FACTOR * ( 0.4+0.6*np.random.rand(N_AP, N_JOB).astype(np.float64) ) #1
-    # br_dist   = genDelayDistribution() #2
-    # proc_mean = genProcessingParameter() #3
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
+    exec(argv[-1]) #NOTE: Inject external parameters
     pass
 
 #NOTE: generate subset partition
@@ -214,7 +213,6 @@ cprint('Subset Number: {}'.format(N_SET), 'red')
 for item in subset_map:
     cprint(item, 'magenta')
 print()
-
 #NOTE: Test Code
 # tmp_n, cnt = 100, 0
 # while tmp_n>=7 and cnt<1000:

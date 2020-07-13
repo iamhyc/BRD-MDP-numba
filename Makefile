@@ -4,8 +4,8 @@ all:
 	pip3 install networkx --user	
 	pip3 install parse --user	
 
-run:	
-	@python3 ./online_main.py --postfix test --plot	
+run:
+	@python3 ./online_main.py --postfix test --plot
 
 submit:	
 	bsub -q short -n 40 -R "span[ptile=40]" -e %J.err -o %J.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py"	

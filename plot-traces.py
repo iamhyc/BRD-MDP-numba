@@ -107,7 +107,6 @@ def plot_bar_graph():
                     summary['Random_average_throughput']]
     average_throughput = 1.0 - np.array(average_throughput)
     print('Average Throughput:', average_throughput)
-    # average_throughput = np.array([0.6571764705882352, 0.6211764705882353, 0.7105767195767195, 0.710475073313783])
     bar_plot3 = ax3.bar(x, average_throughput, color='#1F77B4')
     # ax3.set_ylim([0.0, 1.0])
     ax3.set_title('(c)', y=-0.075, fontsize=20)
@@ -354,13 +353,12 @@ def myNumAPsPlot():
     plt.clf()
     pass
 
-plot_bar_graph()
+# plot_bar_graph()
 # plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
-# plot_cost_cdf_vs_time()
+plot_cost_cdf_vs_time()
 
 # plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
 # plot_traces_study(argv[1])
 # myNumAPsPlot()
-# myProcDistPlot()
