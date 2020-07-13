@@ -12,7 +12,7 @@ from os import path
 from sys import argv
 
 TRACE_NUM   = 0
-A_SCALE     = ['1x', '1_2x', '1_3x', '1_4x', '1_5x'][1]
+A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][0]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
 MAP_SEED    = 3491
@@ -22,7 +22,7 @@ np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 120
-STAGE   = 300
+STAGE   = 200
 
 N_AP  = 15
 N_ES  = 10
@@ -34,8 +34,8 @@ TB    = 0.50         #interval, 500ms
 N_SLT = int(TB/TS)   #25 slots/interval
 N_CNT = 3*N_SLT + 1  #number of counters, ranged in [0,N_CNT-1]
 
-BR_MIN     = int( 0.70 * N_SLT )    #(inclusive)
-BR_MAX     = int( 1.00 * N_SLT )    #(exclusive)
+BR_MIN     = int( 0.70 * N_SLT-1 )    #(inclusive)
+BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,     step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
@@ -45,7 +45,7 @@ UL_RNG     = np.arange(UL_MIN, UL_MAX+1,   step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
 PROC_MIN   = int( 1.00 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 1.20 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 1.25 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
@@ -206,6 +206,7 @@ except AssertionError:
         ])
     })
 finally:
+    br_dist   = genDelayDistribution()
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
     if len(argv)>3 and argv[-2]=='--inject':# Inject external parameters
         exec(argv[-1])

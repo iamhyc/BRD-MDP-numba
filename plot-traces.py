@@ -12,7 +12,7 @@ from params import BETA,LQ
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 # rc('font',**{'family':'serif','serif':['Palatino']}) # Palatino font
-rc('text', usetex=True)
+# rc('text', usetex=True)
 
 MDP_LABEL  = 'MDP Policy'
 CUT_NUM    = 0
@@ -311,10 +311,11 @@ def plot_traces_study(prefix):
     ax.plot(x_ticks, sf_cost,  '-bs')
     ax.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     ax.set_ylabel('Average Cost', fontsize=16)
+
     if _type=='arrival':
-        ax.set_xlabel('Range of Expectation $\lambda_{m,j}$ of Arrival Rate', fontsize=16)
+        ax.set_xlabel('Times of Arrival Intensity to Original Data trace', fontsize=16)
     elif _type=='proc':
-        ax.set_xlabel('Range of Expectation $c_{m,j}$ of Processing Time Distribution', fontsize=16)
+        ax.set_xlabel('Times of Expectation Processing Time', fontsize=16)
     else:
         ax.set_xlabel(_type, fontsize=16)
 
@@ -357,8 +358,8 @@ def myNumAPsPlot():
 # plot_number_vs_time()
 # plot_cost_vs_time()
 # plot_number_cdf_vs_time()
-plot_cost_cdf_vs_time()
+# plot_cost_cdf_vs_time()
 
 # plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
-# plot_traces_study(argv[1])
+plot_traces_study(argv[1])
 # myNumAPsPlot()

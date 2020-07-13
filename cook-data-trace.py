@@ -13,13 +13,14 @@ NUM_AP       = 15
 NUM_JOB_TYPE = 10
 RANDOM_SEED  = 11112
 
-SKIP_RAW_PROCESS = True
-SKIP_SUMMARY     = True
-SKIP_TRACE_GEN   = True
+SKIP_RAW_PROCESS = False
+SKIP_SUMMARY     = False
+SKIP_TRACE_GEN   = False
+NORM_FACTOR = 4
 
 selected_idxs   = range(1)
 input_dir       = argv[1] if len(argv)>2 else '../google-datatrace/task_usage/'
-output_dir      = './data'
+output_dir      = './data'; Path(output_dir).mkdir(exist_ok=True)
 _format         = '{}part-{}-of-{}.csv'
 trace_files     = glob.glob( path.join(input_dir,'*.csv') )
 trace_files.sort()
@@ -50,7 +51,7 @@ if not SKIP_RAW_PROCESS:
                     f_proc.write('{:.3f}\n'.format(proc_time)) #(proc_time)
                     pass
             except StopIteration as e:
-                print('Part-{:05d} done.'.format(idx))
+                print('Part-{:05d} Step 1 done.'.format(idx))
                 pass
             pass
         pass
@@ -73,7 +74,7 @@ if not SKIP_SUMMARY:
         trace_out= path.join(output_dir, 'trace-{:05d}.stat'.format(idx))
         with open(trace_out, 'w') as fout:
             for i,item in enumerate(sorted(trace_record.items())):
-                _data = [min(x,2) for x in item[1]] #normalize
+                _data = [min(x,NORM_FACTOR) for x in item[1]] #FIXME: normalize
                 _data = ','.join(map(str, _data))
                 _tmp = ','.join( [str(i), _data] ) #[str(i), _data] / [item[0], _data]
                 fout.write(_tmp+'\n')
@@ -96,7 +97,7 @@ if not SKIP_SUMMARY:
         pass
 
 #NOTE: Step 3: get arrival trace, and arrival statistics \lambda_{k,j}
-Scales = ['1x', '1_2x', '1_3x', '1_4x', '1_5x']
+Scales = ['1x', '1_2x', '1_3x', '1_4x', '1_5x', '1_6x']
 zero_padding = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
 if not SKIP_TRACE_GEN:
     np.random.seed(RANDOM_SEED)
@@ -119,7 +120,6 @@ if not SKIP_TRACE_GEN:
                 _alloc = np.random.permutation(NUM_AP)
                 _result = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
                 for i,k in enumerate(_alloc):
-                    # print(i, len(_arr_list))
                     if i>len(_arr_list)-1: break
                     _result[k, _arr_list[i]] = 1
                     pass
@@ -136,12 +136,12 @@ if not SKIP_TRACE_GEN:
                 pass
             pass
         #NOTE: c) save statics for all scales
-        print(_statistics / np.sum(_statistics))
         for scale,folder in zip(Scales,trace_folders):
             _num = len( glob.glob( path.join(folder,'*.npy')) )
             _tmp = _statistics / _num
             _tmp_path   = path.join(folder, 'statistics')
             np.save(_tmp_path, _tmp)
             os.rename(_tmp_path+'.npy', _tmp_path)
+            print(_tmp, _num, '\n')
             pass
         pass
