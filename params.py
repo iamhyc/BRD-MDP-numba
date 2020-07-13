@@ -66,7 +66,11 @@ def genProcessingParameter(es2ap_map):
             if m==0: param[m,j] = param[m,j] / 6 #for cloud server computation time
     return param
 
-def genDelayDistribution():
+def genDelayDistribution(redo=False):
+    global BR_RNG, BR_RNG_L
+    if redo:
+        BR_RNG   = np.arange(BR_MIN, BR_MAX,     step=1, dtype=np.int32)
+        BR_RNG_L = len(BR_RNG)
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)
     for k in range(N_AP):
         dist[k] = genFlatDist(BR_RNG_L)
@@ -198,7 +202,9 @@ except AssertionError:
 finally:
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
     if len(argv)>3 and argv[-2]=='--inject':#NOTE: Inject external parameters
+        # cprint(BR_RNG, 'blue')
         exec(argv[-1])
+        # cprint(BR_RNG, 'red')
     pass
 
 #NOTE: generate subset partition
