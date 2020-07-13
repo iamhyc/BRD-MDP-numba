@@ -55,8 +55,12 @@ U_FACTOR    = N_ES * (1/PROC_MAX) / N_AP
 
 npzfile = 'logs/{:05d}.npz'.format(RANDOM_SEED)
 
-@njit
-def genProcessingParameter(es2ap_map):
+def genProcessingParameter(es2ap_map, redo=False):
+    global PROC_RNG, PROC_RNG_L
+    if redo:
+        PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
+        PROC_RNG_L = len(PROC_RNG)
+    
     param = np.zeros((N_ES, N_JOB), dtype=np.int32)
     for j in prange(N_JOB):
         for m in prange(N_ES):
@@ -71,6 +75,7 @@ def genDelayDistribution(redo=False):
     if redo:
         BR_RNG   = np.arange(BR_MIN, BR_MAX,     step=1, dtype=np.int32)
         BR_RNG_L = len(BR_RNG)
+    
     dist = np.zeros((N_AP, BR_RNG_L), dtype=np.float64)
     for k in range(N_AP):
         dist[k] = genFlatDist(BR_RNG_L)
@@ -202,9 +207,7 @@ except AssertionError:
 finally:
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
     if len(argv)>3 and argv[-2]=='--inject':#NOTE: Inject external parameters
-        # cprint(BR_RNG, 'blue')
         exec(argv[-1])
-        # cprint(BR_RNG, 'red')
     pass
 
 #NOTE: generate subset partition
@@ -214,7 +217,7 @@ subset_ind = np.zeros((N_SET, N_AP), dtype=np.int32)
 for n in range(N_SET):
     for k in subset_map[n][0]:
         subset_ind[n, k] = 1
-
+    pass
 #NOTE: print subset partition
 cprint('Subset Number: {}'.format(N_SET), 'red')
 for item in subset_map:
