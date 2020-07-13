@@ -1,34 +1,30 @@
 #!/bin/bash
 # WARNING: Execute this script from parent folder.
-rm -f logs/*.npz
-mv -f params.py params.py.bak
 
-# submit 10-15 processing-study task
-cp -f __test__/params-proc-10-15.py params.py && \
-bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-10-15"
-sleep 40
+# submit 0.50x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-0.50x \
+                        --inject 'PROC_MIN=int(0.50*N_SLT); PROC_MAX=int(0.75*N_SLT)'"
 
-# submit 15-20 processing-study task
-cp -f __test__/params-proc-15-20.py params.py && \
-bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-15-20"
-sleep 40
+# submit 0.75x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-0.75x \
+                        --inject 'PROC_MIN=int(0.75*N_SLT); PROC_MAX=int(1.00*N_SLT)'"
 
-# submit 20-25 processing-study task
-cp -f __test__/params-proc-20-25.py params.py && \
-bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-20-25"
-sleep 40
+# submit 1.00x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-1.00x \
+                        --inject 'PROC_MIN=int(1.00*N_SLT); PROC_MAX=int(1.25*N_SLT)'"
 
-# submit 25-30 processing-study task
-cp -f __test__/params-proc-25-30.py params.py && \
-bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-25-30"
-sleep 40
+# submit 1.25x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-1.25x \
+                        --inject 'PROC_MIN=int(1.25*N_SLT); PROC_MAX=int(1.50*N_SLT)'"
 
-# submit 30-35 processing-study task
-cp -f __test__/params-proc-30-35.py params.py && \
-bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-30-35"
-sleep 40
+# submit 1.50x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-1.50x \
+                        --inject 'PROC_MIN=int(1.50*N_SLT); PROC_MAX=int(1.75*N_SLT)'"
 
-# submit 35-40 processing-study task
-cp -f __test__/params-proc-35-40.py params.py && \
-bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-35-40"
-sleep 40
+# submit 1.75x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-1.75x \
+                        --inject 'PROC_MIN=int(1.75*N_SLT); PROC_MAX=int(2.00*N_SLT)'"
+
+# submit 2.00x processing-study task
+bsub -q short -n 40 -R "span[ptile=40]" -e %J-proc.err -o %J-proc.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix proc-2.00x \
+                        --inject 'PROC_MIN=int(2.00*N_SLT); PROC_MAX=int(2.25*N_SLT)'"
