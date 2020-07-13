@@ -12,7 +12,7 @@ from os import path
 from sys import argv
 
 TRACE_NUM   = 0
-A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][2]
+A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][1]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
 MAP_SEED    = 3491
