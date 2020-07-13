@@ -1,8 +1,8 @@
 
 all:	
 	pip3 install numpy numba scipy matplotlib PyQt5 termcolor parse --user -i https://mirrors.sustc.us/pypi/simple	
-	pip3 install networkx --user	
-	pip3 install parse --user	
+	pip3 install networkx --user
+	pip3 install parse --user
 
 run:
 	@python3 ./online_main.py --postfix test --plot

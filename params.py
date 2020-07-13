@@ -158,6 +158,7 @@ def genMergedCandidateSet(bi_map):
     return result
 
 def loadArrivalTrace(index, loop=True):
+    global TRACE_FOLDER
     trace_files = glob.glob( path.join(TRACE_FOLDER, '*.npy') )
     result = np.zeros((N_SLT,N_AP,N_JOB), dtype=np.int32)
     start_index = (N_SLT*index) % len(trace_files) # [start_idx, start_idx+N_SLT)
@@ -209,6 +210,7 @@ finally:
     if len(argv)>3 and argv[-2]=='--inject':#NOTE: Inject external parameters
         exec(argv[-1])
     pass
+
 
 #NOTE: generate subset partition
 subset_map   = genMergedCandidateSet(bi_map)
