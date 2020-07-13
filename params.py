@@ -207,9 +207,10 @@ except AssertionError:
     })
 finally:
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
-    if len(argv)>3 and argv[-2]=='--inject':#NOTE: Inject external parameters
+    if len(argv)>3 and argv[-2]=='--inject':# Inject external parameters
         exec(argv[-1])
     pass
+
 
 
 #NOTE: generate subset partition
