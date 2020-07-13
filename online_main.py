@@ -110,7 +110,7 @@ def main(args):
         with Timer(output=True):
             #NOTE: load trace from pre-defined trace folder (looped)
             arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
-            assert( np.any(arrivals==1) )
+            # assert( np.any(arrivals==1) )
 
             #NOTE: toss broadcast delay for each AP
             br_delay = np.zeros((N_AP), dtype=np.int32)

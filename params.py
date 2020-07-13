@@ -12,7 +12,7 @@ from os import path
 from sys import argv
 
 TRACE_NUM   = 0
-A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][0]
+A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][2]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
 MAP_SEED    = 3491
@@ -44,8 +44,8 @@ UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,   step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
-PROC_MIN   = int( 1.00 * N_SLT ) #(inclusive)
-PROC_MAX   = int( 1.25 * N_SLT ) #(inclusive)
+PROC_MIN   = int( 1.25 * N_SLT ) #(inclusive)
+PROC_MAX   = int( 1.50 * N_SLT ) #(inclusive)
 PROC_RNG   = np.arange(PROC_MIN, PROC_MAX, step=1, dtype=np.int32)
 PROC_RNG_L = len(PROC_RNG)
 DIM_P      = (LQ+1)
