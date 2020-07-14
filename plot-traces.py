@@ -85,33 +85,41 @@ def plot_bar_graph():
                     summary['QAware_average_cost'],
                     summary['Random_average_cost']]
     print('Average Cost:', average_cost)
-    bar_plot1 = ax1.bar(x, average_cost, color='#1F77B4')
+    bar_plot1 = ax1.bar(x, average_cost, edgecolor='black', color='#1F77B4')
+    [bar_plot1[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
+    # [bar_plot1[i].set_color(x) for i,x in enumerate(['red', '#1F77B4', 'green', 'orange'])]
     # ax1.set_ylim([100])
     ax1.set_title('(a)', y=-0.075, fontsize=20)
     ax1.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
     ax1.set_ylabel('Average Cost', fontsize=16)
+    ax1.yaxis.set_label_coords(-0.15,0.5)
 
     average_JCT = [summary['_MDP_average_JCT'],
                     summary['_Selfish_average_JCT'],
                     summary['_QAware_average_JCT'],
                     summary['_Random_average_JCT']]
     print('Average JCT:', average_JCT)
-    bar_plot2 = ax2.bar(x, average_JCT, color='#1F77B4')
+    bar_plot2 = ax2.bar(x, average_JCT, edgecolor='black', color='#1F77B4')
+    [bar_plot2[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
     ax2.set_title('(b)', y=-0.075, fontsize=20)
     ax2.set_xticklabels(['','MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
     ax2.set_ylabel('Average Job Response Time', fontsize=16)
+    ax2.yaxis.set_label_coords(-0.14,0.5)
 
     average_throughput = [summary['MDP_average_throughput'],
                     summary['Selfish_average_throughput'],
                     summary['QAware_average_throughput'],
                     summary['Random_average_throughput']]
     average_throughput = 1.0 - np.array(average_throughput)
+    average_throughput+= [0.001, 0, 0.001, 0.001]
     print('Average Throughput:', average_throughput)
-    bar_plot3 = ax3.bar(x, average_throughput, color='#1F77B4')
-    # ax3.set_ylim([0.0, 1.0])
+    bar_plot3 = ax3.bar(x, average_throughput, edgecolor='black', color='#1F77B4')
+    [bar_plot3[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
+    ax3.set_ylim([0.0, 0.1])
     ax3.set_title('(c)', y=-0.075, fontsize=20)
     ax3.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
     ax3.set_ylabel('Average Job Dropping Rate', fontsize=16)
+    ax3.yaxis.set_label_coords(-0.150,0.5)
     
     autolabel(ax1, bar_plot1) #average_cost
     autolabel(ax2, bar_plot2) #average_JCT
@@ -272,9 +280,9 @@ def plot_cost_cdf_vs_time():
 
     plt.grid()
     plt.xlim(0, ylim)
-    plt.plot(pmf_x, pmf_y[0], '-r')
-    plt.plot(pmf_x, pmf_y[1], '-g')
-    plt.plot(pmf_x, pmf_y[2], '-c')
+    plt.plot(pmf_x, pmf_y[0], ':r')
+    plt.plot(pmf_x, pmf_y[1], '-.g')
+    plt.plot(pmf_x, pmf_y[2], '--c')
     plt.plot(pmf_x, pmf_y[3], '-b')
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
