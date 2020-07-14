@@ -16,7 +16,7 @@ RANDOM_SEED  = 11112
 SKIP_RAW_PROCESS = False
 SKIP_SUMMARY     = False
 SKIP_TRACE_GEN   = False
-NORM_FACTOR = 5
+NORM_FACTOR = 8
 
 selected_idxs   = range(1)
 input_dir       = argv[1] if len(argv)>2 else '../google-datatrace/task_usage/'
@@ -94,6 +94,7 @@ if not SKIP_SUMMARY:
                 # fout.write('%d,%.3f\n'%(_num, _sum/_num))
                 fout.write( ','.join(proc_record[i]) + '\n' )
             pass
+        print('Part-{:05d} Step 2 done.'.format(idx))
         pass
 
 #NOTE: Step 3: get arrival trace, and arrival statistics \lambda_{k,j}
@@ -144,4 +145,5 @@ if not SKIP_TRACE_GEN:
             os.rename(_tmp_path+'.npy', _tmp_path)
             print(_tmp, _num, '\n')
             pass
+        print('Part-{:05d} Step 3 done.'.format(idx))
         pass
