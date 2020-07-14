@@ -87,7 +87,6 @@ def plot_bar_graph():
     print('Average Cost:', average_cost)
     bar_plot1 = ax1.bar(x, average_cost, edgecolor='black', color='#1F77B4')
     [bar_plot1[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
-    # [bar_plot1[i].set_color(x) for i,x in enumerate(['red', '#1F77B4', 'green', 'orange'])]
     # ax1.set_ylim([100])
     ax1.set_title('(a)', y=-0.075, fontsize=20)
     ax1.set_xticklabels(['', 'MDP', 'Selfish', 'Queue-aware', 'Random'], fontsize=14)
@@ -364,10 +363,10 @@ def myNumAPsPlot():
 
 # plot_bar_graph()
 # plot_number_vs_time()
-# plot_cost_vs_time()
+plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
 # plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
-plot_traces_study(argv[1])
+# plot_traces_study(argv[1])
 # myNumAPsPlot()
