@@ -16,7 +16,7 @@ RANDOM_SEED  = 11112
 SKIP_RAW_PROCESS = False
 SKIP_SUMMARY     = False
 SKIP_TRACE_GEN   = False
-NORM_FACTOR = 50
+NORM_FACTOR = 100
 
 selected_idxs   = range(1)
 input_dir       = argv[1] if len(argv)>2 else '../google-datatrace/task_usage/'
@@ -98,7 +98,7 @@ if not SKIP_SUMMARY:
         pass
 
 #NOTE: Step 3: get arrival trace, and arrival statistics \lambda_{k,j}
-Scales = ['1x', '1_2x', '1_3x', '1_4x', '1_5x', '1_6x']
+Scales = ['1_1x', '1_2x', '1_3x', '1_4x', '1_5x', '1_6x']
 zero_padding = np.zeros((NUM_AP,NUM_JOB_TYPE), dtype=np.int32)
 if not SKIP_TRACE_GEN:
     np.random.seed(RANDOM_SEED)
