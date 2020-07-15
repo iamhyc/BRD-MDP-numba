@@ -16,7 +16,7 @@ RANDOM_SEED  = 11112
 SKIP_RAW_PROCESS = False
 SKIP_SUMMARY     = False
 SKIP_TRACE_GEN   = False
-NORM_FACTOR = 25
+NORM_FACTOR = 250
 
 selected_idxs   = range(1)
 input_dir       = argv[1] if len(argv)>2 else '../google-datatrace/task_usage/'

@@ -320,9 +320,9 @@ def plot_traces_study(prefix):
     ax.set_ylabel('Average Cost', fontsize=16)
 
     if _type=='arrival':
-        ax.set_xlabel('Times of Arrival Intensity to Original Data trace', fontsize=16)
+        ax.set_xlabel('Ratio of Job Arrival Intensity to Original Trace', fontsize=16)
     elif _type=='proc':
-        ax.set_xlabel('Times of Expectation Processing Time', fontsize=16)
+        ax.set_xlabel('Ratio of Mean Job Processing Time to Original Trace', fontsize=16)
     else:
         ax.set_xlabel(_type, fontsize=16)
 
@@ -363,10 +363,10 @@ def myNumAPsPlot():
 
 # plot_bar_graph()
 # plot_number_vs_time()
-plot_cost_vs_time()
+# plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
 # plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
-# plot_traces_study(argv[1])
+plot_traces_study(argv[1])
 # myNumAPsPlot()
