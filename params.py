@@ -167,6 +167,7 @@ def loadArrivalTrace(index, loop=True):
         result[i] = np.load( trace_files[_idx] )
     return result
 
+#--------------------------- Execution Once When First Loaded ---------------------------#
 try:
     assert( Path(npzfile).exists() )
     _params   = np.load(npzfile)
@@ -209,11 +210,10 @@ except AssertionError:
 finally:
     br_dist   = genDelayDistribution()
     ul_rng    = np.arange(N_CNT, dtype=np.float64) #just facalited arrays
-    if len(argv)>3 and argv[-2]=='--inject':# Inject external parameters
+    #NOTE: inject external parameters via `online_main`
+    if len(argv)>3 and argv[-2]=='--inject':
         exec(argv[-1])
     pass
-
-
 
 #NOTE: generate subset partition
 subset_map   = genMergedCandidateSet(bi_map)
