@@ -136,10 +136,10 @@ def plot_cost_vs_time():
     Selfish_cost = [getCost(x['ap_stat'], x['es_stat']) for x in Selfish_trace][CUT_NUM:]
     
     plt.grid()
-    plt.plot(range(n_files-CUT_NUM), MDP_cost,     '-ro')
-    plt.plot(range(n_files-CUT_NUM), QAware_cost,  '-go')
-    plt.plot(range(n_files-CUT_NUM), Random_cost,  '-co')
-    plt.plot(range(n_files-CUT_NUM), Selfish_cost, '-bo')
+    plt.plot(range(n_files-CUT_NUM), MDP_cost,     ':r.')
+    plt.plot(range(n_files-CUT_NUM), QAware_cost,  '-g.')
+    plt.plot(range(n_files-CUT_NUM), Random_cost,  '--c.')
+    plt.plot(range(n_files-CUT_NUM), Selfish_cost, '-.b.')
 
     plt.legend([MDP_LABEL, 'Queue-aware Policy', 'Random Policy', 'Selfish Policy'], fontsize=14)
     plt.ylabel('Cost', fontsize=16)
@@ -363,10 +363,10 @@ def myNumAPsPlot():
 
 # plot_bar_graph()
 # plot_number_vs_time()
-# plot_cost_vs_time()
+plot_cost_vs_time()
 # plot_number_cdf_vs_time()
 # plot_cost_cdf_vs_time()
 
 # plot_update_vs_time(serial='traces-03896-serial', parallel='traces-03896-parallel')
-plot_traces_study(argv[1])
+# plot_traces_study(argv[1])
 # myNumAPsPlot()
