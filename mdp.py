@@ -235,7 +235,7 @@ def optimize(stage, systemStat, oldPolicy):
             nowPolicy[k, j]   = val_tmp.argmin()            #   |
             val_collection[j] = val_tmp.min()               #   |
             pass                                            #   end
-    pass                                                    #end
+        pass                                                #end
 
     # print(val_collection)
 
