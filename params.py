@@ -16,13 +16,14 @@ A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][1]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)
 
 MAP_SEED    = 3491
-RANDOM_SEED = random.randint(0, 2**16)
+# RANDOM_SEED = random.randint(0, 2**16)
 RANDOM_SEED = 3896
 np.random.seed(RANDOM_SEED)
 
 GAMMA   = 0.95
 BETA    = 120
-STAGE   = 250
+STAGE   = 150
+P_LOOP  = 200
 
 N_AP  = 15
 N_ES  = 10
@@ -169,7 +170,7 @@ def loadArrivalTrace(index, loop=True):
 
 #--------------------------- Execution Once When First Loaded ---------------------------#
 try:
-    assert( Path(npzfile).exists() )
+    assert( Path(npzfile).exists() ) #generate new params set only when no existing
     _params   = np.load(npzfile)
     arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics'))
     # arr_prob  = _params['arr_prob']
@@ -238,3 +239,4 @@ print()
 #     print(cnt, (tmp_n, MAP_SEED))
 #     cnt += 1
 #     pass
+#----------------------------- End of First Loaded Section -----------------------------#
