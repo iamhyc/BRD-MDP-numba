@@ -12,7 +12,7 @@
 
 ### Todo
 
-- [ ] try `fastmath` option in `@njit`
+- [x] try `fastmath` option in `@njit` (no performance difference)
 - [ ] commit a `main_one_shot` function, with reduced and formatted output
     - move all related traces under same folder
     - recording somehow per-stage
