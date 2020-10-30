@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import os, pathlib
+import os
+from pathlib import Path
 import argparse
 import numpy as np
 from mdp import *
@@ -86,14 +87,14 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
 
     return nextStat
 
-def main(args):
-    record_mark = '{prefix}-{postfix}'.format(prefix=RECORD_PREFIX, postfix=args.postfix)
+def main_one_shot(args):
+    record_mark = 'records-{prefix}'.format(prefix=RECORD_PREFIX); print(record_mark)
+    logger = getLogger(record_mark)
+    record_folder = Path( record_mark, args.postfix )
+    record_folder.mkdir(exist_ok=True, parents=True)
     if args.plot_flag:
         matplotlib.use("Qt5agg")
         plt.ion()
-    print(record_mark)
-    logger = getLogger(record_mark)
-    pathlib.Path('./traces-{}'.format(record_mark)).mkdir(exist_ok=True)
     
     stage = 0
     oldStat,   nowStat   = State(),          State()
@@ -108,7 +109,7 @@ def main(args):
     
     while stage < STAGE:
         with Timer(output=True):
-            #NOTE: load trace from pre-defined trace folder (looped)
+            #NOTE: load arrival trace from pre-defined trace folder (looped)
             arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
             # assert( np.any(arrivals==1) )
 
@@ -160,8 +161,8 @@ def main(args):
             logger.debug('\t\t\t%3d \t %2d \t\t %2d \t %2d'%(m1, m2-m1, m3-m1, m4-m1))
             pass
 
-        trace_file = 'traces-{}/{:04d}.npz'.format(record_mark, stage)
-        np.savez(trace_file, **{
+        stage_record = Path( record_folder, '%04d'%stage ).as_posix()
+        np.savez(stage_record, **{
             'MDP_value'   : val,
             'MDP_ap_stat' : nowStat.ap_stat,
             'MDP_es_stat' : nowStat.es_stat,
@@ -185,7 +186,7 @@ def main(args):
     RD_nowStat.iterate(empty_admissions, RD_nowStat.es_stat)
     
     #save summary file
-    summary_file = 'traces-{}/summary'.format(record_mark)
+    summary_file = Path( record_folder, 'summary' ).as_posix()
     np.savez(summary_file, **{
         'MDP_average_cost'    : nowStat.average_cost(),
         'Selfish_average_cost': SF_nowStat.average_cost(),
@@ -231,7 +232,7 @@ if __name__ == "__main__":
             help='always as last one for `params.py` usage.')
         args = parser.parse_args()
 
-        main(args)
+        main_one_shot(args)
     except Exception as e:
         raise e
     finally:

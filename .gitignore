@@ -4,6 +4,7 @@ __selected__
 __test__
 logs
 traces*
+records*
 figures
 *.err
 *.out
