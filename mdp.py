@@ -76,7 +76,7 @@ class State(object):
 
     pass
 
-@njit
+@njit(fastmath=True)
 def RandomPolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
     for k in prange(N_AP):
@@ -84,7 +84,7 @@ def RandomPolicy():
             policy[k, j] = np.random.randint(N_ES)
     return policy
 
-@njit
+@njit(fastmath=True)
 def BaselinePolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
     for k in prange(N_AP):
@@ -95,7 +95,7 @@ def BaselinePolicy():
             assert( bi_map[k,policy[k,j]]==1 )
     return policy
 
-@njit
+@njit(fastmath=True)
 def AP2Vec(ap_stat, prob):
     assert((ap_stat <= 1).all())
     ap_vec = np.zeros(N_CNT, dtype=np.float64)
@@ -105,13 +105,13 @@ def AP2Vec(ap_stat, prob):
     ap_vec[0] = prob
     return ap_vec
 
-@njit
+@njit(fastmath=True)
 def ES2Vec(es_stat):
     es_vec = np.zeros((DIM_P), dtype=np.float64)
     es_vec[es_stat] = 1
     return es_vec
 
-@njit
+@njit(fastmath=True)
 def TransES(beta, job_mean):
     mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
     
@@ -129,7 +129,7 @@ def TransES(beta, job_mean):
     
     return mat
 
-@njit
+@njit(fastmath=True)
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
@@ -212,7 +212,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     return np.sum(val_ap) + np.sum(val_es)
 
-@njit
+@njit(fastmath=True)
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
@@ -241,7 +241,7 @@ def optimize(stage, systemStat, oldPolicy):
 
     return nowPolicy, val_collection
 
-@njit
+@njit(fastmath=True)
 def serial_optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)

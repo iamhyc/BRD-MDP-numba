@@ -9,29 +9,29 @@ from numba import njit, prange
 pathlib.Path('logs').mkdir(exist_ok=True)
 pathlib.Path('figures').mkdir(exist_ok=True)
 
-@njit
+@njit(fastmath=True)
 def multoss(p_vec):
     return (np.random.rand() > np.cumsum(p_vec)).argmin()
 
-@njit
+@njit(fastmath=True)
 def toss(p):
     p_vec = np.array([1-p, p], dtype=np.float64)
     return multoss(p_vec)
 
-@njit
+@njit(fastmath=True)
 def factorial(n):
     result = 1.0
     for i in range(1,n+1):
         result *= i
     return result
 
-@njit
+@njit(fastmath=True)
 def binom(n, p, k):
     tmp  = factorial(n) / (factorial(k) * factorial(n-k))
     prob = tmp * np.power(p, k) * np.power(1-p, n-k)
     return prob
 
-@njit
+@njit(fastmath=True)
 def FillMatDiagonal(mat, arr, offset=0):
     assert(mat.shape[0] == mat.shape[1]) #assert square matrix
     for i in range(len(arr)):
@@ -41,24 +41,24 @@ def FillMatDiagonal(mat, arr, offset=0):
             mat[i+offset, i] = arr[i]
     pass
 
-@njit
+@njit(fastmath=True)
 def FillAColumn(mat, idx, arr, offset=0):
     for i in range(len(arr)):
         mat[idx, i+offset] = arr[i]
     pass
 
-@njit
+@njit(fastmath=True)
 def FillARow(mat, idx, arr, offset=0):
     for i in range(len(arr)):
         mat[i+offset, idx] = arr[i]
     pass
 
-@njit
+@njit(fastmath=True)
 def genFlatDist(size):          #e.g. [1, 1, ... 1, 1]
     arr = 0.1+0.1*np.random.rand(size).astype(np.float64)
     return (arr / np.sum(arr))
 
-@njit
+@njit(fastmath=True)
 def genHeavyTailDist(size):     #e.g. [0, 0, ... 1, 1]
     mid_size = size - size//6
     arr_1 = 0.1*np.random.rand(mid_size).astype(np.float64)
@@ -66,7 +66,7 @@ def genHeavyTailDist(size):     #e.g. [0, 0, ... 1, 1]
     arr = np.sort( np.concatenate((arr_1, arr_2)) )
     return (arr / np.sum(arr))
 
-@njit
+@njit(fastmath=True)
 def genHeavyHeadDist(size):     #e.g. [1, 1, ... 0, 0]
     arr = genHeavyTailDist(size)
     return arr[::-1]

@@ -100,7 +100,7 @@ def genUploadingProbabilities(es2ap_map):
                     pass
     return probs
 
-@njit
+@njit(fastmath=True)
 def genTransitionMatrix():
     ul_mat  = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float64)
     off_mat = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float64)

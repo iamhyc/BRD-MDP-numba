@@ -11,12 +11,12 @@ from termcolor import cprint
 
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
 
-@njit
+@njit(fastmath=True)
 def ARandomPolicy(stat, k, j):
     _can_set = np.where( bi_map[k]==1 )[0]
     return np.random.choice(_can_set)
 
-@njit
+@njit(fastmath=True)
 def ASelfishPolicy(stat, k, j):
     eval_cost     = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
     eval_cost    -= int(1E9) * bi_map[k]
@@ -24,7 +24,7 @@ def ASelfishPolicy(stat, k, j):
     assert( bi_map[k,return_choice]==1 ) #NOTE: restrict for candidate set
     return return_choice
 
-@njit
+@njit(fastmath=True)
 def AQueueAwarePolicy(stat, k, j):
     eval_cost     = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
     eval_cost    -= int(1E9) * bi_map[k]
