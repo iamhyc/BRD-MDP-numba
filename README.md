@@ -15,8 +15,10 @@
 - [x] try `fastmath` option in `@njit` (no performance difference)
 - [ ] commit a `main_one_shot` function, with reduced and formatted output
     - ~~move all related traces under same folder~~
-    - recording somehow per-stage
+    - ~~recording somehow per-stage~~
     - complete `main_one_shot` function
 - [ ] add static policy replacement function
 - [ ] test policy replacement
+- [ ] semi-analytical average cost calculation
+    - (how? related to writing)
 - [ ] touch a `plot-traces2.py` with new plot function

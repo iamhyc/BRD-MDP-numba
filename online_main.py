@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import argparse
+from sys import prefix
 import numpy as np
 from mdp import *
 from params import *
@@ -88,6 +89,9 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main_one_shot(args):
+    record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
+                        prefix=RECORD_PREFIX, postfix=args.postfix, tag=args.one_shot)
+    
     pass
 
 def main_long_time(args):
@@ -225,18 +229,22 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(
             description='Main entry to BRD MDP simulation.')
+        parser.add_argument('--one-shot', dest='one_shot', type=int, default=0,
+            help='Run main_one_shot for fast averaging records.')
         parser.add_argument('--serial-optimize', dest='serial_flag', action='store_true', default=False,
             help='Use serial optimization in MDP method.')
         parser.add_argument('--plot', dest='plot_flag', action='store_true', default=False,
             help='Plot figure (with Qt5) while running simulation.')
-        parser.add_argument('--postfix', dest='postfix', type=str, default='',
+        parser.add_argument('--postfix', dest='postfix', type=str, default='test',
             help='specify postfix for record path/files.')
         parser.add_argument('--inject', dest='_', type=str, default='',
             help='always as last one for `params.py` usage.')
         args = parser.parse_args()
 
-        main_one_shot(args)
-        # main_long_time(args)
+        if args.one_shot!=0:
+            main_one_shot(args)
+        else:
+            main_long_time(args)
     except Exception as e:
         raise e
     finally:
