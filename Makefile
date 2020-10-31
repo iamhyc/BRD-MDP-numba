@@ -16,4 +16,4 @@ watch:
 clean:	
 	@rm -f *.err *.out
 	@rm -f logs/$(ID).npz logs/$(ID)-test.log
-	@rm -rf records-$(ID)-test
+	@rm -rf records-$(ID)

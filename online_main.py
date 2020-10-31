@@ -88,6 +88,9 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main_one_shot(args):
+    pass
+
+def main_long_time(args):
     record_mark = 'records-{prefix}'.format(prefix=RECORD_PREFIX); print(record_mark)
     logger = getLogger(record_mark)
     record_folder = Path( record_mark, args.postfix )
@@ -233,6 +236,7 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
         main_one_shot(args)
+        # main_long_time(args)
     except Exception as e:
         raise e
     finally:
