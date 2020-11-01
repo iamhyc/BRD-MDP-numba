@@ -89,9 +89,84 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     return nextStat
 
 def main_one_shot(args):
+    np.random.seed( args.one_shot )
     record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
                         prefix=RECORD_PREFIX, postfix=args.postfix, tag=args.one_shot)
+    #-----------------------------------------------------------
+    stage = 0
+    oldStat,   nowStat   = State(),          State()
+    oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
+    selfishPolicy = ASelfishPolicy
+    SF_oldStat, SF_nowStat = State(), State()
+    QA_oldStat, QA_nowStat = State(), State()
+    RD_oldStat, RD_nowStat = State(), State()
+    #-----------------------------------------------------------
+    while stage < STAGE_ALT:
+        # one realization to next state
+        with Timer(output=True):
+            arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
+            br_delay = np.zeros((N_AP), dtype=np.int32)
+            for k in range(N_AP):
+                br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
+            #----------------------------------------------------------------
+            systemStat     = (oldStat, nowStat, br_delay)
+            oldPolicy      = nowPolicy
+            if args.serial_flag:
+                nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy)
+            else:
+                nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+            #----------------------------------------------------------------
+            oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy)
+            systemStat             = (SF_oldStat, SF_nowStat, br_delay)
+            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, selfishPolicy, selfishPolicy)
+            systemStat             = (QA_oldStat, QA_nowStat, br_delay)
+            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, AQueueAwarePolicy, AQueueAwarePolicy)
+            systemStat             = (RD_oldStat, RD_nowStat, br_delay)
+            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
+            #----------------------------------------------------------------
+            pass
+
+        # replace selfish policy at some stage
+        stage += 1
+        if stage==STAGE_EVAL:
+            selfishPolicy = nowPolicy
+            pass
+
+        # record the stage (along this realization)
+        stage_record_file = Path( record_folder, '%04d'%stage ).as_posix()
+        with open(stage_record_file) as fh:
+            np.savez(fh, **{
+                'MDP_value'   : val,
+                'MDP_ap_stat' : nowStat.ap_stat,
+                'MDP_es_stat' : nowStat.es_stat,
+                "MDP_admissions": nowStat.admissions,
+                "MDP_departures": nowStat.departures,
+                #
+                "Selfish_ap_stat": SF_nowStat.ap_stat,
+                "Selfish_es_stat": SF_nowStat.es_stat,
+                "Selfish_admissions": SF_nowStat.admissions,
+                "Selfish_departures": SF_nowStat.departures,
+                #
+                "QAware_ap_stat" : QA_nowStat.ap_stat,
+                "QAware_es_stat" : QA_nowStat.es_stat,
+                "QAware_admissions": QA_nowStat.admissions,
+                "QAware_departures": QA_nowStat.departures,
+                #
+                "Random_ap_stat" : RD_nowStat.ap_stat,
+                "Random_es_Stat" : RD_nowStat.es_stat,
+                "Random_admissions": RD_nowStat.admissions,
+                "Random_departures": RD_nowStat.departures
+            })
+            pass
+        pass
+    #-----------------------------------------------------------
     
+    # blame remaining jobs to throughput
+    empty_admissions = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
+    nowStat.iterate(empty_admissions, nowStat.es_stat)
+    SF_nowStat.iterate(empty_admissions, SF_nowStat.es_stat)
+    QA_nowStat.iterate(empty_admissions, QA_nowStat.es_stat)
+    RD_nowStat.iterate(empty_admissions, RD_nowStat.es_stat)
     pass
 
 def main_long_time(args):

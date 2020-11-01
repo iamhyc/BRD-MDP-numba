@@ -13,11 +13,11 @@
 ### Todo
 
 - [x] try `fastmath` option in `@njit` (no performance difference)
-- [ ] commit a `main_one_shot` function, with reduced and formatted output
+- [x] commit a `main_one_shot` function, with reduced and formatted output
     - ~~move all related traces under same folder~~
     - ~~recording somehow per-stage~~
-    - complete `main_one_shot` function
-- [ ] add static policy replacement function
+    - ~~complete `main_one_shot` function~~
+- [x] add static policy replacement function
 - [ ] test policy replacement
 - [ ] semi-analytical average cost calculation
     - (how? related to writing)

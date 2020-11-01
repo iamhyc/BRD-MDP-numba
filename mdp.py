@@ -20,6 +20,8 @@ ESValVec   = np.concatenate((ESValVec, PenaltyVec))
 @jitclass([
     ('ap_stat', int32[:,:,:,:]),
     ('es_stat', int32[:,:]),
+    ('admissions', int32[:,:]),
+    ('departures', int32[:,:]),
     ('acc_arr', int64),
     ('acc_dep', int64),
     ('acc_cost', int64),
@@ -32,12 +34,17 @@ class State(object):
         self.es_stat = np.zeros((N_ES, N_JOB),           dtype=np.int32)
         self.acc_arr, self.acc_dep   = 0, 0
         self.acc_cost, self.timeslot = 0, 0
+        self.admissions = np.zeros((N_ES, N_JOB), dtype=np.int32)
+        self.departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
+        self.departures = 0
         self.acc_num                 = 0
         pass
 
     def clone(self, stat):
         self.ap_stat = np.copy(stat.ap_stat)
         self.es_stat = np.copy(stat.es_stat)
+        self.admissions = np.copy(stat.admissions)
+        self.departures = np.copy(stat.departures)
         self.acc_arr, self.acc_dep  = stat.acc_arr, stat.acc_dep
         self.acc_cost, self.timeslot= stat.acc_cost, stat.timeslot
         self.acc_num                = stat.acc_num
@@ -70,6 +77,8 @@ class State(object):
         self.timeslot += 1
         self.acc_cost += self.getCost()
         self.acc_num  += self.getNumber()
+        self.admissions = admissions
+        self.departures = departures
         self.acc_arr  += np.sum(admissions)
         self.acc_dep  += np.sum(departures)
         pass
