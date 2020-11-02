@@ -103,6 +103,7 @@ def main_one_shot(args):
     #-----------------------------------------------------------
     while stage < STAGE_ALT:
         # one realization to next state
+        val = None
         with Timer(output=True):
             arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
             br_delay = np.zeros((N_AP), dtype=np.int32)
@@ -128,7 +129,7 @@ def main_one_shot(args):
 
         # replace selfish policy at some stage
         stage += 1
-        if stage==STAGE_EVAL:
+        if stage in STAGE_EVAL:
             selfishPolicy = nowPolicy
             pass
 
