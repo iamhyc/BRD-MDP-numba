@@ -10,15 +10,16 @@ from utility import *
 import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
+from itertools import product
 
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
 
-@njit(fastmath=True)
+@njit()
 def ARandomPolicy(stat, k, j):
     _can_set = np.where( bi_map[k]==1 )[0]
     return np.random.choice(_can_set)
 
-@njit(fastmath=True)
+@njit()
 def ASelfishPolicy(stat, k, j):
     eval_cost     = ul_prob[k,:,j,:] @ ul_rng + proc_mean[:,j]
     eval_cost    -= int(1E9) * bi_map[k]
@@ -26,13 +27,41 @@ def ASelfishPolicy(stat, k, j):
     assert( bi_map[k,return_choice]==1 ) #NOTE: restrict for candidate set
     return return_choice
 
-@njit(fastmath=True)
+@njit()
 def AQueueAwarePolicy(stat, k, j):
     eval_cost     = ul_prob[k,:,j,:] @ ul_rng + (stat.es_stat[:,j]+1)* proc_mean[:,j]
     eval_cost    -= int(1E9) * bi_map[k]
     return_choice = eval_cost.argmin() #(stat.es_stat[:,j]).argmin()
     assert( bi_map[k,return_choice]==1 ) #NOTE: restrict for candidate set
     return return_choice
+
+def param_fitting():
+    t = 0
+    e_lambda = np.zeros((N_AP, N_JOB), dtype=np.float32)
+    e_c      = np.zeros((N_ES, N_JOB), dtype=np.float32)
+    e_u      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
+    selfish_policy = np.zeros((N_AP, N_ES), dtype=np.int32)
+    for k, m in product(range(N_AP), range(N_ES)):
+        pass
+    #ASelfishPolicy(_, k, j)
+
+    while t < STAGE_ALT:
+        arrivals = loadArrivalTrace(t)
+        #
+        e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals
+        #
+        for m,j in product(range(N_ES), range(N_JOB)):
+            if toss( 1/proc_mean[m,j] ):
+                e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME:
+            else:
+                pass
+            pass
+        #
+        for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
+
+            pass
+        pass
+    pass
 
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat 
@@ -92,6 +121,7 @@ def main_one_shot(args):
     np.random.seed( args.one_shot )
     record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
                         prefix=RECORD_PREFIX, postfix=args.postfix, tag=args.one_shot)
+    Path( record_folder ).mkdir(exist_ok=True, parents=True)
     #-----------------------------------------------------------
     stage = 0
     oldStat,   nowStat   = State(),          State()
@@ -135,7 +165,7 @@ def main_one_shot(args):
 
         # record the stage (along this realization)
         stage_record_file = Path( record_folder, '%04d'%stage ).as_posix()
-        with open(stage_record_file) as fh:
+        with open(stage_record_file, 'ab') as fh:
             np.savez(fh, **{
                 'MDP_value'   : val,
                 'MDP_ap_stat' : nowStat.ap_stat,
@@ -159,9 +189,10 @@ def main_one_shot(args):
                 "Random_departures": RD_nowStat.departures
             })
             pass
+        print('one-shot-{}: stage {:04d}'.format(RECORD_PREFIX, stage))
         pass
     #-----------------------------------------------------------
-    
+
     # blame remaining jobs to throughput
     empty_admissions = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
     nowStat.iterate(empty_admissions, nowStat.es_stat)

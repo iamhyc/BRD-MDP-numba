@@ -101,7 +101,7 @@ def genUploadingProbabilities(es2ap_map):
                     pass
     return probs
 
-@njit(fastmath=True)
+@njit()
 def genTransitionMatrix():
     ul_mat  = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float64)
     off_mat = np.zeros((N_AP,N_ES,N_JOB, N_CNT,N_CNT), dtype=np.float64)
@@ -183,6 +183,7 @@ try:
     bi_map    = _params['bi_map']
     es2ap_map = _params['es2ap_map']
 except AssertionError:
+    print('Creating param file {:05d}.npz ...'.format(RANDOM_SEED))
     bi_map, es2ap_map = genConnectionMap()
     arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics'))
     ul_prob   = genUploadingProbabilities(es2ap_map)

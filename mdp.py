@@ -34,10 +34,9 @@ class State(object):
         self.es_stat = np.zeros((N_ES, N_JOB),           dtype=np.int32)
         self.acc_arr, self.acc_dep   = 0, 0
         self.acc_cost, self.timeslot = 0, 0
+        self.acc_num                 = 0
         self.admissions = np.zeros((N_ES, N_JOB), dtype=np.int32)
         self.departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
-        self.departures = 0
-        self.acc_num                 = 0
         pass
 
     def clone(self, stat):
@@ -85,7 +84,7 @@ class State(object):
 
     pass
 
-@njit(fastmath=True)
+@njit()
 def RandomPolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
     for k in prange(N_AP):
@@ -93,7 +92,7 @@ def RandomPolicy():
             policy[k, j] = np.random.randint(N_ES)
     return policy
 
-@njit(fastmath=True)
+@njit()
 def BaselinePolicy():
     policy = np.zeros((N_AP, N_JOB), dtype=np.int32)
     for k in prange(N_AP):
@@ -104,7 +103,7 @@ def BaselinePolicy():
             assert( bi_map[k,policy[k,j]]==1 )
     return policy
 
-@njit(fastmath=True)
+@njit()
 def AP2Vec(ap_stat, prob):
     assert((ap_stat <= 1).all())
     ap_vec = np.zeros(N_CNT, dtype=np.float64)
@@ -114,13 +113,13 @@ def AP2Vec(ap_stat, prob):
     ap_vec[0] = prob
     return ap_vec
 
-@njit(fastmath=True)
+@njit()
 def ES2Vec(es_stat):
     es_vec = np.zeros((DIM_P), dtype=np.float64)
     es_vec[es_stat] = 1
     return es_vec
 
-@njit(fastmath=True)
+@njit()
 def TransES(beta, job_mean):
     mat = np.zeros((DIM_P,DIM_P), dtype=np.float64)
     
@@ -138,7 +137,7 @@ def TransES(beta, job_mean):
     
     return mat
 
-@njit(fastmath=True)
+@njit()
 def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
     (oldStat, nowStat, br_delay) = systemStat
     _delay                       = br_delay[_k]
@@ -221,7 +220,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     return np.sum(val_ap) + np.sum(val_es)
 
-@njit(fastmath=True)
+@njit()
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)
@@ -250,7 +249,7 @@ def optimize(stage, systemStat, oldPolicy):
 
     return nowPolicy, val_collection
 
-@njit(fastmath=True)
+@njit()
 def serial_optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
     val_collection = np.zeros(N_JOB, dtype=np.float64)

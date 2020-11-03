@@ -18,7 +18,14 @@
     - ~~recording somehow per-stage~~
     - ~~complete `main_one_shot` function~~
 - [x] add static policy replacement function
-- [ ] test policy replacement
+- [x] test policy replacement (with 50 submission)
+    - running on vps and get 50 results
+    - do analysis
 - [ ] semi-analytical average cost calculation
-    - (how? related to writing)
+    - ~~one-step/n-step policy improvement for any stage~~ (n < STAGE_EVAL)
+    - calculate the record data and display
+- [ ] finish two simple analysis
+    - reinforcement learning
+    - optimized baseline policy (aware of start)
 - [ ] touch a `plot-traces2.py` with new plot function
+    - ?
