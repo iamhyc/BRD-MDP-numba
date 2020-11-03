@@ -1,34 +1,70 @@
 #!/usr/bin/env python3
-import os, sys, random
+import os, sys, random, time
+import subprocess as sp
 from threading import main_thread
+
+NUM_CPU = 15
+RANDOM_SEED = 11112
 
 global_template = '''
 bsub -q short -n 40 -R "span[ptile=40]" \
 -e %J-ser.err -o %J-ser.out \
-"NUMBA_NUM_THREADS=40 ./online_main.py --postfix {postfix} --one-shot {one_shot} \
---inject 'TRACE_FOLDER=\"./data/trace-00000-1_2x\"; arr_prob=np.load(Path(TRACE_FOLDER, \"statistics\"))'"
+"NUMBA_NUM_THREADS=40 ./online_main.py --postfix {postfix} --one-shot {one_shot}"
 '''.strip()
 
-local_template = '''
-./online_main.py --postfix {postfix} --one-shot {one_shot} \
---inject 'TRACE_FOLDER=\"./data/trace-00000-1_2x\"; arr_prob=np.load(Path(TRACE_FOLDER, \"statistics\"))'
-'''
+local_template = [
+    "./online_main.py",
+    "--postfix", "{postfix}",
+    "--one-shot", "{one_shot}",
+    "--inject", "TRACE_FOLDER='./data/trace-00000-1_3x'; arr_prob=np.load(Path(TRACE_FOLDER, 'statistics'))"
+]
+
+def all_done(cpu_stat):
+    for stat in cpu_stat:
+        if stat is not None:
+            return False
+    return True
 
 if __name__ == "__main__":
     try:
         NUM = int(sys.argv[1])
-        random.seed(1112)
+        random.seed(RANDOM_SEED)
         one_shot_list = [random.randint(2**2, 2**16) for _ in range(NUM)]
+        start_time = time.time()
 
-        for num in one_shot_list:
-            command = global_template.format(
-                postfix="test",
-                one_shot=num
-            )
-            os.system(command)
+        task_list = dict()
+        for idx, num in enumerate(one_shot_list):
+            command = local_template.copy()
+            command[ local_template.index("{postfix}") ]  = "test"
+            command[ local_template.index("{one_shot}") ] = str(num)
+            task_list[idx] = command
+            pass
         
-        print("[%d] All jobs submitted."%len(one_shot_list))
+        cpu_stat = [None] * NUM_CPU; cpu_stat[0] = 0
+        while not all_done(cpu_stat):
+            _empty = 0
+            for idx, stat in enumerate(cpu_stat):
+                try:
+                    if (stat is None) or (stat==0):
+                        _command = task_list.popitem()[1]
+                        _stdout = open('./logs/%05d-%02d.out'%(RANDOM_SEED, idx), 'w')
+                        _stderr = open('./logs/%05d-%02d.err'%(RANDOM_SEED, idx), 'w')
+                        cpu_stat[idx] = sp.Popen(_command, stdout=_stdout, stderr=_stderr, bufsize=1)
+                    else:
+                        if stat.poll() is not None:
+                            cpu_stat[idx] = None
+                        else:
+                            continue
+                except KeyError as e:
+                    _empty += 1
+                pass
+
+            _time = time.time() - start_time
+            print("[%.2fs elapsed] %d job(s) running, %d job(s) pending\r"%( _time, NUM_CPU-_empty, len(task_list) ), end='')
+            time.sleep(1)
+            pass
+        # print("[%d] All jobs submitted."%len(one_shot_list))
     except Exception as e:
-        print(e)
+        raise e#print(e)
     finally:
         pass
