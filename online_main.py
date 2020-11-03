@@ -193,12 +193,7 @@ def main_one_shot(args):
         pass
     #-----------------------------------------------------------
 
-    # blame remaining jobs to throughput
-    empty_admissions = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.int32)
-    nowStat.iterate(empty_admissions, nowStat.es_stat)
-    SF_nowStat.iterate(empty_admissions, SF_nowStat.es_stat)
-    QA_nowStat.iterate(empty_admissions, QA_nowStat.es_stat)
-    RD_nowStat.iterate(empty_admissions, RD_nowStat.es_stat)
+    # (no need) ~~blame remaining jobs to throughput~~
     pass
 
 def main_long_time(args):

@@ -46,12 +46,15 @@ if __name__ == "__main__":
             for idx, stat in enumerate(cpu_stat):
                 try:
                     if (stat is None) or (stat==0):
-                        _command = task_list.popitem()[1]
-                        _stdout = open('./logs/%05d-%02d.out'%(RANDOM_SEED, idx), 'w')
-                        _stderr = open('./logs/%05d-%02d.err'%(RANDOM_SEED, idx), 'w')
-                        cpu_stat[idx] = sp.Popen(_command, stdout=_stdout, stderr=_stderr, bufsize=1)
+                        _key, _command = task_list.popitem()
+                        _stdout = open('./logs/%05d-%02d.out'%(RANDOM_SEED, _key), 'w')
+                        _stderr = open('./logs/%05d-%02d.err'%(RANDOM_SEED, _key), 'w')
+                        cpu_stat[idx] = sp.Popen(_command, stdout=_stdout, stderr=_stderr)
                     else:
-                        if stat.poll() is not None:
+                        _ret = stat.poll()
+                        if _ret is not None:
+                            _time = time.time() - start_time
+                            print( "[%.2fs elapsed] one job completed with retcode %r%s"%(_time, _ret, ' '*20) )
                             cpu_stat[idx] = None
                         else:
                             continue
@@ -60,9 +63,11 @@ if __name__ == "__main__":
                 pass
 
             _time = time.time() - start_time
-            print("[%.2fs elapsed] %d job(s) running, %d job(s) pending\r"%( _time, NUM_CPU-_empty, len(task_list) ), end='')
+            print("[%.2fs elapsed] %d job(s) running, %d job(s) pending%s\r"%( _time, NUM_CPU-_empty, len(task_list), ' '*20), end='')
             time.sleep(1)
             pass
+        
+        print( "All jobs completed: %.2f second."%(time.time()-start_time) )
         # print("[%d] All jobs submitted."%len(one_shot_list))
     except Exception as e:
         raise e#print(e)
