@@ -3,7 +3,7 @@ import os, sys, random, time
 import subprocess as sp
 from threading import main_thread
 
-NUM_CPU = 15
+NUM_CPU = 10
 RANDOM_SEED = 11112
 
 global_template = '''
@@ -63,11 +63,11 @@ if __name__ == "__main__":
                 pass
 
             _time = time.time() - start_time
-            print("[%.2fs elapsed] %d job(s) running, %d job(s) pending%s\r"%( _time, NUM_CPU-_empty, len(task_list), ' '*20), end='')
+            print("[%.2fs elapsed] %d job(s) running, %d job(s) pending%s\r"%( _time, NUM_CPU-_empty, len(task_list), ' '*10), end='')
             time.sleep(1)
             pass
         
-        print( "All jobs completed: %.2f second."%(time.time()-start_time) )
+        print( "All jobs completed: %.2f second%s."%(time.time()-start_time, ' '*20) )
         # print("[%d] All jobs submitted."%len(one_shot_list))
     except Exception as e:
         raise e#print(e)
