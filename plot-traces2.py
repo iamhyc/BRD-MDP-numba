@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import glob, sys
+import sys, glob
 from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
@@ -11,20 +11,18 @@ from matplotlib import rc
 rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
-# globally load trace folder
-try:
-    _, log_type, log_folder = sys.argv
-    #TODO: load what trace?
-except Exception:
-    print('Loading traces failed with:', sys.argv)
+def getAverageCost(ref, start, end):
     pass
 
+def getAverageNumber(ref, start, end):
+    pass
 
-# main section
-if __name__ == "__main__":
-    try:
-        pass
-    except Exception as e:
-        raise e
-    finally:
-        pass
+try:
+    _, log_folder, log_type  = sys.argv
+    glob.glob( Path(log_folder, log_type) )
+except Exception as e:
+    print('Loading traces failed with:', sys.argv)
+    raise e
+finally:
+    pass
+

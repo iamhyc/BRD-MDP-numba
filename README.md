@@ -26,5 +26,5 @@
 - [ ] finish two simple analysis
     - reinforcement learning
     - optimized baseline policy (aware of start)
-- [ ] touch a `plot-traces2.py` with new plot function
-    - calculate the record data and display
+- [x] touch a `plot-traces2.py` with new plot function
+    - ~~calculate the record data and display~~
