@@ -170,23 +170,23 @@ def main_one_shot(args):
                 'MDP_value'   : val,
                 'MDP_ap_stat' : nowStat.ap_stat,
                 'MDP_es_stat' : nowStat.es_stat,
-                "MDP_admissions": nowStat.admissions,
-                "MDP_departures": nowStat.departures,
+                'MDP_admissions': nowStat.admissions,
+                'MDP_departures': nowStat.departures,
                 #
-                "Selfish_ap_stat": SF_nowStat.ap_stat,
-                "Selfish_es_stat": SF_nowStat.es_stat,
-                "Selfish_admissions": SF_nowStat.admissions,
-                "Selfish_departures": SF_nowStat.departures,
+                'Selfish_ap_stat': SF_nowStat.ap_stat,
+                'Selfish_es_stat': SF_nowStat.es_stat,
+                'Selfish_admissions': SF_nowStat.admissions,
+                'Selfish_departures': SF_nowStat.departures,
                 #
-                "QAware_ap_stat" : QA_nowStat.ap_stat,
-                "QAware_es_stat" : QA_nowStat.es_stat,
-                "QAware_admissions": QA_nowStat.admissions,
-                "QAware_departures": QA_nowStat.departures,
+                'QAware_ap_stat' : QA_nowStat.ap_stat,
+                'QAware_es_stat' : QA_nowStat.es_stat,
+                'QAware_admissions': QA_nowStat.admissions,
+                'QAware_departures': QA_nowStat.departures,
                 #
-                "Random_ap_stat" : RD_nowStat.ap_stat,
-                "Random_es_Stat" : RD_nowStat.es_stat,
-                "Random_admissions": RD_nowStat.admissions,
-                "Random_departures": RD_nowStat.departures
+                'Random_ap_stat' : RD_nowStat.ap_stat,
+                'Random_es_Stat' : RD_nowStat.es_stat,
+                'Random_admissions': RD_nowStat.admissions,
+                'Random_departures': RD_nowStat.departures
             })
             pass
         print('one-shot-{}: stage {:04d}'.format(RECORD_PREFIX, stage))
