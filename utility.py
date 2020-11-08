@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from scipy.stats import norm
 from numba import njit, prange
+from functools import wraps
 
 pathlib.Path('logs').mkdir(exist_ok=True)
 pathlib.Path('figures').mkdir(exist_ok=True)
@@ -105,6 +106,17 @@ class Timer:
             print('Time elapsed: %.3f'%self.delta)
         pass
     
+    @staticmethod
+    def timeit(func):
+        @wraps(func)
+        def wrapper(*args, **kargs):
+            _t = time.time()
+            res = func(*args, **kargs)
+            _t = time.time() - _t
+            print( '[%.3fs] %s'%(_t, func.__name__) )
+            return res
+        return wrapper
+
     def start(self):
         self._start = time.time()
 

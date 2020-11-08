@@ -10,27 +10,34 @@ from numba import njit, prange
 from matplotlib import rc
 rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
 rc('text', usetex=True)
-# tag the benchmarks
-#["MDP", "Selfish", "QAware", "Random"]
+# tag the records
+DATA_TAG = ['ap_stat', 'es_stat', 'admissions', 'departures']
+ALG_TAG  = ['MDP', 'Selfish', 'QAware', 'Random']
+get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 # global variables
 global records_path
 
-def getAverageNumber(ref, start, end):
-    # self.acc_num / self.timeslot
+def getAverageNumber(ref, start=0, end=-1):
+    # acc_num / timeslot
+    _weakref = ref[start:end]
+    acc_num = 0
+    time_slot = len(_weakref)
+    for sample in _weakref:
+        pass
     pass
 
-def getAverageCost(ref, start, end):
+def getAverageCost(ref, start=0, end=-1):
     # self.acc_cost / self.timeslot
     pass
 
-def getDiscountedCost(ref, start, end):
+def getDiscountedCost(ref, start=0, end=-1):
     pass
 
-def getAverageJCT(ref, start, end):
+def getAverageJCT(ref, start, end=-1):
     # self.acc_cost / self.acc_arr
     pass
 
-def getAverageThroughput(ref, start, end):
+def getAverageThroughput(ref, start=0, end=-1):
     # self.acc_dep / self.acc_arr
     pass
 
@@ -43,9 +50,14 @@ def getStatistics(ref, start, end):
 
 def plot_statistics():
     statistics = list()
-    for record in records_path:
-        #TODO: iterDir loading, and pass to GET functions
-        #TODO: compose statistics dict, and push into list
+    for record_dir in records_path:
+        record = sorted( record_dir.iterdir() )
+        record = [np.load(x) for x in record]
+        statistics.append({
+            'AverageNumber' : getAverageNumber(record),
+            'AverageCost'   : getAverageCost(record),
+            'DiscountedCost': getDiscountedCost(record) 
+        })
         pass
     pass
 

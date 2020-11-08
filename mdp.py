@@ -76,8 +76,8 @@ class State(object):
         self.timeslot += 1
         self.acc_cost += self.getCost()
         self.acc_num  += self.getNumber()
-        self.admissions = admissions
-        self.departures = departures
+        self.admissions += admissions
+        self.departures += departures
         self.acc_arr  += np.sum(admissions)
         self.acc_dep  += np.sum(departures)
         pass
