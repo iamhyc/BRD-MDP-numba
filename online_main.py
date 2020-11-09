@@ -165,8 +165,8 @@ def main_one_shot(args):
 
         # record the stage (along this realization)
         stage_record_file = Path( record_folder, '%04d'%stage ).as_posix()
-        with open(stage_record_file, 'ab') as fh:
-            np.savez(fh, **{
+        with open(stage_record_file, 'wb') as fh:
+            np.savez_compressed(fh, **{
                 'MDP_value'   : val,
                 'MDP_ap_stat' : nowStat.ap_stat,
                 'MDP_es_stat' : nowStat.es_stat,
@@ -184,7 +184,7 @@ def main_one_shot(args):
                 'QAware_departures': QA_nowStat.departures,
                 #
                 'Random_ap_stat' : RD_nowStat.ap_stat,
-                'Random_es_Stat' : RD_nowStat.es_stat,
+                'Random_es_stat' : RD_nowStat.es_stat,
                 'Random_admissions': RD_nowStat.admissions,
                 'Random_departures': RD_nowStat.departures
             })

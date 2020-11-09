@@ -3,7 +3,7 @@ import os, sys, random, time
 import subprocess as sp
 from threading import main_thread
 
-NUM_CPU = 10
+NUM_SLOT = 10
 RANDOM_SEED = 11112
 
 global_template = '''
@@ -28,6 +28,7 @@ def all_done(cpu_stat):
 if __name__ == "__main__":
     try:
         NUM = int(sys.argv[1])
+        VERBOSE = False if len(sys.argv)>2 else True
         random.seed(RANDOM_SEED)
         one_shot_list = [random.randint(2**2, 2**16) for _ in range(NUM)]
         start_time = time.time()
@@ -36,11 +37,11 @@ if __name__ == "__main__":
         for idx, num in enumerate(one_shot_list):
             command = local_template.copy()
             command[ local_template.index("{postfix}") ]  = "test"
-            command[ local_template.index("{one_shot}") ] = str(num)
+            command[ local_template.index("{one_shot}") ] = '%05d'%(num)
             task_list[idx] = command
             pass
         
-        cpu_stat = [None] * NUM_CPU; cpu_stat[0] = 0
+        cpu_stat = [None] * NUM_SLOT; cpu_stat[0] = 0
         while not all_done(cpu_stat):
             _empty = 0
             for idx, stat in enumerate(cpu_stat):
@@ -63,11 +64,12 @@ if __name__ == "__main__":
                 pass
 
             _time = time.time() - start_time
-            print("[%.2fs elapsed] %d job(s) running, %d job(s) pending%s\r"%( _time, NUM_CPU-_empty, len(task_list), ' '*10), end='')
+            if VERBOSE:
+                print("[%.2fs elapsed] %d job(s) running, %d job(s) pending%s\r"%( _time, NUM_SLOT-_empty, len(task_list), ' '*10), end='')
             time.sleep(1)
             pass
         
-        print( "All jobs completed: %.2f second%s."%(time.time()-start_time, ' '*20) )
+        print( "All jobs completed: %.2f second.%s"%(time.time()-start_time, ' '*20) )
         # print("[%d] All jobs submitted."%len(one_shot_list))
     except Exception as e:
         raise e#print(e)
