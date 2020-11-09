@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from params import BETA, LQ
+from params import BETA, LQ, N_SLT
 from numba import njit, prange
 # customize matplotlib plotting
 from matplotlib import rc
@@ -20,9 +20,12 @@ global records_path
 def getAverageNumber(ref, start=0, end=-1):
     # acc_num / timeslot
     _weakref = ref[start:end]
-    acc_num = 0
-    time_slot = len(_weakref)
+    acc_num = np.zeros((len(ALG_TAG),), dtype=np.int32)
+    time_slot = len(_weakref) * N_SLT
     for sample in _weakref:
+        acc_num += list(map( lambda x: sample[x], get_tag('ap_stat') ))
+        sample[ _tag ]
+        get_tag('es_stat')
         pass
     pass
 
