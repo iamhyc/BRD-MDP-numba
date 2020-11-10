@@ -5,7 +5,7 @@ all:
 	pip3 install parse --user
 
 run:
-	@python3 ./online_main.py --postfix test --plot
+	@python3 ./online_main.py --postfix long-time --plot
 
 submit:
 	bsub -q short -n 160 -R "span[ptile=40]" -e %J.err -o %J.out "./task-manager.py 50 0"

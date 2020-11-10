@@ -13,6 +13,7 @@ from termcolor import cprint
 from itertools import product
 
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
+NONE_POLICY   = np.zeros((N_AP, N_JOB), dtype=np.int32)
 
 @njit()
 def ARandomPolicy(stat, k, j):
@@ -63,8 +64,10 @@ def param_fitting():
         pass
     pass
 
-def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
-    (oldStat, nowStat, br_delay) = systemStat 
+# @Timer.timeit
+@njit(parallel=False)
+def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicyFn):
+    (oldStat, nowStat, br_delay) = systemStat
     lastStat  = State().clone(nowStat)
     nextStat  = State().clone(lastStat)
 
@@ -74,8 +77,8 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         #NOTE: allocate arrival jobs on APs
         for j in range(N_JOB):
             for k in range(N_AP):
-                if callable(oldPolicy) and callable(nowPolicy):
-                    _m = oldPolicy(oldStat, k, j) if n<br_delay[k] else nowPolicy(nowStat, k, j)
+                if oldPolicyFn is not None: #callable(oldPolicy) and callable(nowPolicy):
+                    _m = oldPolicyFn(oldStat, k, j) if n<br_delay[k] else nowPolicyFn(nowStat, k, j)
                 else:
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
                 assert( bi_map[k,_m]==1 )
@@ -96,9 +99,11 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy):
         #NOTE: process jobs on ES
         departures = np.zeros((N_ES, N_JOB), dtype=np.int32)
         nextStat.es_stat += off_number
-        nextStat.es_stat  = np.clip(nextStat.es_stat, 0, LQ)
+        # nextStat.es_stat = np.clip(nextStat.es_stat, 0, LQ)
         for j in range(N_JOB):
             for m in range(N_ES):
+                if nextStat.es_stat[m,j]>LQ:
+                    nextStat.es_stat[m,j]=LQ
                 if nextStat.es_stat[m,j]>0:
                     completed_num            = 1 if toss(1/proc_mean[m,j]) else 0
                     nextStat.es_stat[m,j]   -= completed_num
@@ -156,18 +161,18 @@ def main_one_shot(args):
                 TI_Policy              = oldPolicy.copy()
                 TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
                 systemStat             = (TI_oldStat, TI_nowStat, br_delay)
-                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy)
+                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
             else:
                 systemStat             = (TI_oldStat, TI_nowStat, br_delay)
-                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy)
+                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
             #----------------------------------------------------------------
-            oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy)
+            oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
             systemStat             = (SF_oldStat, SF_nowStat, br_delay)
-            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, ASelfishPolicy, ASelfishPolicy)
+            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
             systemStat             = (QA_oldStat, QA_nowStat, br_delay)
-            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, AQueueAwarePolicy, AQueueAwarePolicy)
+            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
             systemStat             = (RD_oldStat, RD_nowStat, br_delay)
-            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
+            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
             pass
         # 2. update the stage counter
@@ -247,14 +252,14 @@ def main_long_time(args):
             else:
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             oldStat        = nowStat
-            nowStat        = NextState(arrivals, systemStat, oldPolicy, nowPolicy)
+            nowStat        = NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
             #----------------------------------------------------------------
             systemStat             = (SF_oldStat, SF_nowStat, br_delay)
-            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, ASelfishPolicy, ASelfishPolicy)
+            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
             systemStat             = (QA_oldStat, QA_nowStat, br_delay)
-            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, AQueueAwarePolicy, AQueueAwarePolicy)
+            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
             systemStat             = (RD_oldStat, RD_nowStat, br_delay)
-            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
+            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
 
             #NOTE: console output with State and Policy deviation

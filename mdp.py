@@ -220,6 +220,7 @@ def evaluate(j, _k, systemStat, oldPolicy, nowPolicy):
 
     return np.sum(val_ap) + np.sum(val_es)
 
+# @Timer.timeit
 @njit()
 def optimize(stage, systemStat, oldPolicy):
     nowPolicy      = np.copy(oldPolicy)
