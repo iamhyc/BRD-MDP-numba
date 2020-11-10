@@ -12,7 +12,7 @@ rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
 rc('text', usetex=True)
 # tag the records
 DATA_TAG = ['ap_stat', 'es_stat', 'admissions', 'departures']
-ALG_TAG  = ['MDP', 'Selfish', 'QAware', 'Random']
+ALG_TAG  = ['MDP', 'Tight', 'Selfish', 'QAware', 'Random']
 get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 # global variables
 global records_path
@@ -68,6 +68,7 @@ def getAverageJCT(ref, start=0, end=-1):
 def getAverageThroughput(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_dep  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('departures') ])
+    acc_dep += np.array([ _weakref[-1][x].sum() for x in get_tag('es_stat') ]) # blame remaining jobs as departures
     acc_arr  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('admissions') ])
     return acc_dep / acc_arr
 

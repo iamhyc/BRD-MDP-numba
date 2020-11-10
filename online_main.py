@@ -126,13 +126,15 @@ def main_one_shot(args):
     stage = 0
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
-    selfishPolicy = ASelfishPolicy
     SF_oldStat, SF_nowStat = State(), State()
     QA_oldStat, QA_nowStat = State(), State()
     RD_oldStat, RD_nowStat = State(), State()
+    # default by reference
+    TI_oldStat, TI_nowStat = oldStat, nowStat
+    TI_Policy              = nowPolicy
     #-----------------------------------------------------------
     while stage < STAGE_ALT:
-        # one realization to next state
+        # 1. one realization to next state
         val = None
         with Timer(output=True):
             arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
@@ -147,23 +149,30 @@ def main_one_shot(args):
             else:
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
+            if stage < STAGE_EVAL:
+                TI_Policy = nowPolicy
+                TI_oldStat, TI_nowStat = oldStat, nowStat
+            elif stage==STAGE_EVAL:
+                TI_Policy              = oldPolicy.copy()
+                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
+                systemStat             = (TI_oldStat, TI_nowStat, br_delay)
+                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy)
+            else:
+                systemStat             = (TI_oldStat, TI_nowStat, br_delay)
+                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy)
+            #----------------------------------------------------------------
             oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy)
             systemStat             = (SF_oldStat, SF_nowStat, br_delay)
-            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, selfishPolicy, selfishPolicy)
+            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, ASelfishPolicy, ASelfishPolicy)
             systemStat             = (QA_oldStat, QA_nowStat, br_delay)
             QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, AQueueAwarePolicy, AQueueAwarePolicy)
             systemStat             = (RD_oldStat, RD_nowStat, br_delay)
             RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
             pass
-
-        # replace selfish policy at some stage
+        # 2. update the stage counter
         stage += 1
-        if stage in STAGE_EVAL:
-            selfishPolicy = nowPolicy
-            pass
-
-        # record the stage (along this realization)
+        # 3. record the stage (along this realization)
         stage_record_file = Path( record_folder, '%04d'%stage ).as_posix()
         with open(stage_record_file, 'wb') as fh:
             np.savez_compressed(fh, **{
@@ -172,6 +181,11 @@ def main_one_shot(args):
                 'MDP_es_stat' : nowStat.es_stat,
                 'MDP_admissions': nowStat.admissions,
                 'MDP_departures': nowStat.departures,
+                #
+                'Tight_ap_stat': TI_nowStat.ap_stat,
+                'Tight_es_stat': TI_nowStat.es_stat,
+                'Tight_admissions': TI_nowStat.admissions,
+                'Tight_departures': TI_nowStat.departures,
                 #
                 'Selfish_ap_stat': SF_nowStat.ap_stat,
                 'Selfish_es_stat': SF_nowStat.es_stat,
@@ -192,8 +206,6 @@ def main_one_shot(args):
         print('one-shot-{}: stage {:04d}'.format(RECORD_PREFIX, stage))
         pass
     #-----------------------------------------------------------
-
-    # (no need) ~~blame remaining jobs to throughput~~
     pass
 
 def main_long_time(args):
