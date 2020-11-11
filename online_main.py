@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from os import system
 from pathlib import Path
 import argparse
 from sys import prefix
@@ -14,6 +15,8 @@ from itertools import product
 
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
 NONE_POLICY   = np.zeros((N_AP, N_JOB), dtype=np.int32)
+ALG_TAG = ['MDP', 'TI', 'SF', 'QA', 'RD']
+ALG2IDX = lambda x: ALG_TAG.index(x)
 
 @njit()
 def ARandomPolicy(stat, k, j):
@@ -122,6 +125,15 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
 
     return nextStat
 
+@Timer.timeit
+@njit(parallel=True)
+def NextStateProxy(ret, arrivals, br_delay, tasks): #FIXME: how to unpack tuples?
+    for idx in prange(len(tasks)):
+        _t0, _t1 = tasks[idx][0], tasks[idx][1] # (oldStat,nowStat), (oldPolicy,nowPolicy,None,None)
+        systemStat = (*_t0, br_delay)
+        ret[idx].clone( NextState(arrivals, systemStat, _t1[0],_t1[1],_t1[2],_t1[3]) )
+    return ret
+
 def main_one_shot(args):
     np.random.seed( args.one_shot )
     record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
@@ -154,25 +166,39 @@ def main_one_shot(args):
             else:
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
+            _tasks = [0 for _ in range(len(ALG_TAG))]
+            _tasks[ ALG2IDX('MDP') ] = ( (oldStat,nowStat), (oldPolicy,nowPolicy,None,None) )
+            _tasks[ ALG2IDX('SF') ]  = ( (SF_oldStat,SF_nowStat), (NONE_POLICY,NONE_POLICY,ASelfishPolicy,ASelfishPolicy))
+            _tasks[ ALG2IDX('QA') ]  = ( (QA_oldStat,QA_nowStat), (NONE_POLICY,NONE_POLICY,AQueueAwarePolicy,AQueueAwarePolicy) )
+            _tasks[ ALG2IDX('RD') ]  = ( (RD_oldStat,RD_nowStat), (NONE_POLICY,NONE_POLICY,ARandomPolicy,ARandomPolicy) )
+            #
+            ret = tuple( [State() for _ in range(len(_tasks))] )
+            NextStateProxy(ret, arrivals, br_delay, tuple(_tasks))
+            #
+            oldStat,    nowStat    = nowStat,    ret[ ALG2IDX('MDP') ]
+            SF_oldStat, SF_nowStat = SF_nowStat, ret[ ALG2IDX('SF') ]
+            QA_oldStat, QA_nowStat = QA_nowStat, ret[ ALG2IDX('QA') ]
+            RD_oldStat, RD_nowStat = RD_nowStat, ret[ ALG2IDX('RD') ]
+            #
+            # oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
+            # systemStat             = (SF_oldStat, SF_nowStat, br_delay)
+            # SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
+            # systemStat             = (QA_oldStat, QA_nowStat, br_delay)
+            # QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
+            # systemStat             = (RD_oldStat, RD_nowStat, br_delay)
+            # RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
+            #----------------------------------------------------------------
             if stage < STAGE_EVAL:
                 TI_Policy = nowPolicy
                 TI_oldStat, TI_nowStat = oldStat, nowStat
             elif stage==STAGE_EVAL:
                 TI_Policy              = oldPolicy.copy()
-                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
+                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat) #FIXME: before or after?
                 systemStat             = (TI_oldStat, TI_nowStat, br_delay)
                 TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
             else:
                 systemStat             = (TI_oldStat, TI_nowStat, br_delay)
                 TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
-            #----------------------------------------------------------------
-            oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
-            systemStat             = (SF_oldStat, SF_nowStat, br_delay)
-            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
-            systemStat             = (QA_oldStat, QA_nowStat, br_delay)
-            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
-            systemStat             = (RD_oldStat, RD_nowStat, br_delay)
-            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
             pass
         # 2. update the stage counter
