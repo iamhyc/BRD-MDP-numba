@@ -12,6 +12,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from termcolor import cprint
 from itertools import product
+from numba import njit
+from numba.typed import List
 
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
 NONE_POLICY   = np.zeros((N_AP, N_JOB), dtype=np.int32)
@@ -127,14 +129,33 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
 
 @Timer.timeit
 @njit(parallel=True)
-def NextStateProxy(ret, arrivals, br_delay, tasks): #FIXME: how to unpack tuples?
+def NextStateProxy(stage, arrivals, br_delay, *tasks):
+    ret = [ State() for _ in range(len(tasks)) ]
     for idx in prange(len(tasks)):
-        _t0, _t1 = tasks[idx][0], tasks[idx][1] # (oldStat,nowStat), (oldPolicy,nowPolicy,None,None)
-        systemStat = (*_t0, br_delay)
-        ret[idx].clone( NextState(arrivals, systemStat, _t1[0],_t1[1],_t1[2],_t1[3]) )
+        print(tasks[idx])
+        _tag = ALG_TAG[idx]
+        _oldPolicy,   _nowPolicy   = NONE_POLICY, NONE_POLICY
+        _oldPolicyFn, _nowPolicyFn = ASelfishPolicy, ASelfishPolicy
+        if _tag=='MDP':
+            _oldPolicy,   _nowPolicy   = oldPolicy, nowPolicy
+            # _oldPolicyFn, _nowPolicyFn = None, None
+        elif _tag=='TI': #FIXME: integrate TI evaluation
+            _oldPolicy,   _nowPolicy   = oldPolicy, nowPolicy
+        elif _tag=='SF':
+            _oldPolicyFn, _nowPolicyFn = ASelfishPolicy, ASelfishPolicy
+        elif _tag=='QA':
+            _oldPolicyFn, _nowPolicyFn = AQueueAwarePolicy, AQueueAwarePolicy
+        elif _tag=='RD':
+            _oldPolicyFn, _nowPolicyFn = ARandomPolicy, ARandomPolicy
+        else:
+            pass
+        _oldStat, _nowStat         = tasks[idx][0], tasks[idx][1]
+        systemStat = (_oldStat, _nowStat, br_delay)
+        ret[idx].clone( NextState(arrivals, systemStat, _oldPolicy, _nowPolicy, _oldPolicyFn, _nowPolicyFn) )
     return ret
 
 def main_one_shot(args):
+    global oldPolicy, nowPolicy
     np.random.seed( args.one_shot )
     record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
                         prefix=RECORD_PREFIX, postfix=args.postfix, tag=args.one_shot)
@@ -166,14 +187,13 @@ def main_one_shot(args):
             else:
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
-            _tasks = [0 for _ in range(len(ALG_TAG))]
-            _tasks[ ALG2IDX('MDP') ] = ( (oldStat,nowStat), (oldPolicy,nowPolicy,None,None) )
-            _tasks[ ALG2IDX('SF') ]  = ( (SF_oldStat,SF_nowStat), (NONE_POLICY,NONE_POLICY,ASelfishPolicy,ASelfishPolicy))
-            _tasks[ ALG2IDX('QA') ]  = ( (QA_oldStat,QA_nowStat), (NONE_POLICY,NONE_POLICY,AQueueAwarePolicy,AQueueAwarePolicy) )
-            _tasks[ ALG2IDX('RD') ]  = ( (RD_oldStat,RD_nowStat), (NONE_POLICY,NONE_POLICY,ARandomPolicy,ARandomPolicy) )
+            _tasks = [List([State()]) for _ in range(len(ALG_TAG))]
+            _tasks[ ALG2IDX('MDP') ] = List( [oldStat,nowStat] )
+            _tasks[ ALG2IDX('SF') ]  = List( [SF_oldStat,SF_nowStat] )
+            _tasks[ ALG2IDX('QA') ]  = List( [QA_oldStat,QA_nowStat] )
+            _tasks[ ALG2IDX('RD') ]  = List( [RD_oldStat,RD_nowStat] )
             #
-            ret = tuple( [State() for _ in range(len(_tasks))] )
-            NextStateProxy(ret, arrivals, br_delay, tuple(_tasks))
+            ret = NextStateProxy(stage, arrivals, br_delay, *tuple(_tasks))
             #
             oldStat,    nowStat    = nowStat,    ret[ ALG2IDX('MDP') ]
             SF_oldStat, SF_nowStat = SF_nowStat, ret[ ALG2IDX('SF') ]
