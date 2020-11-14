@@ -227,10 +227,10 @@ for n in range(N_SET):
         subset_ind[n, k] = 1
     pass
 #NOTE: print subset partition
-cprint('Subset Number: {}'.format(N_SET), 'red')
-for item in subset_map:
-    cprint(item, 'magenta')
-print()
+# cprint('Subset Number: {}'.format(N_SET), 'red')
+# for item in subset_map:
+#     cprint(item, 'magenta')
+# print()
 #NOTE: Test Code
 # tmp_n, cnt = 100, 0
 # while tmp_n>=7 and cnt<1000:

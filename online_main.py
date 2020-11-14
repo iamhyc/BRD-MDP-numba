@@ -154,6 +154,7 @@ def main_one_shot(args):
             else:
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
+            #FIXME: before or after?
             if stage < STAGE_EVAL:
                 TI_Policy = nowPolicy
                 TI_oldStat, TI_nowStat = oldStat, nowStat
