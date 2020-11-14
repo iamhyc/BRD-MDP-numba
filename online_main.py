@@ -17,8 +17,12 @@ from numba.typed import List
 
 RECORD_PREFIX = '{:05d}'.format(RANDOM_SEED)
 NONE_POLICY   = np.zeros((N_AP, N_JOB), dtype=np.int32)
-ALG_TAG = ['MDP', 'TI', 'SF', 'QA', 'RD']
+ALG_TAG = ['MDP', 'SF', 'QA', 'RD']
 ALG2IDX = lambda x: ALG_TAG.index(x)
+
+@njit()
+def ANonePolicy(stat, k, j):
+    return -1
 
 @njit()
 def ARandomPolicy(stat, k, j):
@@ -75,14 +79,13 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
     (oldStat, nowStat, br_delay) = systemStat
     lastStat  = State().clone(nowStat)
     nextStat  = State().clone(lastStat)
-
     # update intermediate state with arrivals in each time slot 
     for n in range(N_SLT):
         nextStat.ap_stat = np.zeros((N_AP,N_ES,N_JOB,N_CNT), dtype=np.int32)
         #NOTE: allocate arrival jobs on APs
         for j in range(N_JOB):
             for k in range(N_AP):
-                if oldPolicyFn is not None: #callable(oldPolicy) and callable(nowPolicy):
+                if oldPolicyFn is not ANonePolicy: #FIXME: np.array_equal(oldPolicy, NONE_POLICY)
                     _m = oldPolicyFn(oldStat, k, j) if n<br_delay[k] else nowPolicyFn(nowStat, k, j)
                 else:
                     _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
@@ -124,7 +127,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
         lastStat = nextStat
         nextStat = State().clone(lastStat)
         pass
-
+    #
     return nextStat
 
 @Timer.timeit
@@ -132,15 +135,13 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
 def NextStateProxy(stage, arrivals, br_delay, *tasks):
     ret = [ State() for _ in range(len(tasks)) ]
     for idx in prange(len(tasks)):
-        print(tasks[idx])
         _tag = ALG_TAG[idx]
         _oldPolicy,   _nowPolicy   = NONE_POLICY, NONE_POLICY
-        _oldPolicyFn, _nowPolicyFn = ASelfishPolicy, ASelfishPolicy
+        _oldPolicyFn, _nowPolicyFn = ANonePolicy, ANonePolicy
         if _tag=='MDP':
-            _oldPolicy,   _nowPolicy   = oldPolicy, nowPolicy
-            # _oldPolicyFn, _nowPolicyFn = None, None
-        elif _tag=='TI': #FIXME: integrate TI evaluation
-            _oldPolicy,   _nowPolicy   = oldPolicy, nowPolicy
+            _oldPolicy,   _nowPolicy   = MDP_oldPolicy, MDP_nowPolicy
+        # elif _tag=='TI': #FIXME: integrate TI evaluation
+        #     _oldPolicy,   _nowPolicy   = MDP_oldPolicy, MDP_nowPolicy
         elif _tag=='SF':
             _oldPolicyFn, _nowPolicyFn = ASelfishPolicy, ASelfishPolicy
         elif _tag=='QA':
@@ -155,21 +156,21 @@ def NextStateProxy(stage, arrivals, br_delay, *tasks):
     return ret
 
 def main_one_shot(args):
-    global oldPolicy, nowPolicy
+    global MDP_oldPolicy, MDP_nowPolicy
     np.random.seed( args.one_shot )
     record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
                         prefix=RECORD_PREFIX, postfix=args.postfix, tag=args.one_shot)
     Path( record_folder ).mkdir(exist_ok=True, parents=True)
     #-----------------------------------------------------------
     stage = 0
-    oldStat,   nowStat   = State(),          State()
-    oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
+    MDP_oldStat,   MDP_nowStat   = State(),          State()
+    MDP_oldPolicy, MDP_nowPolicy = BaselinePolicy(), BaselinePolicy()
     SF_oldStat, SF_nowStat = State(), State()
     QA_oldStat, QA_nowStat = State(), State()
     RD_oldStat, RD_nowStat = State(), State()
     # default by reference
-    TI_oldStat, TI_nowStat = oldStat, nowStat
-    TI_Policy              = nowPolicy
+    TI_oldStat, TI_nowStat = MDP_oldStat, MDP_nowStat
+    TI_Policy              = MDP_nowPolicy
     #-----------------------------------------------------------
     while stage < STAGE_ALT:
         # 1. one realization to next state
@@ -180,25 +181,28 @@ def main_one_shot(args):
             for k in range(N_AP):
                 br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
             #----------------------------------------------------------------
-            systemStat     = (oldStat, nowStat, br_delay)
-            oldPolicy      = nowPolicy
+            systemStat    = (MDP_oldStat, MDP_nowStat, br_delay)
+            MDP_oldPolicy = MDP_nowPolicy
             if args.serial_flag:
-                nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy)
+                MDP_nowPolicy, val = serial_optimize(stage, systemStat, MDP_oldPolicy)
             else:
-                nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+                MDP_nowPolicy, val = optimize(stage, systemStat, MDP_oldPolicy)
             #----------------------------------------------------------------
-            _tasks = [List([State()]) for _ in range(len(ALG_TAG))]
-            _tasks[ ALG2IDX('MDP') ] = List( [oldStat,nowStat] )
+            _tasks = [List([State(),State()]) for _ in range(len(ALG_TAG))]
+            _tasks[ ALG2IDX('MDP') ] = List( [MDP_oldStat,MDP_nowStat] )
             _tasks[ ALG2IDX('SF') ]  = List( [SF_oldStat,SF_nowStat] )
             _tasks[ ALG2IDX('QA') ]  = List( [QA_oldStat,QA_nowStat] )
             _tasks[ ALG2IDX('RD') ]  = List( [RD_oldStat,RD_nowStat] )
             #
+            if stage==0: #warm-up: JIT compile
+                systemStat = (State(), State(), br_delay)
+                NextState(arrivals, systemStat, MDP_oldPolicy, MDP_nowPolicy, ANonePolicy, ANonePolicy)
             ret = NextStateProxy(stage, arrivals, br_delay, *tuple(_tasks))
             #
-            oldStat,    nowStat    = nowStat,    ret[ ALG2IDX('MDP') ]
-            SF_oldStat, SF_nowStat = SF_nowStat, ret[ ALG2IDX('SF') ]
-            QA_oldStat, QA_nowStat = QA_nowStat, ret[ ALG2IDX('QA') ]
-            RD_oldStat, RD_nowStat = RD_nowStat, ret[ ALG2IDX('RD') ]
+            MDP_oldStat, MDP_nowStat = MDP_nowStat,ret[ ALG2IDX('MDP') ]
+            SF_oldStat, SF_nowStat   = SF_nowStat, ret[ ALG2IDX('SF') ]
+            QA_oldStat, QA_nowStat   = QA_nowStat, ret[ ALG2IDX('QA') ]
+            RD_oldStat, RD_nowStat   = RD_nowStat, ret[ ALG2IDX('RD') ]
             #
             # oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
             # systemStat             = (SF_oldStat, SF_nowStat, br_delay)
@@ -209,11 +213,11 @@ def main_one_shot(args):
             # RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
             if stage < STAGE_EVAL:
-                TI_Policy = nowPolicy
-                TI_oldStat, TI_nowStat = oldStat, nowStat
+                TI_Policy = MDP_nowPolicy
+                TI_oldStat, TI_nowStat = MDP_oldStat, MDP_nowStat
             elif stage==STAGE_EVAL:
-                TI_Policy              = oldPolicy.copy()
-                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat) #FIXME: before or after?
+                TI_Policy              = MDP_oldPolicy.copy()
+                TI_oldStat, TI_nowStat = State().clone(MDP_oldStat), State().clone(MDP_nowStat) #FIXME: before or after?
                 systemStat             = (TI_oldStat, TI_nowStat, br_delay)
                 TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
             else:
