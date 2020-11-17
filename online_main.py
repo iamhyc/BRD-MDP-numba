@@ -36,34 +36,6 @@ def AQueueAwarePolicy(stat, k, j):
     assert( bi_map[k,return_choice]==1 ) #NOTE: restrict for candidate set
     return return_choice
 
-def param_fitting():
-    t = 0
-    e_lambda = np.zeros((N_AP, N_JOB), dtype=np.float32)
-    e_c      = np.zeros((N_ES, N_JOB), dtype=np.float32)
-    e_u      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
-    selfish_policy = np.zeros((N_AP, N_ES), dtype=np.int32)
-    for k, m in product(range(N_AP), range(N_ES)):
-        pass
-    #ASelfishPolicy(_, k, j)
-
-    while t < STAGE_ALT:
-        arrivals = loadArrivalTrace(t)
-        #
-        e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals
-        #
-        for m,j in product(range(N_ES), range(N_JOB)):
-            if toss( 1/proc_mean[m,j] ):
-                e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME:
-            else:
-                pass
-            pass
-        #
-        for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
-
-            pass
-        pass
-    pass
-
 # @Timer.timeit
 @njit(parallel=False)
 def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicyFn):
@@ -121,6 +93,38 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
         pass
 
     return nextStat
+
+def main_param_fitting(args):
+    t = 1
+    e_lambda = np.zeros((N_AP, N_JOB), dtype=np.float32)
+    e_c      = np.zeros((N_ES, N_JOB), dtype=np.float32)
+    e_u      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
+    selfish_policy = np.zeros((N_AP, N_ES), dtype=np.int32)
+    for k, m in product(range(N_AP), range(N_ES)):
+        pass
+    #ASelfishPolicy(_, k, j)
+
+    while t < STAGE_ALT:
+        arrivals = loadArrivalTrace(t)
+        #
+        e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals #FIXME: arrivals[n, k, j]
+        plt.plot(t, e_lambda[0,0], 'ro')
+        # #
+        # for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
+        #     pass
+        # #
+        # for m,j in product(range(N_ES), range(N_JOB)):
+        #     if toss( 1/proc_mean[m,j] ):
+        #         e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME:
+        #     else:
+        #         pass
+        #     pass
+        #---------------------------------------------------------------------
+        plt.legend(['Arrival Probability', 'Uploading Time', 'Computation Time'])
+        plt.gcf().canvas.draw_idle()
+        plt.gcf().canvas.start_event_loop(0.3)
+        pass
+    pass
 
 def main_one_shot(args):
     np.random.seed( args.one_shot )
@@ -351,6 +355,8 @@ if __name__ == "__main__":
             description='Main entry to BRD MDP simulation.')
         parser.add_argument('--one-shot', dest='one_shot', type=int, default=0,
             help='Run main_one_shot for fast averaging records.')
+        parser.add_argument('--param-fit', dest='param_fit', action='store_true', default=False,
+            help='Run main_param_fitting.')
         parser.add_argument('--serial-optimize', dest='serial_flag', action='store_true', default=False,
             help='Use serial optimization in MDP method.')
         parser.add_argument('--plot', dest='plot_flag', action='store_true', default=False,
@@ -361,7 +367,9 @@ if __name__ == "__main__":
             help='always as last one for `params.py` usage.')
         args = parser.parse_args()
 
-        if args.one_shot!=0:
+        if args.param_fit:
+            main_param_fitting(args)
+        elif args.one_shot!=0:
             main_one_shot(args)
         else:
             main_long_time(args)
