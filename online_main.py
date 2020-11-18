@@ -98,26 +98,39 @@ def main_param_fitting(args):
     matplotlib.use("Qt5agg")
     plt.ion()
     #
-    _stage = 0
-    e_lambda = np.zeros((N_AP, N_JOB), dtype=np.float32)
-    e_c      = np.zeros((N_ES, N_JOB), dtype=np.float32)
-    e_u      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
-    _k, _m, _j = 0, 0, 0 #FIXME:
-
-    while _stage < STAGE_ALT:
-        arrivals = loadArrivalTrace(_stage)
+    stage = 0
+    e_lambda0 = np.zeros((N_AP, N_JOB), dtype=np.float32)
+    e_c0      = np.zeros((N_ES, N_JOB), dtype=np.float32)
+    e_u0      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
+    _k, _j   = np.unravel_index(np.argmax(arr_prob), arr_prob.shape)
+    _m       = np.argmax(proc_mean[_k]) #FIXME: np.argmin and /gt 0
+    oldStat, nowStat = State(), State()
+    oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
+    #
+    while stage < 100:
+        # 0. simulate NextState with MDP_POLICY
+        arrivals = loadArrivalTrace(stage)
+        br_delay = np.zeros((N_AP), dtype=np.int32) #no delay needed
+        systemStat     = (oldStat, nowStat, br_delay)
+        oldPolicy      = nowPolicy
+        if args.serial_flag:
+            nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy)
+        else:
+            nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+        #----------------------------------------------------------------
         # 1. estimation of arrival probability
+        e_lambda = e_lambda0.copy()
         for n in range(N_SLT):
-            t = _stage * N_SLT + n + 1
+            t = stage * N_SLT + n + 1
             e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals[n]
-            #plot averaged value
-            plt.plot(t, e_lambda[_k, _m], 'ro')
-            #plot real value
-            plt.plot((t-1,t), (arr_prob[_k,_j],arr_prob[_k,_j]), '-ro')
-        # 2. simulate NextState with MDP_POLICY
-        # for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
-        #     pass
-        # 3. estimation of computation time probability
+            pass
+        #----------------------------------------------------------------
+        # 2. estimation of mean uploading time
+        e_u = e_u0.copy()
+
+        #----------------------------------------------------------------
+        # 3. estimation of mean computation time
+        e_c = e_c0.copy()
         # for m,j in product(range(N_ES), range(N_JOB)):
         #     if toss( 1/proc_mean[m,j] ):
         #         e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME: really?
@@ -125,11 +138,26 @@ def main_param_fitting(args):
         #         pass
         #     pass
         #---------------------------------------------------------------------
-        plt.legend(['Arrival Probability', 'Uploading Time', 'Computation Time'])
+        #plot estimated value
+        plt.plot((stage-1,stage), (e_lambda0[_k,_j],e_lambda[_k,_j]), '--ro')
+        # plt.plot((stage-1,stage), (e_u0[_k,_m,_j],e_u[_k,_m,_j]), '--go')
+        # plt.plot((stage-1,stage), (e_c0[_m,_j],e_c[_m,_j]), '--bo')
+        #plot real value
+        plt.plot((stage-1,stage), (arr_prob[_k,_j],arr_prob[_k,_j]), '-r')
+        # plt.plot((stage-1,stage), (ul_prob[_k,_m,_j],ul_prob[_k,_m,_j]), '-g') #FIXME: mean uploading time
+        # plt.plot((stage-1,stage), (proc_mean[_m,_j],proc_mean[_m,_j]), '-b')
+        #plot legend
+        plt.legend(['Estimated Arrival Probability', #'Estimated Mean Uploading Time', 'Estimated Mean Computation Time'
+                    'Real Arrival Probability',      #'Real Mean Uploading Time',      'Real Mean Computation Time'
+                    ])
         plt.gcf().canvas.draw_idle()
         plt.gcf().canvas.start_event_loop(0.3)
-        _stage += 1
+        #---------------------------------------------------------------------
+        e_lambda0 = e_lambda; e_c0 = e_c; e_u0 = e_u
+        stage += 1
         pass
+    plt.ioff()
+    plt.show()
     pass
 
 def main_one_shot(args):
