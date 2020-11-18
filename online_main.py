@@ -96,7 +96,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
 
 @njit(parallel=False)
 def main_param_fitting(args):
-    t = 0
+    _stage = 0
     e_lambda = np.zeros((N_AP, N_JOB), dtype=np.float32)
     e_c      = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_u      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
@@ -105,17 +105,17 @@ def main_param_fitting(args):
         pass
     #ASelfishPolicy(_, k, j)
 
-    while t < STAGE_ALT:
+    while _stage < STAGE_ALT:
         arrivals = loadArrivalTrace(t)
-        #
+        # 1.
         for n in range(N_SLT):
-            _slot = t * N_SLT + n + 1
-            e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals #FIXME: arrivals[n, k, j]
+            t = _stage * N_SLT + n + 1
+            e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals[n]
         plt.plot(t, e_lambda[0,0], 'ro')
-        # #
-        # for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
-        #     pass
-        # #
+        # 2. simulate NextState with MDP_POLICY
+        for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
+            pass
+        #
         # for m,j in product(range(N_ES), range(N_JOB)):
         #     if toss( 1/proc_mean[m,j] ):
         #         e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME:
