@@ -94,31 +94,33 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
 
     return nextStat
 
-@njit(parallel=False)
 def main_param_fitting(args):
+    matplotlib.use("Qt5agg")
+    plt.ion()
+    #
     _stage = 0
     e_lambda = np.zeros((N_AP, N_JOB), dtype=np.float32)
     e_c      = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_u      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
-    selfish_policy = np.zeros((N_AP, N_ES), dtype=np.int32)
-    for k, m in product(range(N_AP), range(N_ES)):
-        pass
-    #ASelfishPolicy(_, k, j)
+    _k, _m, _j = 0, 0, 0 #FIXME:
 
     while _stage < STAGE_ALT:
-        arrivals = loadArrivalTrace(t)
-        # 1.
+        arrivals = loadArrivalTrace(_stage)
+        # 1. estimation of arrival probability
         for n in range(N_SLT):
             t = _stage * N_SLT + n + 1
             e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals[n]
-        plt.plot(t, e_lambda[0,0], 'ro')
+            #plot averaged value
+            plt.plot(t, e_lambda[_k, _m], 'ro')
+            #plot real value
+            plt.plot((t-1,t), (arr_prob[_k,_j],arr_prob[_k,_j]), '-ro')
         # 2. simulate NextState with MDP_POLICY
-        for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
-            pass
-        #
+        # for k,m,j in product(range(N_AP), range(N_ES), range(N_JOB)):
+        #     pass
+        # 3. estimation of computation time probability
         # for m,j in product(range(N_ES), range(N_JOB)):
         #     if toss( 1/proc_mean[m,j] ):
-        #         e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME:
+        #         e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME: really?
         #     else:
         #         pass
         #     pass
@@ -126,6 +128,7 @@ def main_param_fitting(args):
         plt.legend(['Arrival Probability', 'Uploading Time', 'Computation Time'])
         plt.gcf().canvas.draw_idle()
         plt.gcf().canvas.start_event_loop(0.3)
+        _stage += 1
         pass
     pass
 
