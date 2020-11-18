@@ -102,7 +102,7 @@ def main_param_fitting(args):
     e_lambda0 = np.zeros((N_AP, N_JOB), dtype=np.float32)
     t_c       = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_c0      = np.zeros((N_ES, N_JOB), dtype=np.float32)
-    e_u0      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
+    e_u0      = np.zeros((N_AP,N_ES,N_JOB,N_CNT-1), dtype=np.float32) #not probability but counter
     e_k, e_j  = np.unravel_index(np.argmax(arr_prob), arr_prob.shape)
     e_m       = np.argmax(proc_mean[e_k]) #FIXME: need to choose a better e_m
     oldStat, nowStat = State(), State()
@@ -140,9 +140,12 @@ def main_param_fitting(args):
                             toss_ul = toss(ul_prob[k,m,j,xi])
                             if toss_ul:
                                 off_number[m,j]             += lastStat.ap_stat[k,m,j,xi]
+                                if xi==N_CNT-1:
+                                    e_u[k,m,j,xi-1] += 1
+                                else:
+                                    e_u[k,m,j,xi] += 1
                             else:
                                 nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
-                            #TODO:
             nextStat.es_stat += off_number
             # 3. estimation of mean computation time
             # print(e_c)
@@ -165,15 +168,17 @@ def main_param_fitting(args):
             pass
         #---------------------------------------------------------------------
         #reference: https://matplotlib.org/gallery/api/two_scales.html
-        ul_mean = np.sum(np.arange(1, N_CNT) * arr_prob[e_k,e_j])
+        e_u_mean  = np.sum( np.arange(1, N_CNT) * normalize(e_u[e_k,e_m,e_j]) )
+        e_u0_mean = np.sum( np.arange(1, N_CNT) * normalize(e_u0[e_k,e_m,e_j]) )
+        ul_mean   = np.sum( np.arange(1, N_CNT) * np.diff(ul_prob[e_k,e_m,e_j]) )
         #plot estimated value
         # plt.plot((stage-1,stage), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '--ro')
-        # plt.plot((stage-1,stage), (e_u0[e_k,e_m,e_j],e_u[e_k,e_m,e_j]), '--go')
-        plt.plot((stage-1,stage), (e_c0[e_m,e_j],e_c[e_m,e_j]), '--bo')
+        plt.plot((stage-1,stage), (e_u0_mean, e_u_mean), '--go')
+        # plt.plot((stage-1,stage), (e_c0[e_m,e_j],e_c[e_m,e_j]), '--bo')
         #plot real value
         # plt.plot((stage-1,stage), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
-        # plt.plot((stage-1,stage), (ul_mean[e_k,e_m,e_j],ul_mean[e_k,e_m,e_j]), '-g')
-        plt.plot((stage-1,stage), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
+        plt.plot((stage-1,stage), (ul_mean, ul_mean), '-g')
+        # plt.plot((stage-1,stage), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
         #plot legend
         plt.legend(['Estimated Arrival Probability', #'Estimated Mean Uploading Time', 'Estimated Mean Computation Time'
                     'Real Arrival Probability',      #'Real Mean Uploading Time',      'Real Mean Computation Time'

@@ -20,6 +20,10 @@ def toss(p):
     return multoss(p_vec)
 
 @njit(fastmath=True)
+def normalize(arr):
+    return arr / np.sum(arr)
+
+@njit(fastmath=True)
 def factorial(n):
     result = 1.0
     for i in range(1,n+1):
