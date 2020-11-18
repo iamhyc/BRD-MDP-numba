@@ -52,7 +52,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
                 if oldPolicyFn is not None: #callable(oldPolicy) and callable(nowPolicy):
                     _m = oldPolicyFn(oldStat, k, j) if n<br_delay[k] else nowPolicyFn(nowStat, k, j)
                 else:
-                    _m = oldPolicy[k,j]           if n<br_delay[k] else nowPolicy[k,j]
+                    _m = oldPolicy[k,j]             if n<br_delay[k] else nowPolicy[k,j]
                 assert( bi_map[k,_m]==1 )
                 nextStat.ap_stat[k, _m, j, 0] = arrivals[n, k, j]
         
@@ -100,52 +100,80 @@ def main_param_fitting(args):
     #
     stage = 0
     e_lambda0 = np.zeros((N_AP, N_JOB), dtype=np.float32)
+    t_c       = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_c0      = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_u0      = np.zeros((N_AP,N_ES,N_JOB), dtype=np.float32)
-    _k, _j   = np.unravel_index(np.argmax(arr_prob), arr_prob.shape)
-    _m       = np.argmax(proc_mean[_k]) #FIXME: np.argmin and /gt 0
+    e_k, e_j  = np.unravel_index(np.argmax(arr_prob), arr_prob.shape)
+    e_m       = np.argmax(proc_mean[e_k]) #FIXME: need to choose a better e_m
     oldStat, nowStat = State(), State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     #
     while stage < 100:
-        # 0. simulate NextState with MDP_POLICY
+        # state simulate with MDP_POLICY
         arrivals = loadArrivalTrace(stage)
         br_delay = np.zeros((N_AP), dtype=np.int32) #no delay needed
         systemStat     = (oldStat, nowStat, br_delay)
         oldPolicy      = nowPolicy
-        if args.serial_flag:
-            nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy)
-        else:
-            nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+        nowPolicy, _   = optimize(stage, systemStat, oldPolicy)
         #----------------------------------------------------------------
-        # 1. estimation of arrival probability
-        e_lambda = e_lambda0.copy()
+        e_lambda = e_lambda0.copy(); e_u = e_u0.copy(); e_c = e_c0.copy()
+        lastStat  = State().clone(nowStat)
+        nextStat  = State().clone(lastStat)
         for n in range(N_SLT):
+            # 1. estimation of arrival probability
+            # print(e_lambda)
             t = stage * N_SLT + n + 1
             e_lambda = (t-1)/t * e_lambda + (1/t) * arrivals[n]
+            nextStat.ap_stat = np.zeros((N_AP,N_ES,N_JOB,N_CNT), dtype=np.int32)
+            for j in range(N_JOB):
+                for k in range(N_AP):
+                    _m = oldPolicy[k,j] if n<br_delay[k] else nowPolicy[k,j]
+                    assert( bi_map[k,_m]==1 )
+                    nextStat.ap_stat[k, _m, j, 0] = arrivals[n, k, j]
+            # 2. estimation of mean uploading time
+            # print(e_u)
+            off_number = np.zeros((N_ES, N_JOB), dtype=np.int32)
+            for xi in range(N_CNT):
+                for j in range(N_JOB):
+                    for m in range(N_ES):
+                        for k in range(N_AP):
+                            toss_ul = toss(ul_prob[k,m,j,xi])
+                            if toss_ul:
+                                off_number[m,j]             += lastStat.ap_stat[k,m,j,xi]
+                            else:
+                                nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
+                            #TODO:
+            nextStat.es_stat += off_number
+            # 3. estimation of mean computation time
+            # print(e_c)
+            for j in range(N_JOB):
+                for m in range(N_ES):
+                    if nextStat.es_stat[m,j]>LQ:
+                        nextStat.es_stat[m,j]=LQ
+                    if nextStat.es_stat[m,j]>0:
+                        _success = toss(1/proc_mean[m,j])
+                        if _success:
+                            t_c[m,j] += 1
+                            e_c[m,j] = (t_c[m,j]-1)/t_c[m,j] * e_c[m,j] + (1/t_c[m,j]) * np.random.geometric(1/proc_mean[m,j])
+                        completed_num            = 1 if _success else 0
+                        nextStat.es_stat[m,j]   -= completed_num 
+                    else:
+                        nextStat.es_stat[m,j]    = 0
+                    pass
+            lastStat = nextStat
+            nextStat = State().clone(lastStat)
             pass
-        #----------------------------------------------------------------
-        # 2. estimation of mean uploading time
-        e_u = e_u0.copy()
-
-        #----------------------------------------------------------------
-        # 3. estimation of mean computation time
-        e_c = e_c0.copy()
-        # for m,j in product(range(N_ES), range(N_JOB)):
-        #     if toss( 1/proc_mean[m,j] ):
-        #         e_c[m,j] = (t-1)/t * e_c[m,j] + (1/t) * proc_mean[m,j] #FIXME: really?
-        #     else:
-        #         pass
-        #     pass
         #---------------------------------------------------------------------
+        #reference: https://matplotlib.org/gallery/api/two_scales.html
+        ul_mean = np.sum(np.arange(1, N_CNT) * arr_prob[e_k,e_j])
         #plot estimated value
-        plt.plot((stage-1,stage), (e_lambda0[_k,_j],e_lambda[_k,_j]), '--ro')
-        # plt.plot((stage-1,stage), (e_u0[_k,_m,_j],e_u[_k,_m,_j]), '--go')
-        # plt.plot((stage-1,stage), (e_c0[_m,_j],e_c[_m,_j]), '--bo')
+        # plt.plot((stage-1,stage), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '--ro')
+        # plt.plot((stage-1,stage), (e_u0[e_k,e_m,e_j],e_u[e_k,e_m,e_j]), '--go')
+        plt.plot((stage-1,stage), (e_c0[e_m,e_j],e_c[e_m,e_j]), '--bo')
         #plot real value
-        plt.plot((stage-1,stage), (arr_prob[_k,_j],arr_prob[_k,_j]), '-r')
-        # plt.plot((stage-1,stage), (ul_prob[_k,_m,_j],ul_prob[_k,_m,_j]), '-g') #FIXME: mean uploading time
-        # plt.plot((stage-1,stage), (proc_mean[_m,_j],proc_mean[_m,_j]), '-b')
+        # plt.plot((stage-1,stage), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
+        # plt.plot((stage-1,stage), (ul_mean[e_k,e_m,e_j],ul_mean[e_k,e_m,e_j]), '-g')
+        plt.plot((stage-1,stage), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
         #plot legend
         plt.legend(['Estimated Arrival Probability', #'Estimated Mean Uploading Time', 'Estimated Mean Computation Time'
                     'Real Arrival Probability',      #'Real Mean Uploading Time',      'Real Mean Computation Time'
