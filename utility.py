@@ -21,7 +21,11 @@ def toss(p):
 
 @njit(fastmath=True)
 def normalize(arr):
-    return arr / np.sum(arr)
+    _sum = np.sum(arr)
+    if _sum==0:
+        return arr
+    else:
+        return arr / _sum
 
 @njit(fastmath=True)
 def factorial(n):

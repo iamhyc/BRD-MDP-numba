@@ -170,15 +170,15 @@ def main_param_fitting(args):
         #reference: https://matplotlib.org/gallery/api/two_scales.html
         e_u_mean  = np.sum( np.arange(1, N_CNT) * normalize(e_u[e_k,e_m,e_j]) )
         e_u0_mean = np.sum( np.arange(1, N_CNT) * normalize(e_u0[e_k,e_m,e_j]) )
-        ul_mean   = np.sum( np.arange(1, N_CNT) * np.diff(ul_prob[e_k,e_m,e_j]) )
+        ul_mean   = np.sum( np.arange(1, N_CNT) * np.diff(ul_prob[e_k,e_m,e_j]) ) #print(e_u_mean, ul_mean)
         #plot estimated value
-        # plt.plot((stage-1,stage), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '--ro')
-        plt.plot((stage-1,stage), (e_u0_mean, e_u_mean), '--go')
-        # plt.plot((stage-1,stage), (e_c0[e_m,e_j],e_c[e_m,e_j]), '--bo')
+        # plt.plot((stage,stage+1), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '--ro')
+        plt.plot((stage,stage+1), (e_u0_mean, e_u_mean), '--go')
+        # plt.plot((stage,stage+1), (e_c0[e_m,e_j],e_c[e_m,e_j]), '--bo')
         #plot real value
-        # plt.plot((stage-1,stage), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
-        plt.plot((stage-1,stage), (ul_mean, ul_mean), '-g')
-        # plt.plot((stage-1,stage), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
+        # plt.plot((stage,stage+1), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
+        plt.plot((stage,stage+1), (ul_mean, ul_mean), '-g')
+        # plt.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
         #plot legend
         plt.legend(['Estimated Arrival Probability', #'Estimated Mean Uploading Time', 'Estimated Mean Computation Time'
                     'Real Arrival Probability',      #'Real Mean Uploading Time',      'Real Mean Computation Time'
