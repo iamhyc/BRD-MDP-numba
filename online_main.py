@@ -95,8 +95,17 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
     return nextStat
 
 def main_param_fitting(args):
+    #reference: https://matplotlib.org/gallery/api/two_scales.html
     matplotlib.use("Qt5agg")
     plt.ion()
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('Index of Intervals')
+    ax1.set_ylabel('probability')
+    # ax1.set_xlim(0, 99)
+    ax1.set_ylim([-0.00, 0.10])
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('time slots')
+    ax2.set_ylim([0, 75])
     #
     stage = 0
     e_lambda0 = np.zeros((N_AP, N_JOB), dtype=np.float32)
@@ -104,7 +113,7 @@ def main_param_fitting(args):
     e_c0      = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_u0      = np.zeros((N_AP,N_ES,N_JOB,N_CNT-1), dtype=np.float32) #not probability but counter
     e_k, e_j  = np.unravel_index(np.argmax(arr_prob), arr_prob.shape)
-    e_m       = np.argmax(proc_mean[e_k]) #FIXME: need to choose a better e_m
+    e_m       = 0 #np.argmax(proc_mean[e_k])
     oldStat, nowStat = State(), State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     #
@@ -148,7 +157,7 @@ def main_param_fitting(args):
                                 nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
             nextStat.es_stat += off_number
             # 3. estimation of mean computation time
-            # print(e_c)
+            # print(np.abs(e_c - proc_mean)); print()
             for j in range(N_JOB):
                 for m in range(N_ES):
                     if nextStat.es_stat[m,j]>LQ:
@@ -167,22 +176,24 @@ def main_param_fitting(args):
             nextStat = State().clone(lastStat)
             pass
         #---------------------------------------------------------------------
-        #reference: https://matplotlib.org/gallery/api/two_scales.html
         e_u_mean  = np.sum( np.arange(1, N_CNT) * normalize(e_u[e_k,e_m,e_j]) )
         e_u0_mean = np.sum( np.arange(1, N_CNT) * normalize(e_u0[e_k,e_m,e_j]) )
         ul_mean   = np.sum( np.arange(1, N_CNT) * np.diff(ul_prob[e_k,e_m,e_j]) ) #print(e_u_mean, ul_mean)
         #plot estimated value
-        # plt.plot((stage,stage+1), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '--ro')
-        plt.plot((stage,stage+1), (e_u0_mean, e_u_mean), '--go')
-        # plt.plot((stage,stage+1), (e_c0[e_m,e_j],e_c[e_m,e_j]), '--bo')
+        _ln1e = ax1.plot((stage,stage+1), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '-r.')
+        _ln2e = ax2.plot((stage,stage+1), (e_u0_mean, e_u_mean), '-g^')
+        _ln3e = ax2.plot((stage,stage+1), (e_c0[e_m,e_j],e_c[e_m,e_j]), '-bv')
         #plot real value
-        # plt.plot((stage,stage+1), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
-        plt.plot((stage,stage+1), (ul_mean, ul_mean), '-g')
-        # plt.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
+        _ln1 = ax1.plot((stage,stage+1), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '--r')
+        _ln2 = ax2.plot((stage,stage+1), (ul_mean, ul_mean), '--g')
+        _ln3 = ax2.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '--b')
         #plot legend
-        plt.legend(['Estimated Arrival Probability', #'Estimated Mean Uploading Time', 'Estimated Mean Computation Time'
-                    'Real Arrival Probability',      #'Real Mean Uploading Time',      'Real Mean Computation Time'
-                    ])
+        ax1.legend(_ln1e + _ln1 + _ln2e + _ln2 + _ln3e + _ln3,
+                    ['Estimated Arrival Probability', 'Real Arrival Probability',
+                    'Estimated Mean Computation Time', 'Real Mean Uploading Time',
+                    'Estimated Mean Uploading Time', 'Real Mean Computation Time'
+                    ], loc='center right')
+        fig.tight_layout()
         plt.gcf().canvas.draw_idle()
         plt.gcf().canvas.start_event_loop(0.3)
         #---------------------------------------------------------------------
