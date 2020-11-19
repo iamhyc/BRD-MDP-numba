@@ -236,19 +236,6 @@ def main_one_shot(args):
             else:
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
-            #FIXME: before or after?
-            if stage < STAGE_EVAL:
-                TI_Policy = nowPolicy
-                TI_oldStat, TI_nowStat = oldStat, nowStat
-            elif stage==STAGE_EVAL:
-                TI_Policy              = oldPolicy.copy()
-                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
-                systemStat             = (TI_oldStat, TI_nowStat, br_delay)
-                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
-            else:
-                systemStat             = (TI_oldStat, TI_nowStat, br_delay)
-                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
-            #----------------------------------------------------------------
             oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
             systemStat             = (SF_oldStat, SF_nowStat, br_delay)
             SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
@@ -256,6 +243,16 @@ def main_one_shot(args):
             QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
             systemStat             = (RD_oldStat, RD_nowStat, br_delay)
             RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
+            #----------------------------------------------------------------
+            if stage < STAGE_EVAL:
+                TI_Policy = nowPolicy
+                TI_oldStat, TI_nowStat = oldStat, nowStat
+            elif stage==STAGE_EVAL: #could integrated with 'stage<STAGE_EVAL' condition
+                TI_Policy              = nowPolicy.copy()
+                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
+            else:
+                systemStat             = (TI_oldStat, TI_nowStat, br_delay)
+                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
             #----------------------------------------------------------------
             pass
         # 2. update the stage counter
