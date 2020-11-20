@@ -75,22 +75,31 @@ def getAverageThroughput(ref, start=0, end=-1):
 def plot_statistics():
     statistics = list()
     for record_dir in records_path:
-        record = sorted( record_dir.iterdir() )
-        record = [np.load(x) for x in record]
-        statistics.append({
-            'AverageNumber' : getAverageNumber(record),
-            'AverageCost'   : getAverageCost(record),
-            'DiscountedCost': getDiscountedCost(record),
-            'AverageJCT'    : getAverageJCT(record),
-            'AverageThroughput': getAverageThroughput(record)
-        })
+        _save_file = save_path.joinpath( record_dir.stem+'.npz' ); print(_save_file)
+        if _save_file.exists():
+            statistics.append( np.load(_save_file) )
+        else:
+            record = sorted( record_dir.iterdir() )
+            record = [np.load(x) for x in record]
+            _result = {
+                'AverageNumber' : getAverageNumber(record),
+                'AverageCost'   : getAverageCost(record),
+                'DiscountedCost': getDiscountedCost(record),
+                'AverageJCT'    : getAverageJCT(record),
+                'AverageThroughput': getAverageThroughput(record)
+            }
+            statistics.append(_result)
+            np.savez_compressed(_save_file.as_posix(), *_result)
         pass
-    #TODO: plot and compare
+    #
+    print( len(statistics) )
     pass
 
 try:
     _, log_folder, log_type  = sys.argv
     records_path = sorted( Path(log_folder).glob(log_type+'-*') )
+    save_path    = Path(log_folder, log_type+'_statistics')
+    save_path.mkdir(exist_ok=True)
     plot_statistics()
 except Exception as e:
     print('Loading traces failed with:', sys.argv)
