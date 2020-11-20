@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+from tqdm import tqdm
 from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
@@ -9,10 +10,11 @@ from numba import njit, prange
 # customize matplotlib plotting
 from matplotlib import rc
 rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
-rc('text', usetex=True)
+# rc('text', usetex=True)
 # tag the records
 DATA_TAG = ['ap_stat', 'es_stat', 'admissions', 'departures']
 ALG_TAG  = ['MDP', 'Tight', 'Selfish', 'QAware', 'Random']
+ALG_COLOR= ['r',   'k',     'b',       'g',      'c']
 get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 # global variables
 global records_path
@@ -72,10 +74,10 @@ def getAverageThroughput(ref, start=0, end=-1):
     acc_arr  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('admissions') ])
     return acc_dep / acc_arr
 
-def plot_statistics():
+def load_statistics():
     statistics = list()
-    for record_dir in records_path:
-        _save_file = save_path.joinpath( record_dir.stem+'.npz' ); print(_save_file)
+    for record_dir in tqdm(records_path, desc='Loading statistics'):
+        _save_file = save_path.joinpath( record_dir.stem+'.npz' )
         if _save_file.exists():
             statistics.append( np.load(_save_file) )
         else:
@@ -89,10 +91,15 @@ def plot_statistics():
                 'AverageThroughput': getAverageThroughput(record)
             }
             statistics.append(_result)
-            np.savez_compressed(_save_file.as_posix(), *_result)
+            np.savez_compressed(_save_file.as_posix(), **_result)
         pass
     #
-    print( len(statistics) )
+    fig, ax = plt.subplots()
+    _sum = np.zeros((len(ALG_TAG),), dtype=np.float32)
+    for idx, data in enumerate(statistics):
+        _sum += data['AverageCost']
+        ax.plot(idx, _sum[0]/(idx+1), '.r')
+    plt.show()
     pass
 
 try:
@@ -100,7 +107,9 @@ try:
     records_path = sorted( Path(log_folder).glob(log_type+'-*') )
     save_path    = Path(log_folder, log_type+'_statistics')
     save_path.mkdir(exist_ok=True)
-    plot_statistics()
+    load_statistics()
+    #
+    
 except Exception as e:
     print('Loading traces failed with:', sys.argv)
     raise e
