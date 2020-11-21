@@ -16,8 +16,11 @@ local_template = [
     "./online_main.py",
     "--postfix", "{postfix}",
     "--one-shot", "{one_shot}",
-    "--inject", "TRACE_FOLDER='./data/trace-00000-1_3x'; arr_prob=np.load(Path(TRACE_FOLDER, 'statistics'))"
+    "--inject", "{inject}"
+    # "--inject", "TRACE_FOLDER='./data/trace-00000-1_3x'; arr_prob=np.load(Path(TRACE_FOLDER, 'statistics'))"
 ]
+
+EVAL_RANGE = range(10,110,10)
 
 def all_done(cpu_stat):
     for stat in cpu_stat:
@@ -33,14 +36,18 @@ if __name__ == "__main__":
         one_shot_list = [random.randint(2**2, 2**16) for _ in range(NUM)]
         start_time = time.time()
 
-        task_list = dict()
-        for idx, num in enumerate(one_shot_list):
-            command = local_template.copy()
-            command[ local_template.index("{postfix}") ]  = "test"
-            command[ local_template.index("{one_shot}") ] = '%05d'%(num)
-            task_list[idx] = command
+        task_list = dict(); idx = 0
+        for stage in EVAL_RANGE: #NOTE: evaluation range
+            for num in (one_shot_list):
+                command = local_template.copy()
+                command[ local_template.index("{postfix}") ]  = "ti%02d"%stage
+                command[ local_template.index("{one_shot}") ] = '%05d'%(num)
+                command[ local_template.index("{inject}") ] = 'STAGE_EVAL=%d'%stage
+                task_list[idx] = command
+                idx += 1
             pass
-        
+        assert( len(EVAL_RANGE) * len(one_shot_list) == len(task_list) )
+
         cpu_stat = [None] * NUM_SLOT; cpu_stat[0] = 0
         while not all_done(cpu_stat):
             _empty = 0

@@ -185,11 +185,11 @@ try:
     save_path    = Path(log_folder, log_type+'_statistics')
     save_path.mkdir(exist_ok=True)
     statistics = load_statistics()
-    plot_statistics()
+    # plot_statistics()
     # Fig. 5. Illustration of performance metrics comparison with benchmarks.
     # plot_bar_graph()
     # Fig. 7 Illustration of monotonical performance gap decreasing.
-    # plot_tight_bound()
+    plot_tight_bound()
 except Exception as e:
     print('Loading traces failed with:', sys.argv)
     raise e

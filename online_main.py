@@ -213,13 +213,14 @@ def main_one_shot(args):
     stage = 0
     oldStat,   nowStat   = State(),          State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
-    SF_oldStat, SF_nowStat = State(), State()
-    QA_oldStat, QA_nowStat = State(), State()
-    RD_oldStat, RD_nowStat = State(), State()
+    # SF_oldStat, SF_nowStat = State(), State()
+    # QA_oldStat, QA_nowStat = State(), State()
+    # RD_oldStat, RD_nowStat = State(), State()
     # default by reference
     TI_oldStat, TI_nowStat = oldStat, nowStat
     TI_Policy              = nowPolicy
     #-----------------------------------------------------------
+    print(STAGE_EVAL)
     while stage < STAGE_ALT:
         # 1. one realization to next state
         val = None
@@ -237,12 +238,12 @@ def main_one_shot(args):
                 nowPolicy, val = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
             oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
-            systemStat             = (SF_oldStat, SF_nowStat, br_delay)
-            SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
-            systemStat             = (QA_oldStat, QA_nowStat, br_delay)
-            QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
-            systemStat             = (RD_oldStat, RD_nowStat, br_delay)
-            RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
+            # systemStat             = (SF_oldStat, SF_nowStat, br_delay)
+            # SF_oldStat, SF_nowStat = SF_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ASelfishPolicy, ASelfishPolicy)
+            # systemStat             = (QA_oldStat, QA_nowStat, br_delay)
+            # QA_oldStat, QA_nowStat = QA_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, AQueueAwarePolicy, AQueueAwarePolicy)
+            # systemStat             = (RD_oldStat, RD_nowStat, br_delay)
+            # RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
             if stage < STAGE_EVAL:
                 TI_Policy = nowPolicy
@@ -272,20 +273,20 @@ def main_one_shot(args):
                 'Tight_admissions': TI_nowStat.admissions,
                 'Tight_departures': TI_nowStat.departures,
                 #
-                'Selfish_ap_stat': SF_nowStat.ap_stat,
-                'Selfish_es_stat': SF_nowStat.es_stat,
-                'Selfish_admissions': SF_nowStat.admissions,
-                'Selfish_departures': SF_nowStat.departures,
+                # 'Selfish_ap_stat': SF_nowStat.ap_stat,
+                # 'Selfish_es_stat': SF_nowStat.es_stat,
+                # 'Selfish_admissions': SF_nowStat.admissions,
+                # 'Selfish_departures': SF_nowStat.departures,
                 #
-                'QAware_ap_stat' : QA_nowStat.ap_stat,
-                'QAware_es_stat' : QA_nowStat.es_stat,
-                'QAware_admissions': QA_nowStat.admissions,
-                'QAware_departures': QA_nowStat.departures,
-                #
-                'Random_ap_stat' : RD_nowStat.ap_stat,
-                'Random_es_stat' : RD_nowStat.es_stat,
-                'Random_admissions': RD_nowStat.admissions,
-                'Random_departures': RD_nowStat.departures
+                # 'QAware_ap_stat' : QA_nowStat.ap_stat,
+                # 'QAware_es_stat' : QA_nowStat.es_stat,
+                # 'QAware_admissions': QA_nowStat.admissions,
+                # 'QAware_departures': QA_nowStat.departures,
+                # #
+                # 'Random_ap_stat' : RD_nowStat.ap_stat,
+                # 'Random_es_stat' : RD_nowStat.es_stat,
+                # 'Random_admissions': RD_nowStat.admissions,
+                # 'Random_departures': RD_nowStat.departures
             })
             pass
         print('one-shot-{}: stage {:04d}'.format(RECORD_PREFIX, stage))
