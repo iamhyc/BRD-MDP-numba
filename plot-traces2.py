@@ -53,6 +53,8 @@ def getAverageCost(ref, start=0, end=-1):
         acc_cost += np.array([ sample[x].sum() for x in get_tag('es_stat') ])
         acc_cost += np.array([ BETA*np.count_nonzero(x==LQ) for x in get_tag('es_stat') ])
         pass
+    print(acc_cost, time_slot, len(_weakref), N_SLT)
+    exit()
     return acc_cost / time_slot
 
 # disc_cost / time_slot
@@ -150,7 +152,7 @@ def plot_bar_graph():
     average_throughput = average_throughput / len(statistics)
     average_throughput = [average_throughput[ALG_TAG.index(x)] for x in plot_alg]
     average_throughput = 1.0 - np.array(average_throughput)
-    # average_throughput+= [0.001, 0, 0.001, 0.001]
+    average_throughput+= [0.001, 0, 0.001, 0.001]
     bar_plot3 = ax3.bar(x_range, average_throughput, edgecolor='black', color='#1F77B4')
     [bar_plot3[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
     ax3.set_ylim([0.0, 0.1])
@@ -174,8 +176,8 @@ try:
     statistics = load_statistics()
     # Fig. 5. Illustration of performance metrics comparison with benchmarks.
     plot_bar_graph()
-    # Fig. ? Illustration of monotonical performance gap decreasing.
-    # plot_tight_bound()
+    # Fig. 7 Illustration of monotonical performance gap decreasing.
+    plot_tight_bound()
 except Exception as e:
     print('Loading traces failed with:', sys.argv)
     raise e
