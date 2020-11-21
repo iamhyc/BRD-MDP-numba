@@ -35,7 +35,7 @@ def autolabel(ax, rects):
 def getAverageNumber(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_num  = np.zeros((len(ALG_TAG),), dtype=np.int32)
-    time_slot = len(_weakref) * N_SLT
+    time_slot = len(_weakref) #* N_SLT
     for sample in _weakref:
         acc_num += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
         acc_num += np.array([ sample[x].sum() for x in get_tag('es_stat') ])
@@ -46,22 +46,20 @@ def getAverageNumber(ref, start=0, end=-1):
 def getAverageCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_cost = np.zeros((len(ALG_TAG),), dtype=np.int32)
-    time_slot = len(_weakref) * N_SLT
+    time_slot = len(_weakref) #* N_SLT
     for sample in _weakref:
         # np.sum(ap_stat) + np.sum(es_stat) + _penalty
         acc_cost += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
         acc_cost += np.array([ sample[x].sum() for x in get_tag('es_stat') ])
         acc_cost += np.array([ BETA*np.count_nonzero(x==LQ) for x in get_tag('es_stat') ])
         pass
-    print(acc_cost, time_slot, len(_weakref), N_SLT)
-    exit()
     return acc_cost / time_slot
 
 # disc_cost / time_slot
 def getDiscountedCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     disc_cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
-    time_slot = len(_weakref) * N_SLT
+    time_slot = len(_weakref) #* N_SLT
     for idx, sample in enumerate(_weakref):
         _cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
         _cost += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
@@ -76,7 +74,7 @@ def getAverageJCT(ref, start=0, end=-1):
     # self.acc_cost / self.acc_arr
     _weakref = ref[start:end]
     avg_cost = getAverageCost(ref, start, end)
-    acc_cost = avg_cost * len(_weakref) * N_SLT
+    acc_cost = avg_cost * len(_weakref) #* N_SLT
     acc_arr  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('admissions') ])
     return acc_cost / acc_arr
 
@@ -85,7 +83,7 @@ def getAverageThroughput(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_dep  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('departures') ])
     acc_dep += np.array([ _weakref[-1][x].sum() for x in get_tag('es_stat') ]) # blame remaining jobs as departures
-    acc_arr  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('admissions') ])
+    acc_arr  = np.array([ (_weakref[-1][x]).sum() for x in get_tag('admissions') ])
     return acc_dep / acc_arr
 
 def load_statistics():
@@ -131,11 +129,11 @@ def plot_bar_graph():
     ax1.yaxis.set_label_coords(-0.15,0.5)
     autolabel(ax1, bar_plot1)
 
-    # Average Job REsponse Time
+    # Average Job Response Time
     average_JCT = np.zeros((len(ALG_TAG),), dtype=np.float32)
     for sample in statistics:
-        average_JCT += sample['AverageThroughput']
-    average_JCT = average_JCT / len(statistics)
+        average_JCT += sample['AverageJCT']
+    average_JCT = average_JCT / len(statistics) * N_SLT
     average_JCT = [average_JCT[ALG_TAG.index(x)] for x in plot_alg]
     bar_plot2 = ax2.bar(x_range, average_JCT, edgecolor='black', color='#1F77B4')
     [bar_plot2[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
@@ -148,14 +146,14 @@ def plot_bar_graph():
     #Average Job Dropping Rate
     average_throughput = np.zeros((len(ALG_TAG),), dtype=np.float32)
     for sample in statistics:
-        average_throughput += sample['AverageJCT']
+        average_throughput += sample['AverageThroughput']
     average_throughput = average_throughput / len(statistics)
     average_throughput = [average_throughput[ALG_TAG.index(x)] for x in plot_alg]
     average_throughput = 1.0 - np.array(average_throughput)
-    average_throughput+= [0.001, 0, 0.001, 0.001]
+    # average_throughput+= [0.001, 0, 0.001, 0.001]
     bar_plot3 = ax3.bar(x_range, average_throughput, edgecolor='black', color='#1F77B4')
     [bar_plot3[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
-    ax3.set_ylim([0.0, 0.1])
+    ax3.set_ylim([0.0, 0.05])
     ax3.set_title('(c)', y=-0.075, fontsize=20)
     ax3.set_xticklabels(['']+plot_alg, fontsize=14)
     ax3.set_ylabel('Average Job Dropping Rate', fontsize=16)
