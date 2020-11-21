@@ -205,6 +205,9 @@ def main_param_fitting(args):
     pass
 
 def main_one_shot(args):
+    if args.plot_flag:
+        matplotlib.use("Qt5agg")
+        plt.ion()
     np.random.seed( args.one_shot )
     record_folder = 'records-{prefix}/{postfix}-{tag}'.format(
                         prefix=RECORD_PREFIX, postfix=args.postfix, tag=args.one_shot)
@@ -258,6 +261,11 @@ def main_one_shot(args):
             pass
         # 2. update the stage counter
         stage += 1
+        if args.plot_flag:
+            plt.plot([stage, stage+1], [oldStat.getCost(), nowStat.getCost()], '-ro')
+            plt.plot([stage, stage+1], [TI_oldStat.getCost(), TI_nowStat.getCost()], '-ko')
+            plt.gcf().canvas.draw_idle()
+            plt.gcf().canvas.start_event_loop(0.3)
         # 3. record the stage (along this realization)
         stage_record_file = Path( record_folder, '%04d'%stage ).as_posix()
         with open(stage_record_file, 'wb') as fh:
