@@ -35,7 +35,7 @@ def autolabel(ax, rects):
 def getAverageNumber(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_num  = np.zeros((len(ALG_TAG),), dtype=np.int32)
-    time_slot = len(_weakref) #* N_SLT
+    time_slot = len(_weakref) * N_SLT
     for sample in _weakref:
         acc_num += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
         acc_num += np.array([ sample[x].sum() for x in get_tag('es_stat') ])
@@ -46,7 +46,7 @@ def getAverageNumber(ref, start=0, end=-1):
 def getAverageCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_cost = np.zeros((len(ALG_TAG),), dtype=np.int32)
-    time_slot = len(_weakref) #* N_SLT
+    time_slot = len(_weakref) * N_SLT
     for sample in _weakref:
         # np.sum(ap_stat) + np.sum(es_stat) + _penalty
         acc_cost += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
@@ -59,7 +59,7 @@ def getAverageCost(ref, start=0, end=-1):
 def getDiscountedCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     disc_cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
-    time_slot = len(_weakref) #* N_SLT
+    time_slot = len(_weakref) * N_SLT
     for idx, sample in enumerate(_weakref):
         _cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
         _cost += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
@@ -74,16 +74,17 @@ def getAverageJCT(ref, start=0, end=-1):
     # self.acc_cost / self.acc_arr
     _weakref = ref[start:end]
     avg_cost = getAverageCost(ref, start, end)
-    acc_cost = avg_cost * len(_weakref) #* N_SLT
+    acc_cost = avg_cost * len(_weakref) * N_SLT
     acc_arr  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('admissions') ])
     return acc_cost / acc_arr
 
 # acc_dep / acc_arr
 def getAverageThroughput(ref, start=0, end=-1):
     _weakref = ref[start:end]
+    prev_arr = np.zeros(ALG_NUM) if start==0 else ref[start-1]
     acc_dep  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('departures') ])
     acc_dep += np.array([ _weakref[-1][x].sum() for x in get_tag('es_stat') ]) # blame remaining jobs as departures
-    acc_arr  = np.array([ (_weakref[-1][x]).sum() for x in get_tag('admissions') ])
+    acc_arr  = np.array([ (_weakref[-1][x]-prev_arr).sum() for x in get_tag('admissions') ])
     return acc_dep / acc_arr
 
 def load_statistics():
@@ -106,6 +107,18 @@ def load_statistics():
             np.savez_compressed(_save_file.as_posix(), **_result)
         pass
     return statistics
+
+def plot_statistics():
+    _sum = np.zeros((len(ALG_TAG),), dtype=np.float32)
+    for t,sample in enumerate(statistics):
+        _sum += sample['DiscountedCost']
+        for idx in range(ALG_NUM):
+            plt.plot((t+1), _sum[idx]/(t+1), ALG_COLOR[idx]+'.')
+    plt.title('Discounted Cost')
+    plt.xlabel('Index of Broadcast Interval')
+    plt.legend(ALG_TAG)
+    plt.show()
+    pass
 
 #---------------------------------------------------------------------------------------#
 def plot_bar_graph():
@@ -133,7 +146,7 @@ def plot_bar_graph():
     average_JCT = np.zeros((len(ALG_TAG),), dtype=np.float32)
     for sample in statistics:
         average_JCT += sample['AverageJCT']
-    average_JCT = average_JCT / len(statistics) * N_SLT
+    average_JCT = average_JCT / len(statistics)
     average_JCT = [average_JCT[ALG_TAG.index(x)] for x in plot_alg]
     bar_plot2 = ax2.bar(x_range, average_JCT, edgecolor='black', color='#1F77B4')
     [bar_plot2[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
@@ -172,10 +185,11 @@ try:
     save_path    = Path(log_folder, log_type+'_statistics')
     save_path.mkdir(exist_ok=True)
     statistics = load_statistics()
+    plot_statistics()
     # Fig. 5. Illustration of performance metrics comparison with benchmarks.
-    plot_bar_graph()
+    # plot_bar_graph()
     # Fig. 7 Illustration of monotonical performance gap decreasing.
-    plot_tight_bound()
+    # plot_tight_bound()
 except Exception as e:
     print('Loading traces failed with:', sys.argv)
     raise e
