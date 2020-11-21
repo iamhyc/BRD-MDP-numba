@@ -15,9 +15,21 @@ rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
 DATA_TAG = ['ap_stat', 'es_stat', 'admissions', 'departures']
 ALG_TAG  = ['MDP', 'Tight', 'Selfish', 'QAware', 'Random']
 ALG_COLOR= ['r',   'k',     'b',       'g',      'c']
+ALG_NUM  = len(ALG_TAG)
 get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 # global variables
 global records_path
+
+def autolabel(ax, rects):
+    """Attach a text label above each bar in *rects*, displaying its height."""
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{:.2f}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', fontsize=16)
+    pass
 
 # acc_num / time_slot
 def getAverageNumber(ref, start=0, end=-1):
@@ -93,13 +105,65 @@ def load_statistics():
             statistics.append(_result)
             np.savez_compressed(_save_file.as_posix(), **_result)
         pass
-    #
-    fig, ax = plt.subplots()
-    _sum = np.zeros((len(ALG_TAG),), dtype=np.float32)
-    for idx, data in enumerate(statistics):
-        _sum += data['AverageCost']
-        ax.plot(idx, _sum[0]/(idx+1), '.r')
+    return statistics
+
+#---------------------------------------------------------------------------------------#
+def plot_bar_graph():
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    ax1.tick_params(axis='both', which='major', labelsize=20)
+    ax2.tick_params(axis='both', which='major', labelsize=20)
+    ax3.tick_params(axis='both', which='major', labelsize=20)
+    plot_alg = ['MDP', 'Selfish', 'QAware', 'Random']
+    x_range = np.arange(4)
+    # Average Cost
+    average_cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
+    for sample in statistics:
+        average_cost += sample['AverageCost']
+    average_cost = average_cost / len(statistics)
+    average_cost = [average_cost[ALG_TAG.index(x)] for x in plot_alg]
+    bar_plot1 = ax1.bar(x_range, average_cost, edgecolor='black', color='#1F77B4')
+    [bar_plot1[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
+    ax1.set_title('(a)', y=-0.075, fontsize=20)
+    ax1.set_xticklabels(['']+plot_alg, fontsize=14)
+    ax1.set_ylabel('Average Cost', fontsize=16)
+    ax1.yaxis.set_label_coords(-0.15,0.5)
+    autolabel(ax1, bar_plot1)
+
+    # Average Job REsponse Time
+    average_JCT = np.zeros((len(ALG_TAG),), dtype=np.float32)
+    for sample in statistics:
+        average_JCT += sample['AverageThroughput']
+    average_JCT = average_JCT / len(statistics)
+    average_JCT = [average_JCT[ALG_TAG.index(x)] for x in plot_alg]
+    bar_plot2 = ax2.bar(x_range, average_JCT, edgecolor='black', color='#1F77B4')
+    [bar_plot2[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
+    ax2.set_title('(b)', y=-0.075, fontsize=20)
+    ax2.set_xticklabels(['']+plot_alg, fontsize=14)
+    ax2.set_ylabel('Average Job Response Time', fontsize=16)
+    ax2.yaxis.set_label_coords(-0.14,0.5)
+    autolabel(ax2, bar_plot2)
+
+    #Average Job Dropping Rate
+    average_throughput = np.zeros((len(ALG_TAG),), dtype=np.float32)
+    for sample in statistics:
+        average_throughput += sample['AverageJCT']
+    average_throughput = average_throughput / len(statistics)
+    average_throughput = [average_throughput[ALG_TAG.index(x)] for x in plot_alg]
+    average_throughput = 1.0 - np.array(average_throughput)
+    # average_throughput+= [0.001, 0, 0.001, 0.001]
+    bar_plot3 = ax3.bar(x_range, average_throughput, edgecolor='black', color='#1F77B4')
+    [bar_plot3[i].set_hatch(x) for i,x in enumerate(['.', '/', 'x', '\\'])]
+    ax3.set_ylim([0.0, 0.1])
+    ax3.set_title('(c)', y=-0.075, fontsize=20)
+    ax3.set_xticklabels(['']+plot_alg, fontsize=14)
+    ax3.set_ylabel('Average Job Dropping Rate', fontsize=16)
+    ax3.yaxis.set_label_coords(-0.150,0.5)
+    autolabel(ax3, bar_plot3)
+
     plt.show()
+    pass
+
+def plot_tight_bound():
     pass
 
 try:
@@ -107,9 +171,11 @@ try:
     records_path = sorted( Path(log_folder).glob(log_type+'-*') )
     save_path    = Path(log_folder, log_type+'_statistics')
     save_path.mkdir(exist_ok=True)
-    load_statistics()
-    #
-    
+    statistics = load_statistics()
+    # Fig. 5. Illustration of performance metrics comparison with benchmarks.
+    plot_bar_graph()
+    # Fig. ? Illustration of monotonical performance gap decreasing.
+    # plot_tight_bound()
 except Exception as e:
     print('Loading traces failed with:', sys.argv)
     raise e
