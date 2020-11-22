@@ -11,6 +11,8 @@ import glob
 from os import path
 from sys import argv
 
+EVAL_RANGE = range(10,110,20)
+
 TRACE_NUM   = 0
 A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][1]
 TRACE_FOLDER='./data/trace-{:05d}-{}'.format(TRACE_NUM, A_SCALE)

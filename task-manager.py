@@ -20,7 +20,8 @@ local_template = [
     # "--inject", "TRACE_FOLDER='./data/trace-00000-1_3x'; arr_prob=np.load(Path(TRACE_FOLDER, 'statistics'))"
 ]
 
-EVAL_RANGE = range(10,110,20)
+from params import EVAL_RANGE
+# EVAL_RANGE = range(10,110,20)
 
 def all_done(cpu_stat):
     for stat in cpu_stat:

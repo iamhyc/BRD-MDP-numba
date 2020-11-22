@@ -13,12 +13,13 @@ rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
 # rc('text', usetex=True)
 # tag the records
 DATA_TAG = ['ap_stat', 'es_stat', 'admissions', 'departures']
-ALG_TAG  = ['MDP', 'Tight', 'Selfish', 'QAware', 'Random']
-ALG_COLOR= ['r',   'k',     'b',       'g',      'c']
+ALG_TAG  = ['MDP', 'Tight']
+ALG_COLOR= ['r',   'k'    ]
 ALG_NUM  = len(ALG_TAG)
 get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 # global variables
 global records_path
+from params import EVAL_RANGE
 
 def autolabel(ax, rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -35,7 +36,7 @@ def autolabel(ax, rects):
 def getAverageNumber(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_num  = np.zeros((len(ALG_TAG),), dtype=np.int32)
-    time_slot = len(_weakref) * N_SLT
+    time_slot = len(_weakref)
     for sample in _weakref:
         acc_num += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
         acc_num += np.array([ sample[x].sum() for x in get_tag('es_stat') ])
@@ -46,7 +47,7 @@ def getAverageNumber(ref, start=0, end=-1):
 def getAverageCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     acc_cost = np.zeros((len(ALG_TAG),), dtype=np.int32)
-    time_slot = len(_weakref) * N_SLT
+    time_slot = len(_weakref)
     for sample in _weakref:
         # np.sum(ap_stat) + np.sum(es_stat) + _penalty
         acc_cost += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
@@ -59,7 +60,7 @@ def getAverageCost(ref, start=0, end=-1):
 def getDiscountedCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     disc_cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
-    time_slot = len(_weakref) * N_SLT
+    time_slot = len(_weakref)
     for idx, sample in enumerate(_weakref):
         _cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
         _cost += np.array([ sample[x].sum() for x in get_tag('ap_stat') ])
@@ -74,7 +75,7 @@ def getAverageJCT(ref, start=0, end=-1):
     # self.acc_cost / self.acc_arr
     _weakref = ref[start:end]
     avg_cost = getAverageCost(ref, start, end)
-    acc_cost = avg_cost * len(_weakref) * N_SLT
+    acc_cost = avg_cost * len(_weakref)
     acc_arr  = np.array([ (_weakref[-1][x]-_weakref[0][x]).sum() for x in get_tag('admissions') ])
     return acc_cost / acc_arr
 
@@ -87,12 +88,17 @@ def getAverageThroughput(ref, start=0, end=-1):
     acc_arr  = np.array([ (_weakref[-1][x]-prev_arr).sum() for x in get_tag('admissions') ])
     return acc_dep / acc_arr
 
-def load_statistics():
-    statistics = list()
-    for record_dir in tqdm(records_path, desc='Loading statistics'):
+def load_statistics(ti_num):
+    _pattern = 'ti{num}-*'.format(num=ti_num)
+    records_path = sorted( Path(log_folder).glob( _pattern ) )
+    save_path    = Path(log_folder, 'ti{num}_statistics'.format(num=ti_num))
+    save_path.mkdir(exist_ok=True)
+
+    samples = list()
+    for record_dir in tqdm(records_path, desc='Loading statistics-%r'%ti_num):
         _save_file = save_path.joinpath( record_dir.stem+'.npz' )
         if _save_file.exists():
-            statistics.append( np.load(_save_file) )
+            samples.append( np.load(_save_file) )
         else:
             record = sorted( record_dir.iterdir() )
             record = [np.load(x) for x in record]
@@ -100,13 +106,13 @@ def load_statistics():
                 'AverageNumber' : getAverageNumber(record),
                 'AverageCost'   : getAverageCost(record),
                 'DiscountedCost': getDiscountedCost(record),
-                'AverageJCT'    : getAverageJCT(record),
-                'AverageThroughput': getAverageThroughput(record)
+                # 'AverageJCT'    : getAverageJCT(record),
+                # 'AverageThroughput': getAverageThroughput(record)
             }
-            statistics.append(_result)
+            samples.append(_result)
             np.savez_compressed(_save_file.as_posix(), **_result)
         pass
-    return statistics
+    return samples
 
 def plot_statistics():
     _sum = np.zeros((len(ALG_TAG),), dtype=np.float32)
@@ -177,14 +183,27 @@ def plot_bar_graph():
     pass
 
 def plot_tight_bound():
+    r_mdp, r_ti = list(), list()
+    for rng in EVAL_RANGE:
+        _sum = np.array([0, 0], dtype=np.float32)
+        for sample in statistics[rng]:
+            _sum += sample['DiscountedCost'] #AverageNumber/AverageCost/DiscountedCost
+        _sum = N_SLT*_sum/len(statistics[rng])
+        r_mdp.append(_sum[0])
+        r_ti.append(_sum[1])
+        pass
+
+    # plt.plot(EVAL_RANGE, r_mdp, '.r-')
+    # plt.plot(EVAL_RANGE, r_ti,  '.b-')
+    plt.plot(EVAL_RANGE, np.array(r_ti)-np.array(r_mdp), '.k-')
+    plt.show()
     pass
 
 try:
-    _, log_folder, log_type  = sys.argv
-    records_path = sorted( Path(log_folder).glob(log_type+'-*') )
-    save_path    = Path(log_folder, log_type+'_statistics')
-    save_path.mkdir(exist_ok=True)
-    statistics = load_statistics()
+    _, log_folder, _  = sys.argv
+    statistics = dict()
+    for rng in EVAL_RANGE:
+        statistics.update( {rng : load_statistics(rng)} )
     # plot_statistics()
     # Fig. 5. Illustration of performance metrics comparison with benchmarks.
     # plot_bar_graph()
