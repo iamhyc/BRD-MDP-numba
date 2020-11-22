@@ -99,6 +99,7 @@ def main_param_fitting(args):
     matplotlib.use("Qt5agg")
     plt.ion()
     fig, ax1 = plt.subplots()
+    ax1.grid(True)
     ax1.set_xlabel('Index of Broadcast Intervals')
     ax1.set_ylabel('probability')
     # ax1.set_xlim(0, 99)
