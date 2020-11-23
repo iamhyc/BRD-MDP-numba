@@ -6,7 +6,8 @@ all:
 	pip3 install tqdm --user
 
 run:
-	@python3 ./online_main.py --postfix long-time --plot
+	rm -f logs/*.npz
+	python3 ./online_main.py --param-fit
 
 submit:
 	bsub -q short -n 160 -R "span[ptile=40]" -e %J.err -o %J.out "./task-manager.py 60 0"

@@ -177,6 +177,7 @@ def main_param_fitting(args):
             nextStat = State().clone(lastStat)
             pass
         #---------------------------------------------------------------------
+        #FIXME: mean uploading time calculation error
         e_u_mean  = np.sum( np.arange(1, N_CNT) * normalize(e_u[e_k,e_m,e_j]) )
         e_u0_mean = np.sum( np.arange(1, N_CNT) * normalize(e_u0[e_k,e_m,e_j]) )
         ul_mean   = np.sum( np.arange(1, N_CNT) * np.diff(ul_prob[e_k,e_m,e_j]) ) #print(e_u_mean, ul_mean)
@@ -185,9 +186,9 @@ def main_param_fitting(args):
         _ln2e = ax2.plot((stage,stage+1), (e_u0_mean, e_u_mean), '-g^')
         _ln3e = ax2.plot((stage,stage+1), (e_c0[e_m,e_j],e_c[e_m,e_j]), '-bv')
         #plot real value
-        _ln1 = ax1.plot((stage,stage+1), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '--r')
-        _ln2 = ax2.plot((stage,stage+1), (ul_mean, ul_mean), '--g')
-        _ln3 = ax2.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '--b')
+        _ln1 = ax1.plot((stage,stage+1), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
+        _ln2 = ax2.plot((stage,stage+1), (ul_mean, ul_mean), '-g')
+        _ln3 = ax2.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
         #plot legend
         ax1.legend(_ln1e + _ln1 + _ln2e + _ln2 + _ln3e + _ln3,
                     ['Estimated Arrival Probability', 'Real Arrival Probability',
