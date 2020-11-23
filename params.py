@@ -11,7 +11,7 @@ import glob
 from os import path
 from sys import argv
 
-EVAL_RANGE = range(10,110,20)
+EVAL_RANGE = [1, 2, 5, 8, 20] #range(10,110,20)
 
 TRACE_NUM   = 0
 A_SCALE     = ['1_2x', '1_3x', '1_4x', '1_5x', '1_6x'][1]

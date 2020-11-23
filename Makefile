@@ -9,7 +9,7 @@ run:
 	@python3 ./online_main.py --postfix long-time --plot
 
 submit:
-	bsub -q short -n 160 -R "span[ptile=40]" -e %J.err -o %J.out "./task-manager.py 40 0"
+	bsub -q short -n 160 -R "span[ptile=40]" -e %J.err -o %J.out "./task-manager.py 50 0"
 	#bsub -q short -n 40 -R "span[ptile=40]" -e %J.err -o %J.out "NUMBA_NUM_THREADS=40 python3 ./online_main.py --postfix main"
 
 watch:
