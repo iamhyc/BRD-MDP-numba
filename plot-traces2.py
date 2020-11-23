@@ -197,7 +197,8 @@ def plot_tight_bound():
     # plt.plot(EVAL_RANGE, r_ti,  '.b-')
     plt.plot(EVAL_RANGE, np.array(r_ti)-np.array(r_mdp), '.k-')
     plt.xlabel('T')
-    plt.ylabel('Performance Gap (Numerical Part)')
+    plt.ylabel('Performance Gap e(T)')
+    plt.grid(True)
     plt.show()
     pass
 
