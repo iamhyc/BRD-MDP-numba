@@ -6,7 +6,7 @@ all:
 	pip3 install tqdm --user
 
 run:
-	rm -f logs/*.npz
+	# rm -f logs/*.npz
 	python3 ./online_main.py --param-fit
 
 submit:

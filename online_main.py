@@ -18,7 +18,10 @@ NONE_POLICY   = np.zeros((N_AP, N_JOB), dtype=np.int32)
 @njit()
 def ARandomPolicy(stat, k, j):
     _can_set = np.where( bi_map[k]==1 )[0]
-    return np.random.choice(_can_set)
+    if k==e_k and j==e_j:
+        return e_m
+    else:
+        return np.random.choice(_can_set)
 
 @njit()
 def ASelfishPolicy(stat, k, j):
@@ -95,6 +98,7 @@ def NextState(arrivals, systemStat, oldPolicy, nowPolicy, oldPolicyFn, nowPolicy
     return nextStat
 
 def main_param_fitting(args):
+    global e_k, e_m, e_j
     #reference: https://matplotlib.org/gallery/api/two_scales.html
     matplotlib.use("Qt5agg")
     plt.ion()
@@ -112,9 +116,10 @@ def main_param_fitting(args):
     e_lambda0 = np.zeros((N_AP, N_JOB), dtype=np.float32)
     t_c       = np.zeros((N_ES, N_JOB), dtype=np.float32)
     e_c0      = np.zeros((N_ES, N_JOB), dtype=np.float32)
-    e_u0      = np.zeros((N_AP,N_ES,N_JOB,N_CNT-1), dtype=np.float32) #not probability but counter
-    e_k, e_j  = np.unravel_index(np.argmax(arr_prob), arr_prob.shape)
-    e_m       = 0 #np.argmax(proc_mean[e_k])
+    e_u0      = np.zeros((N_AP,N_ES,N_JOB,N_CNT), dtype=np.float32) #not probability but counter
+    e_k       = 3
+    e_m       = 1 #np.where( bi_map[e_k]==1 )[0]
+    e_j       = 0 #random.randint(0, N_JOB); print('j =',e_j) #0
     oldStat, nowStat = State(), State()
     oldPolicy, nowPolicy = BaselinePolicy(), BaselinePolicy()
     #
@@ -137,7 +142,8 @@ def main_param_fitting(args):
             nextStat.ap_stat = np.zeros((N_AP,N_ES,N_JOB,N_CNT), dtype=np.int32)
             for j in range(N_JOB):
                 for k in range(N_AP):
-                    _m = oldPolicy[k,j] if n<br_delay[k] else nowPolicy[k,j]
+                    _m = ARandomPolicy(oldStat, k, j) if n<br_delay[k] else ARandomPolicy(nowStat, k, j)
+                    # _m = oldPolicy[k,j] if n<br_delay[k] else nowPolicy[k,j]
                     assert( bi_map[k,_m]==1 )
                     nextStat.ap_stat[k, _m, j, 0] = arrivals[n, k, j]
             # 2. estimation of mean uploading time
@@ -150,10 +156,7 @@ def main_param_fitting(args):
                             toss_ul = toss(ul_prob[k,m,j,xi])
                             if toss_ul:
                                 off_number[m,j]             += lastStat.ap_stat[k,m,j,xi]
-                                if xi==N_CNT-1:
-                                    e_u[k,m,j,xi-1] += 1
-                                else:
-                                    e_u[k,m,j,xi] += 1
+                                e_u[k,m,j,xi]               += lastStat.ap_stat[k,m,j,xi]
                             else:
                                 nextStat.ap_stat[k,m,j,xi+1] = lastStat.ap_stat[k,m,j,xi]
             nextStat.es_stat += off_number
@@ -176,25 +179,27 @@ def main_param_fitting(args):
             lastStat = nextStat
             nextStat = State().clone(lastStat)
             pass
+        #to next interval
+        oldStat, nowStat = nowStat, nextStat
         #---------------------------------------------------------------------
-        #FIXME: mean uploading time calculation error
-        e_u_mean  = np.sum( np.arange(1, N_CNT) * normalize(e_u[e_k,e_m,e_j]) )
-        e_u0_mean = np.sum( np.arange(1, N_CNT) * normalize(e_u0[e_k,e_m,e_j]) )
-        ul_mean   = np.sum( np.arange(1, N_CNT) * np.diff(ul_prob[e_k,e_m,e_j]) ) #print(e_u_mean, ul_mean)
+        e_u_mean  = np.sum( np.arange(N_CNT) * normalize(e_u[e_k,e_m,e_j]) )
+        e_u0_mean = np.sum( np.arange(N_CNT) * normalize(e_u0[e_k,e_m,e_j]) )
+        ul_mean   = np.sum( np.arange(N_CNT) * ul_dist[e_k,e_m,e_j] ) #print(e_u_mean, ul_mean)
+        # print(e_u[e_k,e_m,e_j], '\n')
         #plot estimated value
         _ln1e = ax1.plot((stage,stage+1), (e_lambda0[e_k,e_j],e_lambda[e_k,e_j]), '-r.')
-        _ln2e = ax2.plot((stage,stage+1), (e_u0_mean, e_u_mean), '-g^')
-        _ln3e = ax2.plot((stage,stage+1), (e_c0[e_m,e_j],e_c[e_m,e_j]), '-bv')
+        _ln2e = ax2.plot((stage,stage+1), (e_u0_mean, e_u_mean), '-b^')
+        _ln3e = ax2.plot((stage,stage+1), (e_c0[e_m,e_j],e_c[e_m,e_j]), '-gv')
         #plot real value
-        _ln1 = ax1.plot((stage,stage+1), (arr_prob[e_k,e_j],arr_prob[e_k,e_j]), '-r')
-        _ln2 = ax2.plot((stage,stage+1), (ul_mean, ul_mean), '-g')
-        _ln3 = ax2.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-b')
+        _ln1 = ax1.plot((stage,stage+1), (arr_prob[e_k,e_j]+0.002,arr_prob[e_k,e_j]+0.002), '-r')
+        _ln2 = ax2.plot((stage,stage+1), (ul_mean, ul_mean), '-b')
+        _ln3 = ax2.plot((stage,stage+1), (proc_mean[e_m,e_j],proc_mean[e_m,e_j]), '-g')
         #plot legend
         ax1.legend(_ln1e + _ln1 + _ln2e + _ln2 + _ln3e + _ln3,
                     ['Estimated Arrival Probability', 'Real Arrival Probability',
-                    'Estimated Mean Computation Time', 'Real Mean Uploading Time',
-                    'Estimated Mean Uploading Time', 'Real Mean Computation Time'
-                    ], loc='center right')
+                    'Estimated Mean Uploading Time', 'Real Mean Uploading Time',
+                    'Estimated Mean Computation Time', 'Real Mean Computation Time'
+                    ], loc=0) #center right
         fig.tight_layout()
         plt.gcf().canvas.draw_idle()
         plt.gcf().canvas.start_event_loop(0.3)

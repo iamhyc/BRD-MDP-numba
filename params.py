@@ -41,8 +41,8 @@ BR_MAX     = int( 0.90 * N_SLT )    #(exclusive)
 BR_RNG     = np.arange(BR_MIN, BR_MAX,     step=1, dtype=np.int32)
 BR_RNG_L   = len(BR_RNG)
 
-UL_MIN     = int( 2.50 * N_SLT )    #(inclusive)
-UL_MAX     = int( 3.00 * N_SLT )    #(exclusive)
+UL_MIN     = int( 1.50 * N_SLT )    #(inclusive)
+UL_MAX     = int( 2.00 * N_SLT )    #(exclusive)
 UL_RNG     = np.arange(UL_MIN, UL_MAX+1,   step=1, dtype=np.int32)
 UL_RNG_L   = len(UL_RNG)
 
@@ -84,22 +84,31 @@ def genDelayDistribution(redo=False):
     return dist
 
 def genUploadingProbabilities(es2ap_map):
+    dist  = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
     probs = np.zeros((N_AP, N_ES, N_JOB, N_CNT), dtype=np.float64)
     choice_dist = genFlatDist(UL_RNG_L)
     for j in range(N_JOB):
         for m in range(N_ES):
             for k in range(N_AP):
                 if k==es2ap_map[m]: #co-location
-                    probs[k,m,j] = np.ones(N_CNT, dtype=np.float64) #NOTE: uploaded at once (double-check needed)
+                    probs[k,m,j] = np.ones(N_CNT, dtype=np.float64) #uploaded at once (double-check needed)
                 else: #follow some normal distribution
                     mean = UL_RNG[ multoss(choice_dist) ]
-                    var  = (N_CNT - mean) / 3 #3-sigma-rule
+                    var  = min(mean, N_CNT-mean) / 3 #3-sigma-rule to the nearest bound
                     rv   = norm(loc=mean, scale=var)
-                    rv_total    = rv.cdf(N_CNT) - rv.cdf(range(N_CNT+1))
-                    rv_prob     = np.diff( rv.cdf(range(N_CNT+1)) ) / rv_total[:-1]
+                    rv_pmf       = np.diff( rv.cdf(range(N_CNT+1)) ) / (rv.cdf(N_CNT)-rv.cdf(0))
+                    assert( np.isclose( rv_pmf.sum(), 1.0 ) )
+                    rv_cdf       = np.clip(rv_pmf.cumsum(), 0, 1)
+                    rv_prob      = rv_pmf / (1 - rv_cdf)  #[ Pr{x=t|x>t-1} ]
+                    rv_prob      = np.clip(rv_prob, 0, 1) #avoid INF
+                    dist[k,m,j]  = rv_pmf
                     probs[k,m,j] = rv_prob #true story, the last uploading is a ONE.
+                    # print(rv_pmf); exit()
+                    # rv_cdf       = rv.cdf(range(N_CNT+1)) #[ Pr{x>t-1} ]
+                    # rv_total     = rv.cdf(N_CNT) - rv_cdf #clip at ending
+                    # rv_prob      = rv_pmf / rv_total[:-1] 
                     pass
-    return probs
+    return dist, probs
 
 @njit()
 def genTransitionMatrix():
@@ -178,6 +187,7 @@ try:
     br_dist   = _params['br_dist']
     proc_mean = _params['proc_mean']
     ul_prob   = _params['ul_prob']
+    ul_dist   = _params['ul_dist']
     ul_trans  = _params['ul_trans']
     off_trans = _params['off_trans']
     bi_map    = _params['bi_map']
@@ -186,7 +196,7 @@ except AssertionError:
     print('Creating param file {:05d}.npz ...'.format(RANDOM_SEED))
     bi_map, es2ap_map = genConnectionMap()
     arr_prob  = np.load(Path(TRACE_FOLDER, 'statistics'))
-    ul_prob   = genUploadingProbabilities(es2ap_map)
+    ul_dist,ul_prob = genUploadingProbabilities(es2ap_map)
     br_dist   = genDelayDistribution()
     proc_mean = genProcessingParameter(es2ap_map)
     ul_trans, off_trans = genTransitionMatrix()
@@ -196,6 +206,7 @@ except AssertionError:
         'es2ap_map': es2ap_map,
         'arr_prob' : arr_prob,
         'ul_prob'  : ul_prob,
+        'ul_dist'  : ul_dist,
         'br_dist'  : br_dist,
         'proc_mean': proc_mean,
         'ul_trans' : ul_trans,
