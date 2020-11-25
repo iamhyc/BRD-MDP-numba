@@ -198,7 +198,7 @@ def main_param_fitting(args):
         ax1.legend(_ln1e + _ln1 + _ln2e + _ln2 + _ln3e + _ln3,
                     ['Estimated Arrival Probability', 'Real Arrival Probability',
                     'Estimated Mean Uploading Time', 'Real Mean Uploading Time',
-                    'Estimated Mean Computation Time', 'Real Mean Computation Time'
+                    'Estimated Mean Processing Time', 'Real Mean Processing Time'
                     ], loc=0) #center right
         fig.tight_layout()
         plt.gcf().canvas.draw_idle()
