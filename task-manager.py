@@ -3,7 +3,7 @@ import os, sys, random, time
 import subprocess as sp
 from threading import main_thread
 
-NUM_SLOT = 10
+NUM_SLOT = 4
 RANDOM_SEED = 11112
 
 global_template = '''

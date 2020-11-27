@@ -89,9 +89,9 @@ def getAverageThroughput(ref, start=0, end=-1):
     return acc_dep / acc_arr
 
 def load_statistics(ti_num):
-    _pattern = 'ti{num}-*'.format(num=ti_num)
+    _pattern = 'ti{:02d}-*'.format(ti_num)
     records_path = sorted( Path(log_folder).glob( _pattern ) )
-    save_path    = Path(log_folder, 'ti{num}_statistics'.format(num=ti_num))
+    save_path    = Path(log_folder, 'ti{:02d}_statistics'.format(ti_num))
     save_path.mkdir(exist_ok=True)
 
     samples = list()
