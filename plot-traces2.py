@@ -20,6 +20,7 @@ get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 # global variables
 global records_path
 from params import EVAL_RANGE
+EVAL_RANGE = [1,2,5,8,20,30,50]
 
 def autolabel(ax, rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -89,9 +90,9 @@ def getAverageThroughput(ref, start=0, end=-1):
     return acc_dep / acc_arr
 
 def load_statistics(ti_num):
-    _pattern = 'ti{num}-*'.format(num=ti_num)
+    _pattern = 'ti{:02d}-*'.format(ti_num)
     records_path = sorted( Path(log_folder).glob( _pattern ) )
-    save_path    = Path(log_folder, 'ti{num}_statistics'.format(num=ti_num))
+    save_path    = Path(log_folder, 'ti{:02d}_statistics'.format(ti_num))
     save_path.mkdir(exist_ok=True)
 
     samples = list()
