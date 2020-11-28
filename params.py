@@ -10,6 +10,7 @@ from pathlib import Path
 import glob
 from os import path
 from sys import argv
+from itertools import chain
 
 EVAL_RANGE = [1, 2, 5, 8, 20] #range(10,110,20)
 
@@ -26,7 +27,7 @@ GAMMA   = 0.95
 BETA    = 120
 STAGE   = 120
 STAGE_ALT = 120
-STAGE_EVAL = 5
+STAGE_EVAL = chain( range(1,10), range(10,20,2), range(20,50,5) )
 
 N_AP  = 15
 N_ES  = 10

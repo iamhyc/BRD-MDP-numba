@@ -21,9 +21,9 @@
 - [x] test policy replacement (with 50 submission)
     - ~~running on vps and get 50 results~~
 - [ ] semi-analytical average cost calculation
-    - ~~one-step/n-step policy improvement for any stage~~ (n < STAGE_EVAL)
+    - ~~n-step policy improvement for any stage~~ (fast evaluation)
     - Possible: enhance one evaluation with multi-step policy improvement's return?
-- [ ] finish two simple analysis
+- [x] finish two simple analysis
     - reinforcement learning
     - optimized baseline policy (aware of start)
 - [x] touch a `plot-traces2.py` with new plot function

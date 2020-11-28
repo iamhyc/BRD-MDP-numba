@@ -16,7 +16,7 @@ local_template = [
     "./online_main.py",
     "--postfix", "{postfix}",
     "--one-shot", "{one_shot}",
-    "--inject", "{inject}"
+    # "--inject", "{inject}"
     # "--inject", "TRACE_FOLDER='./data/trace-00000-1_3x'; arr_prob=np.load(Path(TRACE_FOLDER, 'statistics'))"
 ]
 
@@ -37,15 +37,12 @@ if __name__ == "__main__":
         start_time = time.time()
 
         task_list = dict(); idx = 0
-        for stage in EVAL_RANGE: #NOTE: evaluation range
-            for num in (one_shot_list):
-                command = local_template.copy()
-                command[ local_template.index("{postfix}") ]  = "ti%02d"%stage
-                command[ local_template.index("{one_shot}") ] = '%05d'%(num)
-                command[ local_template.index("{inject}") ] = 'STAGE_EVAL=%d'%stage
-                task_list[idx] = command
-                idx += 1
-            pass
+        for num in (one_shot_list):
+            command = local_template.copy()
+            command[ local_template.index("{postfix}") ]  = "fasti"
+            command[ local_template.index("{one_shot}") ] = '%05d'%(num)
+            task_list[idx] = command
+            idx += 1
         assert( len(EVAL_RANGE) * len(one_shot_list) == len(task_list) )
 
         cpu_stat = [None] * NUM_SLOT; cpu_stat[0] = 0

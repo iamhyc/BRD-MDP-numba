@@ -223,10 +223,9 @@ def main_one_shot(args):
     TI_oldStat, TI_nowStat = oldStat, nowStat
     TI_Policy              = nowPolicy
     #-----------------------------------------------------------
-    print(STAGE_EVAL)
     while stage < STAGE_ALT:
         # 1. one realization to next state
-        val = None
+        val, ti_val = 0, 0
         with Timer(output=True):
             arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
             br_delay = np.zeros((N_AP), dtype=np.int32)
@@ -248,13 +247,11 @@ def main_one_shot(args):
             # systemStat             = (RD_oldStat, RD_nowStat, br_delay)
             # RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
-            if stage < STAGE_EVAL:
-                TI_Policy = nowPolicy
-                TI_oldStat, TI_nowStat = oldStat, nowStat
-            elif stage==STAGE_EVAL: #could integrated with 'stage<STAGE_EVAL' condition
+            if stage in STAGE_EVAL:
                 TI_Policy              = nowPolicy.copy()
                 TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
             else:
+
                 systemStat             = (TI_oldStat, TI_nowStat, br_delay)
                 TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
             #----------------------------------------------------------------
@@ -276,10 +273,11 @@ def main_one_shot(args):
                 'MDP_admissions': nowStat.admissions,
                 'MDP_departures': nowStat.departures,
                 #
-                'Tight_ap_stat': TI_nowStat.ap_stat,
-                'Tight_es_stat': TI_nowStat.es_stat,
-                'Tight_admissions': TI_nowStat.admissions,
-                'Tight_departures': TI_nowStat.departures,
+                'Tight_value': ti_val
+                # 'Tight_ap_stat': TI_nowStat.ap_stat,
+                # 'Tight_es_stat': TI_nowStat.es_stat,
+                # 'Tight_admissions': TI_nowStat.admissions,
+                # 'Tight_departures': TI_nowStat.departures,
                 #
                 # 'Selfish_ap_stat': SF_nowStat.ap_stat,
                 # 'Selfish_es_stat': SF_nowStat.es_stat,
