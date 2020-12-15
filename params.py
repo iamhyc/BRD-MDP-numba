@@ -222,8 +222,8 @@ finally:
     pass
 
 #NOTE: generate subset partition
-subset_map   = genMergedCandidateSet(bi_map)
-N_SET        = len(subset_map)
+subset_map = genMergedCandidateSet(bi_map)
+N_SET      = len(subset_map)
 subset_ind = np.zeros((N_SET, N_AP), dtype=np.int32)
 for n in range(N_SET):
     for k in subset_map[n][0]:
