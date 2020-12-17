@@ -225,7 +225,7 @@ def main_one_shot(args):
     #-----------------------------------------------------------
     while stage < STAGE_ALT:
         # 1. one realization to next state
-        val, ti_val = 0, 0
+        ti_val = 0
         with Timer(output=True):
             arrivals = loadArrivalTrace(stage) #toss(arr_prob[k,j])
             br_delay = np.zeros((N_AP), dtype=np.int32)
@@ -235,9 +235,9 @@ def main_one_shot(args):
             systemStat     = (oldStat, nowStat, br_delay)
             oldPolicy      = nowPolicy
             if args.serial_flag:
-                nowPolicy, val = serial_optimize(stage, systemStat, oldPolicy)
+                nowPolicy, _ = serial_optimize(stage, systemStat, oldPolicy)
             else:
-                nowPolicy, val = optimize(stage, systemStat, oldPolicy)
+                nowPolicy, _ = optimize(stage, systemStat, oldPolicy)
             #----------------------------------------------------------------
             oldStat,    nowStat    = nowStat,    NextState(arrivals, systemStat, oldPolicy, nowPolicy, None, None)
             # systemStat             = (SF_oldStat, SF_nowStat, br_delay)
@@ -267,7 +267,7 @@ def main_one_shot(args):
         stage_record_file = Path( record_folder, '%04d'%stage ).as_posix()
         with open(stage_record_file, 'wb') as fh:
             np.savez_compressed(fh, **{
-                'MDP_value'   : val,
+                # 'MDP_value'   : val,
                 'MDP_ap_stat' : nowStat.ap_stat,
                 'MDP_es_stat' : nowStat.es_stat,
                 'MDP_admissions': nowStat.admissions,
