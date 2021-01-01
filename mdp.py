@@ -152,8 +152,8 @@ def full_evaluate(systemStat, oldPolicy, nowPolicy):
         old_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
         now_prob = np.zeros((N_AP, N_ES), dtype=np.float64)
         for k in prange(N_AP):
-            old_prob[ k, oldPolicy[k] ] = arr_prob[k,j]
-            now_prob[ k, nowPolicy[k] ] = arr_prob[k,j]
+            old_prob[ k, oldPolicy[k,j] ] = arr_prob[k,j]
+            now_prob[ k, nowPolicy[k,j] ] = arr_prob[k,j]
         # init vector
         for m in prange(N_ES):
             es_vec[m] = ES2Vec(nowStat.es_stat[m,j]) #not dependent on candidate set

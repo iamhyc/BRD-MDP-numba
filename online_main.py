@@ -250,6 +250,7 @@ def main_one_shot(args):
             if stage in STAGE_EVAL:
                 systemStat = (oldStat, nowStat, br_delay)
                 ti_val = full_evaluate(systemStat, nowPolicy, nowPolicy)
+                # print(stage, ti_val)
             else:
                 ti_val = 0
             #----------------------------------------------------------------
