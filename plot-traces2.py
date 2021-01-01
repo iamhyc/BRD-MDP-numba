@@ -103,9 +103,9 @@ def load_statistics(ti_num):
             record = sorted( record_dir.iterdir() )
             record = [np.load(x) for x in record]
             _result = {
-                'AverageNumber' : getAverageNumber(record, end=ti_num),
-                'AverageCost'   : getAverageCost(record, end=ti_num),
-                'DiscountedCost': getDiscountedCost(record, end=ti_num),
+                'AverageNumber' : getAverageNumber(record, end=ti_num)[0],
+                'AverageCost'   : getAverageCost(record, end=ti_num)[0],
+                'DiscountedCost': getDiscountedCost(record, end=ti_num)[0],
                 'Tight_value'   : record[ti_num]['Tight_value']
                 # 'AverageJCT'    : getAverageJCT(record),
                 # 'AverageThroughput': getAverageThroughput(record)
@@ -184,15 +184,25 @@ def plot_bar_graph():
     pass
 
 def plot_tight_bound():
+    _tag = 'DiscountedCost' #AverageNumber/AverageCost/DiscountedCost
     r_mdp, r_ti = list(), list()
+
     for rng in EVAL_RANGE:
-        _sum = np.array([0, 0], dtype=np.float32)
+        num_avg, alt_avg = 0.0, 0.0
         for sample in statistics[rng]:
-            _sum += sample['DiscountedCost'] #AverageNumber/AverageCost/DiscountedCost
-        _sum = N_SLT*_sum/len(statistics[rng])
-        r_mdp.append(_sum[0])
-        r_ti.append(_sum[1])
+            num_avg += sample[_tag] 
+            alt_avg += sample['Tight_value']
+        num_avg = N_SLT*num_avg/len(statistics[rng])
+        alt_avg = N_SLT*alt_avg/len(statistics[rng])
+        # r_mdp.append(_sum)
+        r_ti.append( num_avg + pow(GAMMA, rng)*alt_avg )
         pass
+
+    mdp_avg = 0.0
+    for sample in statistics[STAGE_ALT-1]:
+        mdp_avg += sample[_tag]
+    mdp_avg = N_SLT*mdp_avg/len(statistics[STAGE_ALT-1])
+    r_mdp   = [mdp_avg] * len(EVAL_RANGE)
 
     # plt.plot(EVAL_RANGE, r_mdp, '.r-')
     # plt.plot(EVAL_RANGE, r_ti,  '.b-')
