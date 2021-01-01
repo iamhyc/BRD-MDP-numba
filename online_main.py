@@ -232,8 +232,8 @@ def main_one_shot(args):
             for k in range(N_AP):
                 br_delay[k] = BR_RNG[ multoss(br_dist[k]) ]
             #----------------------------------------------------------------
-            systemStat     = (oldStat, nowStat, br_delay)
-            oldPolicy      = nowPolicy
+            systemStat = (oldStat, nowStat, br_delay)
+            oldPolicy  = nowPolicy
             if args.serial_flag:
                 nowPolicy, _ = serial_optimize(stage, systemStat, oldPolicy)
             else:
@@ -248,12 +248,10 @@ def main_one_shot(args):
             # RD_oldStat, RD_nowStat = RD_nowStat, NextState(arrivals, systemStat, NONE_POLICY, NONE_POLICY, ARandomPolicy, ARandomPolicy)
             #----------------------------------------------------------------
             if stage in STAGE_EVAL:
-                TI_Policy              = nowPolicy.copy()
-                TI_oldStat, TI_nowStat = State().clone(oldStat), State().clone(nowStat)
+                systemStat = (oldStat, nowStat, br_delay)
+                ti_val = full_evaluate(systemStat, nowPolicy, nowPolicy)
             else:
-
-                systemStat             = (TI_oldStat, TI_nowStat, br_delay)
-                TI_oldStat, TI_nowStat = TI_nowStat, NextState(arrivals, systemStat, TI_Policy, TI_Policy, None, None)
+                ti_val = 0
             #----------------------------------------------------------------
             pass
         # 2. update the stage counter
