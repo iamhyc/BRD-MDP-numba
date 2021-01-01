@@ -43,7 +43,7 @@ if __name__ == "__main__":
             command[ local_template.index("{one_shot}") ] = '%05d'%(num)
             task_list[idx] = command
             idx += 1
-        assert( len(EVAL_RANGE) * len(one_shot_list) == len(task_list) )
+        assert( len(one_shot_list) == len(task_list) )
 
         cpu_stat = [None] * NUM_SLOT; cpu_stat[0] = 0
         while not all_done(cpu_stat):
