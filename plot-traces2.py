@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from params import BETA, GAMMA, LQ, N_SLT
+from params import BETA, GAMMA, LQ, N_SLT, STAGE_ALT
 from numba import njit, prange
 # customize matplotlib plotting
 from matplotlib import rc
@@ -13,7 +13,7 @@ rc('font', **{'family': 'sans-serif', 'sans-serif':['Helvetica']})
 # rc('text', usetex=True)
 # tag the records
 DATA_TAG = ['ap_stat', 'es_stat', 'admissions', 'departures']
-ALG_TAG  = ['MDP', 'Tight']
+ALG_TAG  = ['MDP']
 ALG_COLOR= ['r',   'k'    ]
 ALG_NUM  = len(ALG_TAG)
 get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
@@ -89,23 +89,24 @@ def getAverageThroughput(ref, start=0, end=-1):
     return acc_dep / acc_arr
 
 def load_statistics(ti_num):
-    _pattern = 'ti{:02d}-*'.format(ti_num)
+    _pattern = 'fasti-*'
     records_path = sorted( Path(log_folder).glob( _pattern ) )
-    save_path    = Path(log_folder, 'ti{:02d}_statistics'.format(ti_num))
+    save_path    = Path(log_folder, 'fasti_statistics'.format(ti_num))
     save_path.mkdir(exist_ok=True)
 
     samples = list()
-    for record_dir in tqdm(records_path, desc='Loading statistics-%r'%ti_num):
-        _save_file = save_path.joinpath( record_dir.stem+'.npz' )
+    for record_dir in tqdm(records_path, desc='Loading statistics'):
+        _save_file = save_path.joinpath( record_dir.stem+'_%02d.npz'%ti_num )
         if _save_file.exists():
             samples.append( np.load(_save_file) )
         else:
             record = sorted( record_dir.iterdir() )
             record = [np.load(x) for x in record]
             _result = {
-                'AverageNumber' : getAverageNumber(record),
-                'AverageCost'   : getAverageCost(record),
-                'DiscountedCost': getDiscountedCost(record),
+                'AverageNumber' : getAverageNumber(record, end=ti_num),
+                'AverageCost'   : getAverageCost(record, end=ti_num),
+                'DiscountedCost': getDiscountedCost(record, end=ti_num),
+                'Tight_value'   : record[ti_num]['Tight_value']
                 # 'AverageJCT'    : getAverageJCT(record),
                 # 'AverageThroughput': getAverageThroughput(record)
             }
@@ -204,8 +205,8 @@ def plot_tight_bound():
 
 try:
     _, log_folder, _  = sys.argv
-    statistics = dict()
-    for rng in EVAL_RANGE:
+    statistics = list()
+    for rng in EVAL_RANGE+[STAGE_ALT-1]:
         statistics.update( {rng : load_statistics(rng)} )
     # plot_statistics()
     # Fig. 5. Illustration of performance metrics comparison with benchmarks.
