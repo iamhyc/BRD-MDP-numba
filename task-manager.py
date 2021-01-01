@@ -59,7 +59,10 @@ if __name__ == "__main__":
                         _ret = stat.poll()
                         if _ret is not None:
                             _time = time.time() - start_time
-                            print( "[%.2fs elapsed] one job completed with retcode %r%s"%(_time, _ret, ' '*20) )
+                            if _ret==0:
+                                print( "[%.2fs elapsed] one job completed successfully.%s"%(_time, ' '*20) )
+                            else:
+                                print( "[%.2fs elapsed] job %r failed with retcode %r%s"%(_time, stat.args[-4:], _ret, ' '*10) )
                             cpu_stat[idx] = None
                         else:
                             continue
