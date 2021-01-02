@@ -3,7 +3,7 @@ import os, sys, random, time
 import subprocess as sp
 from threading import main_thread
 
-NUM_SLOT = 4
+NUM_SLOT = 6
 RANDOM_SEED = 11112
 
 global_template = '''
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         NUM = int(sys.argv[1])
         VERBOSE = False if len(sys.argv)>2 else True
         random.seed(RANDOM_SEED)
-        one_shot_list = [random.randint(2**2, 2**16) for _ in range(NUM)]
+        one_shot_list = [random.randint(2**2, 2**16) for _ in range(NUM)][60:]
         start_time = time.time()
 
         task_list = dict(); idx = 0

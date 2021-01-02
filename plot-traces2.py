@@ -21,6 +21,9 @@ get_tag  = lambda y:[x+'_'+y for x in ALG_TAG]
 global records_path
 from params import EVAL_RANGE
 
+from itertools import chain
+STAGE_EVAL = list(chain( range(1,10), range(10,20,2), range(20,50,5) ))
+
 def autolabel(ax, rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
     for rect in rects:
@@ -56,7 +59,7 @@ def getAverageCost(ref, start=0, end=-1):
         pass
     return acc_cost / time_slot
 
-# disc_cost / time_slot
+# disc_cost
 def getDiscountedCost(ref, start=0, end=-1):
     _weakref = ref[start:end]
     disc_cost = np.zeros((len(ALG_TAG),), dtype=np.float32)
@@ -68,7 +71,7 @@ def getDiscountedCost(ref, start=0, end=-1):
         _cost += np.array([ BETA*np.count_nonzero(x==LQ) for x in get_tag('es_stat') ])
         disc_cost += pow(GAMMA, idx) * _cost
         pass
-    return disc_cost / time_slot
+    return disc_cost
 
 # acc_cost / acc_arr
 def getAverageJCT(ref, start=0, end=-1):
@@ -95,7 +98,7 @@ def load_statistics(ti_num):
     save_path.mkdir(exist_ok=True)
 
     samples = list()
-    for record_dir in tqdm(records_path, desc='Loading statistics'):
+    for record_dir in tqdm(records_path, desc='Loading statistics-%r'%ti_num):
         _save_file = save_path.joinpath( record_dir.stem+'_%02d.npz'%ti_num )
         if _save_file.exists():
             samples.append( np.load(_save_file) )
@@ -187,26 +190,27 @@ def plot_tight_bound():
     _tag = 'DiscountedCost' #AverageNumber/AverageCost/DiscountedCost
     r_mdp, r_ti = list(), list()
 
-    for rng in EVAL_RANGE:
-        num_avg, alt_avg = 0.0, 0.0
+    for rng in STAGE_EVAL:
+        ti_avg = 0.0
         for sample in statistics[rng]:
-            num_avg += sample[_tag] 
-            alt_avg += sample['Tight_value']
-        num_avg = N_SLT*num_avg/len(statistics[rng])
-        alt_avg = N_SLT*alt_avg/len(statistics[rng])
-        # r_mdp.append(_sum)
-        r_ti.append( num_avg + pow(GAMMA, rng)*alt_avg )
+            assert( sample['Tight_value'] != 0 )
+            ti_avg += sample[_tag] + pow(GAMMA, rng)*sample['Tight_value']
+        assert( len(statistics[rng])==60 )
+        ti_avg = ti_avg / len(statistics[rng])
+        r_ti.append( ti_avg )
         pass
 
     mdp_avg = 0.0
     for sample in statistics[STAGE_ALT-1]:
         mdp_avg += sample[_tag]
-    mdp_avg = N_SLT*mdp_avg/len(statistics[STAGE_ALT-1])
-    r_mdp   = [mdp_avg] * len(EVAL_RANGE)
+    mdp_avg = mdp_avg / len(statistics[STAGE_ALT-1])
+    r_mdp   = [mdp_avg] * len(STAGE_EVAL)
 
-    # plt.plot(EVAL_RANGE, r_mdp, '.r-')
-    # plt.plot(EVAL_RANGE, r_ti,  '.b-')
-    plt.plot(EVAL_RANGE, np.array(r_ti)-np.array(r_mdp), '.k-')
+    print(r_ti); print(mdp_avg)
+
+    # plt.plot(STAGE_EVAL, r_mdp, '.r-')
+    # plt.plot(STAGE_EVAL, r_ti,  '.b-')
+    plt.plot(STAGE_EVAL, np.array(r_ti)-np.array(r_mdp), '.k-')
     plt.xlabel('T')
     plt.ylabel('Performance Gap e(T)')
     plt.grid(True)
@@ -214,9 +218,9 @@ def plot_tight_bound():
     pass
 
 try:
-    _, log_folder, _  = sys.argv
-    statistics = list()
-    for rng in EVAL_RANGE+[STAGE_ALT-1]:
+    _, log_folder  = sys.argv
+    statistics = dict()
+    for rng in STAGE_EVAL+[STAGE_ALT-1]:
         statistics.update( {rng : load_statistics(rng)} )
     # plot_statistics()
     # Fig. 5. Illustration of performance metrics comparison with benchmarks.
