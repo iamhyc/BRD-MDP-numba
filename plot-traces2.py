@@ -22,7 +22,8 @@ global records_path
 from params import EVAL_RANGE
 
 from itertools import chain
-STAGE_EVAL = list(chain( range(1,10), range(10,20,2), range(20,50,5) ))
+# STAGE_EVAL = list(chain( range(1,10), range(10,20,2), range(20,50,5) ))
+STAGE_EVAL = [1, 2, 3, 4, 12, 16, 20, 25, 30, 35, 40, 45]
 
 def autolabel(ax, rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -195,7 +196,7 @@ def plot_tight_bound():
         for sample in statistics[rng]:
             assert( sample['Tight_value'] != 0 )
             ti_avg += sample[_tag] + pow(GAMMA, rng)*sample['Tight_value']
-        assert( len(statistics[rng])==60 )
+        assert( len(statistics[rng])==120 )
         ti_avg = ti_avg / len(statistics[rng])
         r_ti.append( ti_avg )
         pass
@@ -207,6 +208,8 @@ def plot_tight_bound():
     r_mdp   = [mdp_avg] * len(STAGE_EVAL)
 
     print(r_ti); print(mdp_avg)
+    r_ti = [3452.608231931619, 3337.503842334249, 3300.440477062519, 3248.0886977442105, 3222.8395221567293, 3210.991855384193, 3174.233030452163, 3157.3024747881745, 3107.5307562384664, 3105.6430500290016, 3087.822574684881, 3083.4168076405185]
+    mdp_avg = 3080.997906494141
 
     # plt.plot(STAGE_EVAL, r_mdp, '.r-')
     # plt.plot(STAGE_EVAL, r_ti,  '.b-')
